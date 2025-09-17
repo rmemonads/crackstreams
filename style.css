@@ -17,7 +17,7 @@ color: #ff4747;
 .site-title-section {
   text-align: center;
   padding: 12px 10px;
-  background: #000;
+  background: #111;
   box-shadow: 0 4px 6px rgba(0,0,0,0.5);
   border-bottom: 1px solid #ff5e00;
 }
@@ -33,7 +33,7 @@ color: #ff4747;
 
 /* ====== HEADER MENUS ====== */
 header {
-  background: #000;
+  background: #111;
   padding: 8px 20px;
   display: flex;
   justify-content: center;
@@ -539,6 +539,7 @@ section h2 {
     font-size: 13px;
   }
 }
+
 
 
 
