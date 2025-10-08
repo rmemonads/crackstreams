@@ -228,9 +228,12 @@ async function initializeWatchPage() {
 
         document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
         
-        const pageTitle = `Live ${match.title} Stream Link (${activeStream.source.charAt(0).toUpperCase() + activeStream.source.slice(1)} Stream ${activeStream.streamNo})`;
-        document.title = pageTitle;
-        titleEl.textContent = pageTitle;
+		
+        const qualityLabel = activeStream.hd ? "HD" : "SD";
+const pageTitle = `Live ${match.title} Stream Link (${activeStream.source.charAt(0).toUpperCase() + activeStream.source.slice(1)} ${qualityLabel} ${activeStream.streamNo})`;
+document.title = pageTitle;
+titleEl.textContent = pageTitle;
+
         descEl.textContent = `${match.title} live on Methstreams.world. Join the stream and chat with others in our live chat!`;
         playerEl.src = activeStream.embedUrl;
 
