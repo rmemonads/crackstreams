@@ -1,5 +1,5 @@
 // =================================================================================
-// SCRIPT.JS - Match Information Page (Corrected for New URL Structure)
+// SCRIPT.JS - Match Information Page (Final Version for Hash-based URLs)
 // =================================================================================
 
 // ---------------------------
@@ -117,10 +117,10 @@ function renderStreamRow(stream, index, matchId, sourceName) {
     row.className = "stream-row";
 
     // === THE ONLY CHANGE IS HERE ===
-    // Build the new path-based URL
+    // Build the new hash-based URL that works on GitHub Pages
     const quality = stream.hd ? 'hd' : 'sd';
     const streamNumber = stream.streamNo;
-    row.href = `../Watch/${matchId}/${sourceName}/${quality}${streamNumber}`;
+    row.href = `../Watch/#/${matchId}/${sourceName}/${quality}${streamNumber}`;
     // ===============================
     
     const qualityTagClass = stream.hd ? "hd" : "sd";
