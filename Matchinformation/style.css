@@ -95,7 +95,7 @@ p .skeleton.w-60 { width: 60%; }
   .header-btn { padding: 6px 10px; font-size: 13px; }
   #match-header h1 { font-size: 1.3rem; }
   #match-description { font-size: 0.9rem; }
-  .stream-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .stream-row {align-items: flex-start; gap: 10px; }
 }
 @media (max-width: 480px) {
   .fullpage { padding: 0 0.5rem; }
@@ -110,4 +110,5 @@ p .skeleton.w-60 { width: 60%; }
   .stream-label { font-size: 14px; }
 
 }
+
 
