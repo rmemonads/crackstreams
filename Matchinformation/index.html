@@ -41,40 +41,63 @@
 
   <!-- Main Content -->
   <div class="fullpage">
-    <main class="match-details-container">
-      <!-- SKELETON LOADER FOR PAGE CONTENT -->
-      <div id="match-header">
-        <h1 id="match-title"><div class="skeleton"></div></h1>
-      </div>
-      <p id="match-description">
-        <span class="skeleton"></span>
-        <span class="skeleton w-60"></span>
-      </p>
-      
-      <div id="countdown-section" class="countdown hidden"></div>
-      
-      <section id="streams-section">
-        <div class="skeleton-header">
-          <div class="skeleton-button"></div>
-          <div class="skeleton-summary"></div>
+    <div class="content-wrapper">
+      <main class="match-details-container">
+        <!-- SKELETON LOADER FOR PAGE CONTENT -->
+        <div id="match-header">
+          <h1 id="match-title"><div class="skeleton"></div></h1>
         </div>
+        <p id="match-description">
+          <span class="skeleton"></span>
+          <span class="skeleton w-60"></span>
+        </p>
         
-        <div id="streams-container">
-            <!-- Skeleton for a stream source -->
-            <div class="stream-source is-loading">
-                <div class="source-header">
-                    <span class="source-name">&nbsp;</span>
-                    <span class="source-count">&nbsp;</span>
-                </div>
-                <small class="source-desc">&nbsp;</small>
-                <div class="stream-row"></div>
-                <div class="stream-row"></div>
-            </div>
+        <div id="countdown-section" class="countdown hidden"></div>
+        
+        <section id="streams-section">
+          <div class="skeleton-header">
+            <div class="skeleton-button"></div>
+            <div class="skeleton-summary"></div>
+          </div>
+          
+          <div id="streams-container">
+              <!-- Skeleton for a stream source -->
+              <div class="stream-source is-loading">
+                  <div class="source-header">
+                      <span class="source-name">&nbsp;</span>
+                      <span class="source-count">&nbsp;</span>
+                  </div>
+                  <small class="source-desc">&nbsp;</small>
+                  <div class="stream-row"></div>
+                  <div class="stream-row"></div>
+              </div>
+          </div>
+          
+          <button id="show-all-sources-btn" class="show-all-btn hidden"></button>
+        </section>
+      </main>
+
+      <!-- DISCORD WIDGET SIDEBAR -->
+      <aside class="discord-sidebar">
+        <div id="discord-widget-container">
+          <div class="discord-header">
+              <div class="header-text">
+                  <h3>Join our <span>Discord!</span></h3>
+                  <p><span id="discord-online-count">...</span> online members</p>
+              </div>
+              <a href="#" id="discord-join-button" class="discord-btn" target="_blank" rel="noopener noreferrer">Join Now</a>
+          </div>
+          <ul id="discord-members-list" class="members-list">
+              <!-- Skeleton Loader for Members -->
+              <li class="member-skeleton"><div class="avatar-skeleton"></div><div class="name-skeleton"></div></li>
+              <li class="member-skeleton"><div class="avatar-skeleton"></div><div class="name-skeleton"></div></li>
+              <li class="member-skeleton"><div class="avatar-skeleton"></div><div class="name-skeleton"></div></li>
+              <li class="member-skeleton"><div class="avatar-skeleton"></div><div class="name-skeleton"></div></li>
+              <li class="member-skeleton"><div class="avatar-skeleton"></div><div class="name-skeleton"></div></li>
+          </ul>
         </div>
-        
-        <button id="show-all-sources-btn" class="show-all-btn hidden"></button>
-      </section>
-    </main>
+      </aside>
+    </div>
   </div>
 
   <!-- Search Overlay -->
