@@ -89,7 +89,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .stream-row:hover .open-arrow { opacity: 1; color: var(--accent-hover); }
 
 /* --- ACTIVE STREAM ROW STYLING --- */
-.stream-row.active { background-color: #384252; border-left: 3px solid #dc2626cc; padding-left: calc(1rem - 3px); cursor: default; }
+.stream-row.active { background-color: #010416; border-left: 3px solid #dc2626cc; padding-left: calc(1rem - 3px); cursor: default; }
 .stream-row.active .open-arrow { display: none; }
 .status-running { font-size: 0.8rem; font-weight: 600; color: #dc2626cc; margin-left: auto; }
 
@@ -125,4 +125,5 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
   .stream-meta { font-size: 0.8rem; }
   .stream-label { font-size: 14px; }
 }
+
 
