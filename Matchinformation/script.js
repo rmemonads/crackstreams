@@ -280,10 +280,112 @@ async function loadMatchDetails() {
     }
 }
 
+// ===================================
+// CUSTOM DISCORD WIDGET
+// ===================================
+async function loadDiscordWidget() {
+    const serverId = "1422384816472457288";
+    const apiUrl = `https://discord.com/api/guilds/${serverId}/widget.json`;
+    
+    const onlineCountEl = document.getElementById("discord-online-count");
+    const membersListEl = document.getElementById("discord-members-list");
+    const joinButton = document.getElementById("discord-join-button");
+    const widgetContainer = document.getElementById("discord-widget-container");
+
+    if (!widgetContainer) return;
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch Discord widget data');
+        }
+        const data = await response.json();
+
+        // Update online count
+        onlineCountEl.textContent = data.presence_count || '0';
+        
+        // Update join links from API
+        const inviteUrl = data.instant_invite;
+        if (inviteUrl && joinButton) {
+          joinButton.href = inviteUrl;
+        }
+
+        // Clear skeleton loaders
+        membersListEl.innerHTML = ''; 
+
+        const fragment = document.createDocumentFragment();
+
+        // Populate members list (max 10)
+        if (data.members && data.members.length > 0) {
+            const membersToShow = data.members.slice(0, 10);
+            
+            membersToShow.forEach(member => {
+                const li = document.createElement('li');
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'member-avatar';
+                
+                const avatarImg = document.createElement('img');
+                avatarImg.src = member.avatar_url;
+                avatarImg.alt = member.username;
+                
+                const onlineIndicator = document.createElement('span');
+                onlineIndicator.className = 'online-indicator';
+                
+                avatarDiv.appendChild(avatarImg);
+                avatarDiv.appendChild(onlineIndicator);
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'member-name';
+                nameSpan.textContent = member.username;
+
+                li.appendChild(avatarDiv);
+                li.appendChild(nameSpan);
+                fragment.appendChild(li);
+            });
+
+        } else {
+            const noMembersLi = document.createElement('li');
+            noMembersLi.style.color = 'var(--text-secondary)';
+            noMembersLi.style.display = 'block';
+            noMembersLi.style.textAlign = 'center';
+            noMembersLi.textContent = 'No online members to display.';
+            fragment.appendChild(noMembersLi);
+        }
+
+        // ALWAYS add the "and more..." link if an invite URL exists
+        if (inviteUrl) {
+            const moreLi = document.createElement('li');
+            moreLi.className = 'more-members-link';
+            
+            const p = document.createElement('p');
+            const moreLink = document.createElement('a');
+            
+            moreLink.href = inviteUrl;
+            moreLink.target = '_blank';
+            moreLink.rel = 'noopener noreferrer';
+            moreLink.textContent = 'Discord!';
+
+            p.append('and more in our ', moreLink);
+            moreLi.appendChild(p);
+            fragment.appendChild(moreLi);
+        }
+
+        membersListEl.appendChild(fragment);
+
+    } catch (error) {
+        console.error("Error loading Discord widget:", error);
+        if (widgetContainer) {
+            widgetContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Could not load Discord widget.</p>';
+        }
+    }
+}
+
 // ---------------------------
 // INITIALIZE PAGE
 // ---------------------------
 document.addEventListener("DOMContentLoaded", () => {
     loadMatchDetails();
     setupSearch(); 
+    loadDiscordWidget();
 });
