@@ -167,7 +167,7 @@
 // Part 2: Main Page Logic (from script.js)
 (function() {
   let allMatchesCache = [];
-  const categoryPages = [ { name: "Football", link: "football.html" }, { name: "Cricket", link: "cricket.html" }, { name: "Basketball", link: "basketball.html" }, { name: "Handball", link: "handball.html" }, { name: "Hockey", link: "hockey.html" }, { name: "Baseball", link: "baseball.html" }, { name: "Rugby", link: "rugby.html" }, { name: "Tennis", link: "tennis.html" }];
+  const categoryPages = [ { name: "Football", link: "/Category/?popular=true#/Football" }, { name: "Cricket", link: "cricket.html" }, { name: "Basketball", link: "basketball.html" }, { name: "Handball", link: "handball.html" }, { name: "Hockey", link: "hockey.html" }, { name: "Baseball", link: "baseball.html" }, { name: "Rugby", link: "rugby.html" }, { name: "Tennis", link: "tennis.html" }];
   const matchCategories = [ { id: "live-viewcount", label: "🔥 Popular Live (by viewers)", endpoint: "https://streamed.pk/api/matches/live/popular-viewcount", sortByViewers: true }, { id: "live", label: "🔥 Popular Live", endpoint: "https://streamed.pk/api/matches/live/popular" }, { id: "football", label: "⚽ Popular Football", endpoint: "https://streamed.pk/api/matches/football/popular" }, { id: "basketball", label: "🏀 Popular Basketball", endpoint: "https://streamed.pk/api/matches/basketball/popular" }, { id: "tennis", label: "🎾 Popular Tennis", endpoint: "https://streamed.pk/api/matches/tennis/popular" }, { id: "cricket", label: "🏏 Popular Cricket", endpoint: "https://streamed.pk/api/matches/cricket/popular" }, { id: "mma", label: "🥋 Popular MMA", endpoint: "https://streamed.pk/api/matches/mma/popular" }, { id: "hockey", label: "🏒 Popular Hockey", endpoint: "https://streamed.pk/api/matches/hockey/popular" }, { id: "baseball", label: "⚾ Popular Baseball", endpoint: "https://streamed.pk/api/matches/baseball/popular" }, { id: "boxing", label: "🥊 Popular Boxing", endpoint: "https://streamed.pk/api/matches/boxing/popular" }];
 
   function setupCarouselPagination(container, leftBtn, rightBtn) { const getScrollStep = () => container.clientWidth; leftBtn.addEventListener("click", () => container.scrollBy({ left: -getScrollStep(), behavior: "smooth" })); rightBtn.addEventListener("click", () => container.scrollBy({ left: getScrollStep(), behavior: "smooth" })); }
@@ -242,4 +242,5 @@
   initializePage();
 
 })();
+
 
