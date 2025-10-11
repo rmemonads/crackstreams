@@ -108,7 +108,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
   .header-btn { padding: 6px 10px; font-size: 13px; }
   #watch-title { font-size: 1.3rem; }
   #watch-description { font-size: 0.9rem; }
-  .stream-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .stream-row {align-items: flex-start; gap: 10px; }
   .stream-meta { margin-right: auto;}
   .stream-label { width: 100%; display: block;}
   .status-running, .open-arrow { margin-left: auto; padding-left: 8px;}
@@ -125,5 +125,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
   .stream-meta { font-size: 0.8rem; }
   .stream-label { font-size: 14px; }
 }
+
 
 
