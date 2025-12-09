@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serverless CMS - GitHub Pages</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- TinyMCE (Rich Text Editor) -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-view" class="view active">
+        <div class="login-box">
+            <h2><i class="fa-solid fa-lock"></i> CMS Login</h2>
+            <p>Connect to your GitHub Repository</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="gh-token" placeholder="ghp_..." required>
+                </div>
+                <div class="input-group">
+                    <label>Repository Owner (Username)</label>
+                    <input type="text" id="gh-owner" placeholder="e.g. johndoe" required>
+                </div>
+                <div class="input-group">
+                    <label>Repository Name</label>
+                    <input type="text" id="gh-repo" placeholder="e.g. my-blog" required>
+                </div>
+                <button type="submit" class="btn-primary">Connect</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-view" class="view">
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-layer-group"></i> CMS
+            </div>
+            <nav>
+                <button id="nav-dashboard" class="nav-item active"><i class="fa-solid fa-list"></i> Articles</button>
+                <button id="nav-create" class="nav-item"><i class="fa-solid fa-plus"></i> New Article</button>
+                <button id="nav-logout" class="nav-item logout"><i class="fa-solid fa-sign-out"></i> Logout</button>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            
+            <!-- DASHBOARD: List Articles -->
+            <div id="dashboard-panel" class="panel active">
+                <div class="panel-header">
+                    <h2>Blog Posts</h2>
+                    <button class="btn-primary" onclick="showEditor()">Create New</button>
+                </div>
+                <div id="loading-spinner" class="spinner hidden"></div>
+                <div id="article-list" class="article-grid">
+                    <!-- Articles injected here via JS -->
+                </div>
+            </div>
+
+            <!-- EDITOR: Create/Edit -->
+            <div id="editor-panel" class="panel">
+                <div class="panel-header">
+                    <h2 id="editor-title">Edit Article</h2>
+                    <div class="actions">
+                        <button class="btn-secondary" onclick="showDashboard()">Cancel</button>
+                        <button class="btn-primary" id="save-btn"><i class="fa-solid fa-floppy-disk"></i> Publish Changes</button>
+                    </div>
+                </div>
+
+                <div class="editor-grid">
+                    <!-- Metadata Sidebar -->
+                    <div class="meta-settings">
+                        <div class="form-group">
+                            <label>Article Title</label>
+                            <input type="text" id="post-title" placeholder="Enter title...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Slug (Folder Name)</label>
+                            <input type="text" id="post-slug" placeholder="url-slug-here">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Author Name</label>
+                            <input type="text" id="post-author" value="Md Ashikuzzaman">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Meta Description</label>
+                            <textarea id="post-desc" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Banner Image</label>
+                            <div class="drop-zone" id="drop-zone">
+                                <p>Drag & Drop or Paste URL</p>
+                                <input type="text" id="post-banner" placeholder="https://...">
+                                <input type="file" id="file-input" accept="image/*" hidden>
+                            </div>
+                            <div id="upload-status"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Schema Type</label>
+                            <select id="post-schema">
+                                <option value="Article">Article</option>
+                                <option value="Review">Review</option>
+                                <option value="HowTo">HowTo</option>
+                                <option value="FAQPage">FAQ</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Canonical URL</label>
+                            <div class="toggle-group">
+                                <label><input type="radio" name="canonical" value="self" checked> Self</label>
+                                <label><input type="radio" name="canonical" value="custom"> Custom</label>
+                            </div>
+                            <input type="text" id="post-canonical-custom" class="hidden" placeholder="https://external.com/original">
+                        </div>
+                    </div>
+
+                    <!-- WYSIWYG Editor -->
+                    <div class="main-editor">
+                        <textarea id="tinymce-editor"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
