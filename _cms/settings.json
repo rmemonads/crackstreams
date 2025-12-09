@@ -2,18 +2,22 @@
   "siteTitle": "hi",
   "siteUrl": "https://crackstreams.help",
   "favicon": "",
+  "copyright": "",
   "homepage": "homepage",
   "enable404": true,
   "gaId": "",
   "adsenseAuto": "",
   "customCss": "",
   "customHeadJs": "",
+  "verifications": [],
+  "headerMenu": [],
+  "footerMenu": [],
+  "socialLinks": [],
   "ads": [
     {
       "code": "",
-      "placement": "none",
+      "placement": "header_bottom",
       "exclude": ""
     }
-  ],
-  "verifications": []
+  ]
 }
