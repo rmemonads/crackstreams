@@ -4,7 +4,7 @@
   "favicon": "",
   "copyright": "&copy; 2030 All rights reserved",
   "homepage": "",
-  "enable404": true,
+  "enable404": false,
   "gaId": "",
   "adsenseAuto": "",
   "customCss": "",
