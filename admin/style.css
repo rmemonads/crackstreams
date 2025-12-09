@@ -44,7 +44,7 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .panel { display: none; flex-direction: column; height: 100%; padding: 20px; overflow-y: auto; }
 .panel.active { display: flex; }
 .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-.header-actions { display: flex; gap: 10px; }
+.header-actions { display: flex; gap: 10px; align-items: center; }
 .search-bar { padding: 8px; background: #252525; border: 1px solid #444; color: white; border-radius: 4px; }
 .wp-table { width: 100%; border-collapse: collapse; background: var(--bg-panel); border-radius: 6px; overflow: hidden; }
 .wp-table th, .wp-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
@@ -55,8 +55,17 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
 .settings-card { background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 6px; }
 .full-width-card { grid-column: 1 / -1; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .settings-card h3 { color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 1rem; }
 .hint { font-size: 0.75rem; color: #888; margin-top: 4px; }
+.switch-label { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: #fff; cursor: pointer; }
+
+/* REPEATERS */
+.repeater-container { margin-bottom: 10px; }
+.repeater-item { background: #1e1e1e; padding: 10px; margin-bottom: 8px; border-radius: 3px; position: relative; border: 1px dashed #444; }
+.repeater-remove { position: absolute; top: 5px; right: 5px; color: #666; font-size: 0.8rem; }
+.add-repeater-btn { background: #333; color: var(--primary); width: 100%; padding: 5px; font-size: 0.8rem; margin-top: 5px; border: 1px dashed #444; cursor: pointer; }
+.menu-row, .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* AD UNITS */
 .ad-unit-block { background: #252525; padding: 15px; margin-bottom: 15px; border: 1px solid #444; border-radius: 4px; position: relative; }
@@ -70,7 +79,7 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .title-input { background: transparent; border: none; color: white; font-size: 1.2rem; font-weight: bold; flex: 1; }
 .title-input:focus { outline: none; }
 .editor-actions { display: flex; gap: 10px; align-items: center; }
-.draft-status { font-size: 0.8rem; color: var(--primary); font-style: italic; margin-right: 10px; }
+.draft-status { font-size: 0.8rem; color: var(--primary); font-style: italic; margin-right: 10px; min-width: 100px; text-align: right; }
 
 .editor-layout { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; }
 .editor-sidebar-column { width: 300px; background: #181818; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
@@ -96,18 +105,16 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .schema-label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 3px; }
 .schema-input { width: 100%; padding: 8px; background: #121212; border: 1px solid #444; color: white; border-radius: 3px; font-size: 0.85rem; }
 
-/* REPEATER & MEDIA */
-.repeater-item { background: #1e1e1e; padding: 10px; margin-bottom: 8px; border-radius: 3px; position: relative; border: 1px dashed #444; }
-.repeater-remove { position: absolute; top: 5px; right: 5px; color: #666; font-size: 0.8rem; }
-.add-repeater-btn { background: #333; color: var(--primary); width: 100%; padding: 5px; font-size: 0.8rem; margin-top: 5px; border: 1px dashed #444; cursor: pointer; }
+/* MEDIA */
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
 .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px; font-size: 0.9rem; }
-.image-drop-wrapper { position: relative; border: 1px solid #444; border-radius: 4px; overflow: hidden; }
-.image-drop-wrapper input { border: none; border-bottom: 1px solid #444; border-radius: 0; }
+.image-drop-wrapper { position: relative; border: 1px solid #444; border-radius: 4px; overflow: hidden; padding: 5px; }
+.image-drop-wrapper input { border: none; border-bottom: 1px solid #444; border-radius: 0; background: transparent; width:100%; }
 .image-drop-wrapper.dragover .drop-overlay { display: flex; }
-.drop-overlay { display: none; position: absolute; inset: 0; background: rgba(0, 170, 255, 0.2); backdrop-filter: blur(2px); align-items: center; justify-content: center; font-weight: bold; color: white; pointer-events: none; }
-#banner-preview { width: 100%; display: block; max-height: 150px; object-fit: cover; }
+.drop-overlay { display: none; position: absolute; inset: 0; background: rgba(0, 170, 255, 0.4); backdrop-filter: blur(2px); align-items: center; justify-content: center; font-weight: bold; color: white; pointer-events: none; z-index: 5; }
+#banner-preview { width: 100%; display: block; max-height: 150px; object-fit: cover; margin-top: 5px; }
+
 .media-drop-area { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
 .media-drop-area:hover { border-color: var(--primary); background: #202020; }
 .sidebar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -120,6 +127,7 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 /* UTILS */
 .btn-primary { background: var(--primary); color: white; padding: 8px 16px; border-radius: 4px; font-weight: 600; }
 .btn-secondary { background: #444; color: white; padding: 8px 16px; border-radius: 4px; }
+.btn-danger { background: var(--danger); color: white; padding: 8px 16px; border-radius: 4px; }
 .btn-xs { padding: 4px 10px; font-size: 0.8rem; }
 .btn-small { padding: 6px; width: 100%; background: #333; color: white; border-radius: 4px; margin-top: 10px; }
 .full-width { width: 100%; }
