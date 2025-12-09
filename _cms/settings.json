@@ -1,13 +1,13 @@
 {
   "siteTitle": "hi",
+  "siteUrl": "https://crackstreams.help/",
   "favicon": "",
+  "homepage": "",
+  "enable404": false,
   "gaId": "",
   "adsenseAuto": "",
-  "customAd": {
-    "code": "",
-    "placement": "none",
-    "exclude": ""
-  },
   "customCss": "",
-  "customHeadJs": ""
+  "customHeadJs": "",
+  "ads": [],
+  "verifications": []
 }
