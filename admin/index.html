@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Using TinyMCE with your API Key -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -36,12 +35,10 @@
     <!-- MAIN APP -->
     <div id="app-view" class="view">
         
-        <!-- MAIN SIDEBAR (Navigation) -->
+        <!-- SIDEBAR -->
         <aside id="main-sidebar" class="sidebar">
             <div class="brand">
-                <div class="brand-text">
-                    <i class="fa-solid fa-layer-group"></i> <span>Dashboard</span>
-                </div>
+                <span class="brand-text">CMS</span>
                 <button id="sidebar-toggle-btn" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
             </div>
             <nav>
@@ -50,6 +47,12 @@
                 </button>
                 <button id="nav-btn-pages" onclick="switchPanel('pages')" class="nav-item">
                     <i class="fa-solid fa-file"></i> <span>Pages</span>
+                </button>
+                
+                <div class="nav-spacer"></div>
+
+                <button id="nav-btn-settings" onclick="switchPanel('settings')" class="nav-item">
+                    <i class="fa-solid fa-sliders"></i> <span>Global Settings</span>
                 </button>
                 <button id="nav-logout" class="nav-item logout">
                     <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
@@ -88,11 +91,91 @@
                 </div>
             </div>
 
-            <!-- EDITOR (The Core) -->
+            <!-- GLOBAL SETTINGS -->
+            <div id="panel-settings" class="panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-sliders"></i> Global Settings</h2>
+                    <button class="btn-primary" onclick="saveGlobalSettings()">Save Settings</button>
+                </div>
+                
+                <div class="settings-grid">
+                    <!-- General -->
+                    <div class="settings-card">
+                        <h3>General</h3>
+                        <div class="form-group">
+                            <label>Site Title</label>
+                            <input type="text" id="set-site-title" placeholder="My Awesome Website">
+                        </div>
+                        <div class="form-group">
+                            <label>Favicon URL</label>
+                            <input type="text" id="set-favicon" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="settings-card">
+                        <h3>Analytics (Lazy Load)</h3>
+                        <div class="form-group">
+                            <label>Google Analytics ID (G-XXXXXXX)</label>
+                            <input type="text" id="set-ga-id" placeholder="G-12345678">
+                            <p style="font-size:0.75rem; color:#888; margin-top:5px;">Code runs after scroll, click, or 4 seconds.</p>
+                        </div>
+                    </div>
+
+                    <!-- AdSense -->
+                    <div class="settings-card">
+                        <h3>Google AdSense</h3>
+                        <div class="form-group">
+                            <label>Auto Ads Code (Header)</label>
+                            <textarea id="set-adsense-auto" rows="3" placeholder="<script... client=ca-pub...></script>"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Custom Ads -->
+                    <div class="settings-card full-width-card">
+                        <h3>Custom Ad Unit</h3>
+                        <div class="form-group">
+                            <label>Ad HTML Code</label>
+                            <textarea id="set-custom-ad-code" rows="3" placeholder="<div>My Ad</div>"></textarea>
+                        </div>
+                        <div class="form-group two-col">
+                            <div>
+                                <label>Placement</label>
+                                <select id="set-ad-placement">
+                                    <option value="none">Disabled</option>
+                                    <option value="below_feature">Below Featured Image</option>
+                                    <option value="after_p_1">After Paragraph 1</option>
+                                    <option value="after_p_2">After Paragraph 2</option>
+                                    <option value="after_p_3">After Paragraph 3</option>
+                                    <option value="end">End of Content</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Exclude Paths (Comma separated)</label>
+                                <input type="text" id="set-ad-exclude" placeholder="contact, privacy-policy">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Code -->
+                    <div class="settings-card full-width-card">
+                        <h3>Custom Code</h3>
+                        <div class="form-group">
+                            <label>Global CSS</label>
+                            <textarea id="set-custom-css" rows="4" placeholder=".my-class { color: red; }"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Global Header Scripts</label>
+                            <textarea id="set-custom-head-js" rows="3" placeholder="<script>...</script>"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDITOR -->
             <div id="panel-editor" class="panel">
                 <div class="editor-header">
                     <div class="editor-title-row">
-                        <button id="sidebar-expand-btn" class="icon-btn hidden" title="Show Sidebar"><i class="fa-solid fa-bars"></i></button>
                         <input type="text" id="meta-title" placeholder="Add Title Here..." class="title-input">
                         <div class="editor-actions">
                             <span id="live-link-container" class="hidden"></span>
@@ -103,11 +186,8 @@
                 </div>
 
                 <div class="editor-layout">
-                    
-                    <!-- LEFT SIDEBAR (SETTINGS + MEDIA) -->
+                    <!-- LEFT SIDEBAR -->
                     <div class="editor-sidebar-column">
-                        
-                        <!-- Tabs -->
                         <div class="sidebar-tabs">
                             <button class="tab-btn active" onclick="switchSidebarTab('settings')"><i class="fa-solid fa-gear"></i> Settings</button>
                             <button class="tab-btn" onclick="switchSidebarTab('media')"><i class="fa-solid fa-image"></i> Media</button>
@@ -116,7 +196,7 @@
                         <!-- Tab: Settings -->
                         <div id="tab-settings" class="sidebar-content active">
                             <div class="form-group">
-                                <label>Slug (URL Part)</label>
+                                <label>Slug</label>
                                 <input type="text" id="meta-slug">
                             </div>
                             <div class="form-group">
@@ -125,11 +205,10 @@
                             </div>
                             <div class="form-group">
                                 <label>Author</label>
-                                <input type="text" id="meta-author" value="Md Ashikuzzaman">
+                                <input type="text" id="meta-author" value="Admin">
                             </div>
-
                             <div class="form-group">
-                                <label>Featured Image (URL or Drop Here)</label>
+                                <label>Featured Image</label>
                                 <div id="featured-dropzone" class="image-drop-wrapper">
                                     <input type="text" id="meta-banner" placeholder="https://...">
                                     <img id="banner-preview" class="hidden">
@@ -138,33 +217,27 @@
                             </div>
                         </div>
 
-                        <!-- Tab: Media (Canva Style) -->
+                        <!-- Tab: Media -->
                         <div id="tab-media" class="sidebar-content">
                             <div class="media-drop-area" id="sidebar-dropzone">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Drop files to Upload</p>
                                 <input type="file" id="sidebar-file-input" multiple hidden>
                             </div>
-                            <div id="sidebar-media-grid" class="sidebar-grid">
-                                <!-- Images load here -->
-                            </div>
+                            <div id="sidebar-media-grid" class="sidebar-grid"></div>
                             <button class="btn-small full-width" onclick="loadSidebarMedia()">Refresh Media</button>
                         </div>
-
                     </div>
 
-                    <!-- RIGHT COLUMN: EDITOR + SCHEMA -->
+                    <!-- RIGHT COLUMN -->
                     <div class="editor-main-column">
-                        
-                        <!-- TinyMCE Area -->
                         <div class="editor-wrapper">
                             <textarea id="tinymce-editor"></textarea>
                         </div>
-
-                        <!-- Advanced Schema Section -->
+                        <!-- Schema Wrapper -->
                         <div class="schema-wrapper">
                             <div class="schema-header">
-                                <h3><i class="fa-solid fa-code"></i> Structured Data (Schema.org)</h3>
+                                <h3><i class="fa-solid fa-code"></i> Structured Data</h3>
                                 <div class="schema-controls">
                                     <select id="add-schema-type">
                                         <option value="FAQPage">FAQ Page</option>
@@ -172,19 +245,24 @@
                                         <option value="HowTo">HowTo</option>
                                         <option value="Product">Product</option>
                                     </select>
-                                    <button class="btn-secondary btn-xs" onclick="addSchemaBlock()">+ Add Schema</button>
+                                    <button class="btn-secondary btn-xs" onclick="addSchemaBlock()">+ Add</button>
                                 </div>
                             </div>
                             <div id="schema-container">
-                                <!-- Dynamic Schema Blocks go here -->
+                                <!-- Default Article Toggle -->
                                 <div class="schema-block default-block">
-                                    <div class="block-header"><span>Article (Default)</span> <small>Auto-generated from post content</small></div>
+                                    <div class="block-header">
+                                        <span>Article Schema</span>
+                                        <label class="switch-label">
+                                            <input type="checkbox" id="include-article-schema" checked>
+                                            <span class="chk-text">Enable</span>
+                                        </label>
+                                    </div>
+                                    <small style="color:#666;">Auto-generated from content</small>
                                 </div>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
 
