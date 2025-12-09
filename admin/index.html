@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serverless CMS - GitHub Pages</title>
+    <title>Ultimate Serverless CMS</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- TinyMCE (Using Version 7 Stable with your API KEY) -->
+    <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-    
-    <!-- Custom Styles -->
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,118 +16,181 @@
     <!-- LOGIN SCREEN -->
     <div id="login-view" class="view active">
         <div class="login-box">
-            <h2><i class="fa-solid fa-lock"></i> CMS Login</h2>
-            <p>Connect to your GitHub Repository</p>
+            <h2><i class="fa-solid fa-layer-group"></i> CMS Login</h2>
             <form id="login-form">
                 <div class="input-group">
-                    <label>GitHub Personal Access Token (PAT)</label>
-                    <input type="password" id="gh-token" placeholder="ghp_..." required>
+                    <label>GitHub Personal Access Token</label>
+                    <input type="password" id="gh-token" required>
                 </div>
                 <div class="input-group">
-                    <label>Repository Owner (Username)</label>
-                    <input type="text" id="gh-owner" placeholder="e.g. johndoe" required>
+                    <label>Repo Owner</label>
+                    <input type="text" id="gh-owner" required>
                 </div>
                 <div class="input-group">
-                    <label>Repository Name</label>
-                    <input type="text" id="gh-repo" placeholder="e.g. my-blog" required>
+                    <label>Repo Name</label>
+                    <input type="text" id="gh-repo" required>
                 </div>
                 <button type="submit" class="btn-primary">Connect</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- MAIN APP STRUCTURE -->
     <div id="app-view" class="view">
-        <aside class="sidebar">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
             <div class="brand">
-                <i class="fa-solid fa-layer-group"></i> CMS
+                <i class="fa-solid fa-bolt"></i> <span class="brand-text">InfluencerCMS</span>
+                <button id="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
             </div>
             <nav>
-                <button id="nav-dashboard" class="nav-item active"><i class="fa-solid fa-list"></i> Articles</button>
-                <button id="nav-create" class="nav-item"><i class="fa-solid fa-plus"></i> New Article</button>
-                <button id="nav-logout" class="nav-item logout"><i class="fa-solid fa-sign-out"></i> Logout</button>
+                <button onclick="switchPanel('dashboard')" class="nav-item active" title="Blog Posts">
+                    <i class="fa-solid fa-thumbtack"></i> <span class="nav-text">Posts</span>
+                </button>
+                <button onclick="switchPanel('pages')" class="nav-item" title="Pages">
+                    <i class="fa-solid fa-file"></i> <span class="nav-text">Pages</span>
+                </button>
+                <button onclick="switchPanel('media')" class="nav-item" title="Media Library">
+                    <i class="fa-solid fa-images"></i> <span class="nav-text">Media</span>
+                </button>
+                <button id="nav-logout" class="nav-item logout" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="nav-text">Logout</span>
+                </button>
             </nav>
         </aside>
 
+        <!-- CONTENT AREA -->
         <main class="content-area">
-            
-            <!-- DASHBOARD: List Articles -->
-            <div id="dashboard-panel" class="panel active">
+
+            <!-- 1. POSTS DASHBOARD -->
+            <div id="panel-dashboard" class="panel active">
                 <div class="panel-header">
                     <h2>Blog Posts</h2>
-                    <button class="btn-primary" onclick="showEditor()">Create New</button>
+                    <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> Add New Post</button>
                 </div>
-                <div id="loading-spinner" class="spinner hidden"></div>
-                <div id="article-list" class="article-grid">
-                    <!-- Articles injected here via JS -->
+                <div class="table-container">
+                    <table class="wp-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="posts-list-body">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- EDITOR: Create/Edit -->
-            <div id="editor-panel" class="panel">
+            <!-- 2. PAGES DASHBOARD -->
+            <div id="panel-pages" class="panel">
                 <div class="panel-header">
-                    <h2 id="editor-title">Edit Article</h2>
-                    <div class="actions">
-                        <button class="btn-secondary" onclick="showDashboard()">Cancel</button>
-                        <button class="btn-primary" id="save-btn"><i class="fa-solid fa-floppy-disk"></i> Publish Changes</button>
+                    <h2>Pages</h2>
+                    <button class="btn-primary" onclick="createNew('page')"><i class="fa-solid fa-plus"></i> Add New Page</button>
+                </div>
+                <div class="table-container">
+                    <table class="wp-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Slug</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pages-list-body">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. MEDIA LIBRARY -->
+            <div id="panel-media" class="panel">
+                <div class="panel-header">
+                    <h2>Media Library</h2>
+                    <button class="btn-primary" onclick="loadMediaLibrary()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+                
+                <div class="media-uploader">
+                    <div id="media-dropzone" class="drop-zone-large">
+                        <i class="fa-solid fa-cloud-arrow-up fa-3x"></i>
+                        <p>Drag & Drop images here to upload</p>
+                        <input type="file" id="media-upload-input" multiple hidden>
                     </div>
                 </div>
 
-                <div class="editor-grid">
-                    <!-- Metadata Sidebar -->
-                    <div class="meta-settings">
-                        <div class="form-group">
-                            <label>Article Title</label>
-                            <input type="text" id="post-title" placeholder="Enter title...">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Slug (Folder Name)</label>
-                            <input type="text" id="post-slug" placeholder="url-slug-here">
-                        </div>
+                <div id="media-gallery" class="media-grid">
+                    <!-- Images injected here -->
+                </div>
+            </div>
 
-                        <div class="form-group">
-                            <label>Author Name</label>
-                            <input type="text" id="post-author" value="Md Ashikuzzaman">
-                        </div>
+            <!-- 4. EDITOR (Shared for Pages & Posts) -->
+            <div id="panel-editor" class="panel">
+                <div class="panel-header">
+                    <h2 id="editor-heading">Edit Content</h2>
+                    <div class="actions">
+                        <span id="live-link-container" class="hidden"></span>
+                        <button class="btn-secondary" onclick="cancelEdit()">Cancel</button>
+                        <button class="btn-primary" id="save-btn"><i class="fa-solid fa-paper-plane"></i> Publish</button>
+                    </div>
+                </div>
 
-                        <div class="form-group">
-                            <label>Meta Description</label>
-                            <textarea id="post-desc" rows="3"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Banner Image</label>
-                            <div class="drop-zone" id="drop-zone">
-                                <p>Drag & Drop or Paste URL</p>
-                                <input type="text" id="post-banner" placeholder="https://...">
-                                <input type="file" id="file-input" accept="image/*" hidden>
+                <div class="editor-layout">
+                    <!-- LEFT COLUMN: SETTINGS -->
+                    <div class="editor-sidebar">
+                        <div class="accordion-item">
+                            <h3>General Info</h3>
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" id="meta-title">
                             </div>
-                            <div id="upload-status"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Schema Type</label>
-                            <select id="post-schema">
-                                <option value="Article">Article</option>
-                                <option value="Review">Review</option>
-                                <option value="HowTo">HowTo</option>
-                                <option value="FAQPage">FAQ</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Canonical URL</label>
-                            <div class="toggle-group">
-                                <label><input type="radio" name="canonical" value="self" checked> Self</label>
-                                <label><input type="radio" name="canonical" value="custom"> Custom</label>
+                            <div class="form-group">
+                                <label>Slug (URL)</label>
+                                <input type="text" id="meta-slug">
                             </div>
-                            <input type="text" id="post-canonical-custom" class="hidden" placeholder="https://external.com/original">
+                            <div class="form-group">
+                                <label>Author</label>
+                                <input type="text" id="meta-author" value="Md Ashikuzzaman">
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h3>SEO & Schema</h3>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="meta-desc" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Schema Type</label>
+                                <select id="schema-selector">
+                                    <option value="Article">Article (Default)</option>
+                                    <option value="Review">Review</option>
+                                    <option value="FAQPage">FAQ Page</option>
+                                    <option value="HowTo">How To</option>
+                                    <option value="Product">Product</option>
+                                    <option value="VideoObject">Video</option>
+                                </select>
+                            </div>
+                            <!-- Dynamic Schema Fields Container -->
+                            <div id="dynamic-schema-fields" class="schema-box"></div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h3>Featured Image</h3>
+                            <div class="form-group">
+                                <input type="text" id="meta-banner" placeholder="Image URL">
+                                <button class="btn-small" onclick="switchPanel('media')">Select from Media</button>
+                            </div>
+                            <img id="banner-preview" src="" style="width:100%; display:none; margin-top:10px; border-radius:4px;">
                         </div>
                     </div>
 
-                    <!-- WYSIWYG Editor -->
-                    <div class="main-editor">
+                    <!-- RIGHT COLUMN: TINYMCE -->
+                    <div class="editor-main">
                         <textarea id="tinymce-editor"></textarea>
                     </div>
                 </div>
@@ -138,8 +199,10 @@
         </main>
     </div>
 
-    <!-- Notification Toast -->
     <div id="toast" class="toast"></div>
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+    </div>
 
     <script src="app.js"></script>
 </body>
