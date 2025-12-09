@@ -1,6 +1,6 @@
 {
   "siteTitle": "hi",
-  "siteUrl": "https://crackstreams.guru/",
+  "siteUrl": "https://crackstreams.help/",
   "favicon": "",
   "homepage": "",
   "enable404": false,
@@ -8,6 +8,12 @@
   "adsenseAuto": "",
   "customCss": "",
   "customHeadJs": "",
-  "ads": [],
+  "ads": [
+    {
+      "code": "",
+      "placement": "none",
+      "exclude": ""
+    }
+  ],
   "verifications": []
 }
