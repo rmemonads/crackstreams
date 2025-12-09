@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local Fontello CSS -->
+    <link rel="stylesheet" href="fontello.css">
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +14,7 @@
     <!-- LOGIN SCREEN -->
     <div id="login-view" class="view">
         <div class="login-box">
-            <h2><i class="fa-solid fa-bolt"></i> CMS Login</h2>
+            <h2><i class="icon-lock"></i> CMS Login</h2>
             <form id="login-form">
                 <div class="input-group">
                     <label>GitHub Token (PAT)</label>
@@ -39,23 +40,23 @@
         <aside id="main-sidebar" class="sidebar">
             <div class="brand">
                 <span class="brand-text">CMS Admin</span>
-                <button id="sidebar-toggle-btn" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
+                <button id="sidebar-toggle-btn" class="icon-btn"><i class="icon-menu"></i></button>
             </div>
             <nav>
                 <button id="nav-btn-dashboard" onclick="switchPanel('dashboard')" class="nav-item active">
-                    <i class="fa-solid fa-thumbtack"></i> <span>Posts</span>
+                    <i class="icon-doc-text"></i> <span>Posts</span>
                 </button>
                 <button id="nav-btn-pages" onclick="switchPanel('pages')" class="nav-item">
-                    <i class="fa-solid fa-file"></i> <span>Pages</span>
+                    <i class="icon-doc"></i> <span>Pages</span>
                 </button>
                 
                 <div class="nav-spacer"></div>
 
                 <button id="nav-btn-settings" onclick="switchPanel('settings')" class="nav-item">
-                    <i class="fa-solid fa-sliders"></i> <span>Global Settings</span>
+                    <i class="icon-cog"></i> <span>Settings</span>
                 </button>
                 <button id="nav-logout" class="nav-item logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+                    <i class="icon-logout"></i> <span>Logout</span>
                 </button>
             </nav>
         </aside>
@@ -66,16 +67,16 @@
             <!-- POSTS LIST -->
             <div id="panel-dashboard" class="panel">
                 <div class="panel-header">
-                    <h2><i class="fa-solid fa-thumbtack"></i> Blog Posts</h2>
+                    <h2><i class="icon-doc-text"></i> Blog Posts</h2>
                     <div class="header-actions">
                         <button id="bulk-del-posts" class="btn-danger hidden" onclick="bulkDelete('post')">Delete Selected</button>
                         <input type="text" placeholder="Search posts..." class="search-bar" onkeyup="filterTable('posts-list-body', this.value)">
-                        <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> New Post</button>
+                        <button class="btn-primary" onclick="createNew('post')"><i class="icon-plus"></i> New Post</button>
                     </div>
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('posts-list-body', this)"></th><th>Title</th><th>Actions</th></tr></thead>
+                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('posts-list-body', this)"></th><th>Title</th><th>Last Updated</th><th>Actions</th></tr></thead>
                         <tbody id="posts-list-body"></tbody>
                     </table>
                 </div>
@@ -84,16 +85,16 @@
             <!-- PAGES LIST -->
             <div id="panel-pages" class="panel">
                 <div class="panel-header">
-                    <h2><i class="fa-solid fa-file"></i> Pages</h2>
+                    <h2><i class="icon-doc"></i> Pages</h2>
                     <div class="header-actions">
                         <button id="bulk-del-pages" class="btn-danger hidden" onclick="bulkDelete('page')">Delete Selected</button>
                         <input type="text" placeholder="Search pages..." class="search-bar" onkeyup="filterTable('pages-list-body', this.value)">
-                        <button class="btn-primary" onclick="createNew('page')"><i class="fa-solid fa-plus"></i> New Page</button>
+                        <button class="btn-primary" onclick="createNew('page')"><i class="icon-plus"></i> New Page</button>
                     </div>
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('pages-list-body', this)"></th><th>Title</th><th>Actions</th></tr></thead>
+                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('pages-list-body', this)"></th><th>Title</th><th>Last Updated</th><th>Actions</th></tr></thead>
                         <tbody id="pages-list-body"></tbody>
                     </table>
                 </div>
@@ -102,7 +103,7 @@
             <!-- GLOBAL SETTINGS -->
             <div id="panel-settings" class="panel">
                 <div class="panel-header">
-                    <h2><i class="fa-solid fa-sliders"></i> Global Settings</h2>
+                    <h2><i class="icon-cog"></i> Global Settings</h2>
                     <button class="btn-primary" onclick="saveGlobalSettings()">Save Settings</button>
                 </div>
                 
@@ -132,13 +133,6 @@
                     <div class="settings-card">
                         <h3>Structure</h3>
                         <div class="form-group">
-                            <label>Homepage (Sets Root index.html)</label>
-                            <select id="set-homepage-select">
-                                <option value="">-- Select a Page --</option>
-                            </select>
-                            <p class="hint">Selecting a page copies its content to root.</p>
-                        </div>
-                        <div class="form-group">
                             <label>404 Redirection</label>
                             <label class="switch-label">
                                 <input type="checkbox" id="set-404-redirect">
@@ -163,7 +157,7 @@
                             </div>
                         </div>
                         <div style="margin-top:15px;">
-                            <label class="schema-label">Social Links (Icon Class | Link)</label>
+                            <label class="schema-label">Social Links (Fontello Icon Class | Link)</label>
                             <div id="social-links-container" class="repeater-container"></div>
                             <button class="add-repeater-btn" onclick="addSocialItem()">+ Add Social</button>
                         </div>
@@ -225,8 +219,8 @@
                     <!-- LEFT SIDEBAR -->
                     <div class="editor-sidebar-column">
                         <div class="sidebar-tabs">
-                            <button id="tab-btn-settings" class="tab-btn active" onclick="switchSidebarTab('settings')"><i class="fa-solid fa-gear"></i> Settings</button>
-                            <button id="tab-btn-media" class="tab-btn" onclick="switchSidebarTab('media')"><i class="fa-solid fa-image"></i> Media</button>
+                            <button id="tab-btn-settings" class="tab-btn active" onclick="switchSidebarTab('settings')"><i class="icon-cog"></i></button>
+                            <button id="tab-btn-media" class="tab-btn" onclick="switchSidebarTab('media')"><i class="icon-picture"></i></button>
                         </div>
 
                         <!-- Tab: Settings -->
@@ -248,7 +242,7 @@
                                 <div id="featured-dropzone" class="image-drop-wrapper">
                                     <input type="text" id="meta-banner" placeholder="https://...">
                                     <img id="banner-preview" class="hidden">
-                                    <div class="drop-overlay"><i class="fa-solid fa-upload"></i> Drop to Upload</div>
+                                    <div class="drop-overlay"><i class="icon-upload-cloud"></i> Drop to Upload</div>
                                 </div>
                             </div>
                             <!-- Breadcrumb Schema Toggle -->
@@ -263,8 +257,8 @@
                         <!-- Tab: Media -->
                         <div id="tab-media" class="sidebar-content">
                             <div class="media-drop-area" id="sidebar-dropzone">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p>Drop files or Click to Upload</p>
+                                <i class="icon-upload-cloud"></i>
+                                <p>Drop files or Click</p>
                                 <input type="file" id="sidebar-file-input" multiple hidden>
                             </div>
                             <div id="sidebar-media-grid" class="sidebar-grid"></div>
@@ -279,14 +273,13 @@
                         </div>
                         <div class="schema-wrapper">
                             <div class="schema-header">
-                                <h3><i class="fa-solid fa-code"></i> Structured Data</h3>
+                                <h3><i class="icon-code"></i> Structured Data (Advanced)</h3>
                                 <div class="schema-controls">
                                     <select id="add-schema-type">
-                                        <option value="WebSite">WebSite (Homepage)</option>
                                         <option value="FAQPage">FAQ Page</option>
                                         <option value="Review">Review</option>
-                                        <option value="HowTo">HowTo</option>
                                         <option value="Product">Product</option>
+                                        <option value="WebSite">WebSite (Global)</option>
                                     </select>
                                     <button class="btn-secondary btn-xs" onclick="addSchemaBlock()">+ Add</button>
                                 </div>
