@@ -1,6 +1,6 @@
 /**
  * ULTIMATE SERVERLESS CMS
- * Features: DB-based Sorting, Fontello, Ad Manager (Inner/Sticky), Schema+
+ * Features: DB Sorting, Drag&Drop Fix, Schema+, Ad Sizes, Fontello (Published) / FA (Admin)
  */
 
 const SYSTEM_ASSETS = {
@@ -127,7 +127,6 @@ async function initApp() {
     showLoader(false);
 }
 
-// --- SYSTEM ---
 async function ensureDirectories() {}
 async function ensureSystemFiles() {
     for (const [path, content] of Object.entries(SYSTEM_ASSETS)) {
@@ -136,7 +135,7 @@ async function ensureSystemFiles() {
     }
 }
 
-// --- CONTENT INDEX (Database) ---
+// --- CONTENT INDEX (DB) ---
 async function loadContentIndex() {
     try {
         const res = await githubReq('contents/_cms/index.json');
@@ -144,11 +143,7 @@ async function loadContentIndex() {
             const data = await res.json();
             state.indexSha = data.sha;
             state.contentIndex = JSON.parse(b64DecodeUnicode(data.content));
-        } else {
-            // Build initial index if missing
-            state.contentIndex = [];
-            // We rely on simple crawling once to populate if empty, logic simplified for stability
-        }
+        } else state.contentIndex = [];
     } catch(e) { state.contentIndex = []; }
 }
 
@@ -164,14 +159,13 @@ async function updateContentIndex(slug, type, title, action = 'update') {
         else state.contentIndex.unshift(entry);
     }
 
-    // Save to GitHub
     const body = { message: 'Update Index', content: b64EncodeUnicode(JSON.stringify(state.contentIndex, null, 2)) };
     if (state.indexSha) body.sha = state.indexSha;
     const res = await githubReq('contents/_cms/index.json', 'PUT', body);
     state.indexSha = (await res.json()).content.sha;
 }
 
-// --- NAVIGATION ---
+// --- NAV & SIDEBAR ---
 function switchPanel(id) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById(`panel-${id}`).classList.add('active');
@@ -202,7 +196,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const t = document.getElementById('gh-token').value.trim();
     const o = document.getElementById('gh-owner').value.trim();
     const r = document.getElementById('gh-repo').value.trim();
-
     try {
         const res = await fetch(`https://api.github.com/repos/${o}/${r}`, { headers: { Authorization: `Bearer ${t}` } });
         if (!res.ok) throw new Error('Invalid Credentials');
@@ -226,7 +219,7 @@ async function getLatestFileSha(path) {
     try { const res = await githubReq(`contents/${path}`); return res ? (await res.json()).sha : null; } catch (e) { return null; }
 }
 
-// --- SETTINGS ---
+// --- SETTINGS (FIXED) ---
 async function loadGlobalSettings() {
     try {
         const res = await githubReq('contents/_cms/settings.json');
@@ -251,7 +244,10 @@ function populateSettingsForm() {
     document.getElementById('set-custom-head-js').value = s.customHeadJs || '';
     document.getElementById('set-404-redirect').checked = s.enable404 || false;
     
-    renderRepeater('meta-verify-container', s.verifications, 'meta');
+    // Verifications (Single Field)
+    const vContainer = document.getElementById('meta-verify-container'); vContainer.innerHTML = '';
+    (s.verifications || []).forEach(v => addMetaVerifyItem(v));
+
     renderRepeater('header-menu-container', s.headerMenu, 'menu');
     renderRepeater('footer-menu-container', s.footerMenu, 'menu');
     renderRepeater('social-links-container', s.socialLinks, 'social');
@@ -305,20 +301,14 @@ async function saveGlobalSettings() {
     finally { showLoader(false); }
 }
 
-// --- LISTS (DB BASED) ---
+// --- LISTS ---
 async function loadList(type) {
     const tbody = document.getElementById(type === 'post' ? 'posts-list-body' : 'pages-list-body');
     tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
     
-    // Sort by date desc
     const items = state.contentIndex.filter(i => i.type === type).sort((a,b) => new Date(b.date) - new Date(a.date));
     
-    // Fallback: If DB empty, crawl once
-    if (items.length === 0) {
-        await crawlAndRebuildIndex(type);
-        return; 
-    }
-
+    if (items.length === 0) { await crawlAndRebuildIndex(type); return; }
     renderTableRows(tbody, items, type);
 }
 
@@ -326,20 +316,16 @@ async function crawlAndRebuildIndex(type) {
     try {
         const endpoint = type === 'post' ? 'contents/blog' : 'contents';
         const res = await githubReq(endpoint);
-        if(!res) return;
+        if(!res) { renderTableRows(document.getElementById(type === 'post' ? 'posts-list-body' : 'pages-list-body'), [], type); return; }
         const data = await res.json();
         const restricted = ['blog', 'images', 'admin', 'css', 'js', '.git', '_cms', 'assets', '404.html', 'index.html'];
         
-        const files = data.filter(item => item.type === 'dir' && !restricted.includes(item.name));
-        files.forEach(f => {
-            // Check if exists in index, if not add
+        data.filter(item => item.type === 'dir' && !restricted.includes(item.name)).forEach(f => {
             if (!state.contentIndex.find(i => i.slug === f.name)) {
                 state.contentIndex.push({ slug: f.name, type: type, title: f.name, date: new Date().toISOString() });
             }
         });
-        // Render
-        const tbody = document.getElementById(type === 'post' ? 'posts-list-body' : 'pages-list-body');
-        renderTableRows(tbody, state.contentIndex.filter(i => i.type === type), type);
+        renderTableRows(document.getElementById(type === 'post' ? 'posts-list-body' : 'pages-list-body'), state.contentIndex.filter(i => i.type === type), type);
     } catch(e) {}
 }
 
@@ -353,9 +339,9 @@ function renderTableRows(tbody, items, type) {
             <td><strong>${f.title}</strong><br><small style="color:#666">/${f.slug}</small></td>
             <td style="font-size:0.8rem">${dateStr}</td>
             <td>
-                <a href="${liveLink}" target="_blank" class="btn-secondary btn-xs"><i class="icon-eye"></i></a>
-                <button class="btn-primary btn-xs" onclick="editContent('${type}', '${f.slug}')"><i class="icon-pencil"></i></button> 
-                <button class="btn-danger btn-xs" onclick="deleteContent('${type}', '${f.slug}')"><i class="icon-trash"></i></button>
+                <a href="${liveLink}" target="_blank" class="btn-secondary btn-xs"><i class="fa-solid fa-eye"></i></a>
+                <button class="btn-primary btn-xs" onclick="editContent('${type}', '${f.slug}')"><i class="fa-solid fa-pen"></i></button> 
+                <button class="btn-danger btn-xs" onclick="deleteContent('${type}', '${f.slug}')"><i class="fa-solid fa-trash"></i></button>
             </td>
         </tr>`;
     });
@@ -455,11 +441,15 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const s = state.settings;
     const fullUrl = `${s.siteUrl}/${isPost?'blog/':''}${slug}/`;
     const assetPath = isPost ? '../../assets' : '../assets';
+    // Admin path for fontello: Posts=../../admin/fontello.css, Pages=../admin/fontello.css
+    const adminPath = isPost ? '../../admin' : '../admin';
+    
     const bannerUrl = document.getElementById('meta-banner').value;
     const bannerHtml = bannerUrl ? `<div class="banner-container"><img id="dynamicBannerImage" class="banner-image" alt="${title}" src="${bannerUrl}"></div>` : '';
 
     const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${l.link}">${l.label}</a></li>`).join('');
     const footerLinks = (s.footerMenu || []).map(l => `<a href="${l.link}">${l.label}</a>`).join('');
+    // Use Fontello classes for social icons on published site
     const socialIcons = (s.socialLinks || []).map(l => `<a href="${l.link}"><i class="${l.label}"></i></a>`).join('');
     const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl);
     const metaDisplay = isPost ? '' : 'style="display:none"';
@@ -475,8 +465,8 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <link rel="icon" href="${s.favicon || ''}">
     <link rel="canonical" href="${fullUrl}">
     <meta property="og:image" content="${bannerUrl}">
-    ${(s.verifications||[]).map(v=>`<meta name="${v.name}" content="${v.content}">`).join('\n')}
-    <link rel="stylesheet" href="${assetPath}/../admin/fontello.css">
+    ${(s.verifications||[]).join('\n')}
+    <link rel="stylesheet" href="${adminPath}/fontello.css">
     <link rel="stylesheet" href="${assetPath}/css/article.css">
     <style>${s.customCss || ''}</style>
     ${s.customHeadJs || ''}
@@ -586,7 +576,7 @@ async function bulkDelete(type) {
     loadList(type);
 }
 
-// --- ADS & INJECTION ---
+// --- ADS ---
 function getAdCode(place, slug) {
     const ads = state.settings.ads || [];
     const ad = ads.find(a => a.placement === place && !isExcluded(a, slug));
@@ -618,33 +608,35 @@ function injectAds(html, slug) {
     return modified;
 }
 
-// --- SCHEMA ---
+// --- SCHEMA & MEDIA ---
 function addSchemaBlock() { renderSchemaBlock(document.getElementById('add-schema-type').value); }
 function renderSchemaBlock(type, data={}) {
     const c=document.getElementById('schema-container'); const id='s-'+Date.now();
     let html=`<div class="schema-block" data-type="${type}"><div class="block-header"><span>${type}</span><button class="remove-schema-btn" onclick="this.closest('.schema-block').remove()">Remove</button></div>`;
-    if(type==='WebSite') html+=`<div class="schema-row"><div><label>Name</label><input class="schema-input" data-key="name" value="${data.name||''}"></div><div><label>URL</label><input class="schema-input" data-key="url" value="${data.url||''}"></div></div>`;
+    if(type==='HowTo') html+=`<div class="schema-row"><div><label>Name</label><input class="schema-input" data-key="name" value="${data.name||''}"></div><div><label>Time (PTxMx)</label><input class="schema-input" data-key="time" value="${data.totalTime||'PT10M'}"></div></div><div class="schema-full-row"><label>Supplies (comma sep)</label><input class="schema-input" data-key="supplies" value="${(data.supply||[]).join(', ')||''}"></div><div class="schema-full-row"><label>Tools (comma sep)</label><input class="schema-input" data-key="tools" value="${(data.tool||[]).join(', ')||''}"></div><div class="repeater-container" id="${id}-steps"></div><button class="add-repeater-btn" onclick="addStepItem('${id}-steps')">+ Step</button>`;
     else if(type==='Review') html+=`<div class="schema-row"><div><label>Item Name</label><input class="schema-input" data-key="item" value="${data.itemReviewed?.name||''}"></div><div><label>Rating (1-5)</label><input class="schema-input" data-key="rating" value="${data.reviewRating?.ratingValue||''}"></div></div><div class="schema-full-row"><label>Review Body</label><textarea class="schema-input" data-key="body">${data.reviewBody||''}</textarea></div>`;
     else if(type==='Product') html+=`<div class="schema-row"><div><label>Name</label><input class="schema-input" data-key="name" value="${data.name||''}"></div><div><label>Brand</label><input class="schema-input" data-key="brand" value="${data.brand?.name||''}"></div></div><div class="schema-row"><div><label>Price</label><input class="schema-input" data-key="price" value="${data.offers?.price||''}"></div><div><label>Currency</label><input class="schema-input" data-key="currency" value="${data.offers?.priceCurrency||'USD'}"></div></div>`;
     else if(type==='FAQPage') html+=`<div class="repeater-container" id="${id}"></div><button class="add-repeater-btn" onclick="addFaqItem('${id}')">+ FAQ</button>`;
     html+='</div>'; c.insertAdjacentHTML('beforeend', html);
     if(type==='FAQPage' && data.mainEntity) data.mainEntity.forEach(q=>addFaqItem(id,q.name,q.acceptedAnswer?.text));
+    if(type==='HowTo' && data.step) data.step.forEach(s=>addStepItem(`${id}-steps`,s.text));
 }
 function addFaqItem(id,q='',a='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div><label class="schema-label">Q</label><input class="schema-input faq-q" value="${q.replace(/"/g,'&quot;')}"></div><div><label class="schema-label">A</label><textarea class="schema-input faq-a">${a}</textarea></div></div>`); }
+function addStepItem(id, t='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div><label class="schema-label">Step</label><textarea class="schema-input step-text">${t}</textarea></div></div>`); }
 function addDefaultArticleSchema(checked) { document.getElementById('schema-container').insertAdjacentHTML('afterbegin', `<div class="schema-block default-block"><div class="block-header"><span>Article Schema</span><label class="switch-label"><input type="checkbox" id="include-article-schema" ${checked?'checked':''}><span class="chk-text">Enable</span></label></div></div>`); }
 
 function generateFinalSchema(url, headline, image) {
     const graph = [];
     if(document.getElementById('include-article-schema').checked) graph.push({"@type": "Article", "headline": headline, "image": [image], "author": { "@type": "Person", "name": document.getElementById('meta-author').value }, "datePublished": new Date().toISOString(), "dateModified": new Date().toISOString() });
-    if(document.getElementById('include-breadcrumb-schema').checked) graph.push({"@type": "BreadcrumbList", "itemListElement": [{"@type":"ListItem","position":1,"name":"Home","item":state.settings.siteUrl},{"@type":"ListItem","position":2,"name":headline,"item":url}]});
+    if(document.getElementById('include-breadcrumb-schema').checked) graph.push({"@type": "BreadcrumbList", "itemListElement": [{"@type":"ListItem","position":1,"name":"Home","item":state.settings.siteUrl},{"@type":"ListItem","position":2,"name":"Blog","item":state.settings.siteUrl+"/blog/"},{"@type":"ListItem","position":3,"name":headline,"item":url}]});
     
     document.querySelectorAll('.schema-block:not(.default-block)').forEach(b => {
         const type = b.dataset.type;
         let obj = { "@type": type };
-        if(type === 'WebSite') { obj.name = b.querySelector('[data-key="name"]').value; obj.url = b.querySelector('[data-key="url"]').value; }
-        else if(type === 'FAQPage') { obj.mainEntity = Array.from(b.querySelectorAll('.repeater-item')).map(r=>({"@type":"Question","name":r.querySelector('.faq-q').value,"acceptedAnswer":{"@type":"Answer","text":r.querySelector('.faq-a').value}})); }
+        if(type === 'FAQPage') obj.mainEntity = Array.from(b.querySelectorAll('.repeater-item')).map(r=>({"@type":"Question","name":r.querySelector('.faq-q').value,"acceptedAnswer":{"@type":"Answer","text":r.querySelector('.faq-a').value}}));
         else if(type === 'Review') { obj.itemReviewed={ "@type": "Thing", "name": b.querySelector('[data-key="item"]').value }; obj.reviewRating={ "@type": "Rating", "ratingValue": b.querySelector('[data-key="rating"]').value }; obj.reviewBody=b.querySelector('[data-key="body"]').value; }
         else if(type === 'Product') { obj.name=b.querySelector('[data-key="name"]').value; obj.brand={ "@type": "Brand", "name": b.querySelector('[data-key="brand"]').value }; obj.offers={ "@type": "Offer", "price": b.querySelector('[data-key="price"]').value, "priceCurrency": b.querySelector('[data-key="currency"]').value }; }
+        else if(type === 'HowTo') { obj.name=b.querySelector('[data-key="name"]').value; obj.totalTime=b.querySelector('[data-key="time"]').value; obj.supply=b.querySelector('[data-key="supplies"]').value.split(',').map(s=>({"@type":"HowToSupply","name":s.trim()})); obj.tool=b.querySelector('[data-key="tools"]').value.split(',').map(s=>({"@type":"HowToTool","name":s.trim()})); obj.step=Array.from(b.querySelectorAll('.step-text')).map(s=>({"@type":"HowToStep","text":s.value})); }
         graph.push(obj);
     });
     return JSON.stringify({ "@context": "https://schema.org", "@graph": graph }, null, 4);
@@ -660,13 +652,28 @@ function b64DecodeUnicode(str){return decodeURIComponent(atob(str).split('').map
 function generateLazyAnalytics() { return state.settings.gaId ? `<script>(function(){const g="${state.settings.gaId}";function l(){const s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id='+g;s.async=true;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];function G(){dataLayer.push(arguments)}G('js',new Date());G('config',g)}window.addEventListener('scroll',l,{once:true});setTimeout(l,4000)})();</script>` : ''; }
 function exitEditor(){switchPanel(state.currentType==='post'?'dashboard':'pages')}
 
-// UI Repeaters
-function addMetaVerifyItem(n='', c='') { document.getElementById('meta-verify-container').insertAdjacentHTML('beforeend', `<div class="repeater-item meta-item-row"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input meta-name" value="${n}" placeholder="Name"><input class="schema-input meta-content" value="${c}" placeholder="Content"></div></div>`); }
+// UI Repeaters (Fixed)
+function renderRepeater(id, data, type) {
+    const c = document.getElementById(id); c.innerHTML = '';
+    (data || []).forEach(item => {
+        if(type === 'menu') addMenuItem(id, item.label, item.link);
+        else if(type === 'social') addSocialItem(item.label, item.link);
+    });
+}
+function collectRepeater(id, type) {
+    const items = [];
+    if(type === 'meta') { document.querySelectorAll('#meta-verify-container .meta-tag-input').forEach(i => { if(i.value) items.push(i.value); }); return items; }
+    document.getElementById(id).querySelectorAll('.repeater-item').forEach(d => {
+        if(type === 'menu' || type === 'social') items.push({ label: d.querySelector('.item-label').value, link: d.querySelector('.item-link').value });
+    });
+    return items;
+}
+function addMetaVerifyItem(val='') { document.getElementById('meta-verify-container').insertAdjacentHTML('beforeend', `<div class="repeater-item meta-item-row"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><input class="schema-input meta-tag-input" value='${val}' placeholder='<meta name="..." content="...">'></div>`); }
 function addMenuItem(id, l='', u='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input item-label" value="${l}" placeholder="Label"><input class="schema-input item-link" value="${u}" placeholder="Link /"></div></div>`); }
-function addSocialItem(l='', u='') { document.getElementById('social-links-container').insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="social-row"><input class="schema-input item-label" value="${l}" placeholder="Icon Class (icon-twitter)"><input class="schema-input item-link" value="${u}" placeholder="URL"></div></div>`); }
-function addAdUnit(d={}) { document.getElementById('ads-repeater-container').insertAdjacentHTML('beforeend', `<div class="ad-unit-block"><button class="ad-remove-btn" onclick="this.parentElement.remove()"><i class="icon-trash"></i></button><label class="schema-label">Ad Code</label><textarea class="schema-input ad-code-input" rows="2">${d.code||''}</textarea><div class="ad-meta-row"><div><select class="schema-input ad-place-input"><option value="header_bottom" ${d.placement==='header_bottom'?'selected':''}>Below Header</option><option value="sticky_footer" ${d.placement==='sticky_footer'?'selected':''}>Sticky Footer</option><option value="end" ${d.placement==='end'?'selected':''}>End Post</option><option value="sticky_left" ${d.placement==='sticky_left'?'selected':''}>Left Sticky</option><option value="sticky_right" ${d.placement==='sticky_right'?'selected':''}>Right Sticky</option><option value="after_p_1" ${d.placement==='after_p_1'?'selected':''}>After Para 1</option><option value="after_p_2" ${d.placement==='after_p_2'?'selected':''}>After Para 2</option><option value="after_p_3" ${d.placement==='after_p_3'?'selected':''}>After Para 3</option></select></div><div><input class="schema-input ad-exclude-input" value="${d.exclude||''}" placeholder="Excl. slugs"></div></div></div>`); }
+function addSocialItem(l='', u='') { document.getElementById('social-links-container').insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="social-row"><input class="schema-input item-label" value="${l}" placeholder="icon-twitter"><input class="schema-input item-link" value="${u}" placeholder="URL"></div></div>`); }
+function addAdUnit(d={}) { document.getElementById('ads-repeater-container').insertAdjacentHTML('beforeend', `<div class="ad-unit-block"><button class="ad-remove-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button><label class="schema-label">Ad Code</label><textarea class="schema-input ad-code-input" rows="2">${d.code||''}</textarea><div class="ad-meta-row"><div><select class="schema-input ad-place-input"><option value="header_bottom" ${d.placement==='header_bottom'?'selected':''}>Below Header (728x90)</option><option value="sticky_footer" ${d.placement==='sticky_footer'?'selected':''}>Sticky Footer (728x90)</option><option value="end" ${d.placement==='end'?'selected':''}>End Post (300x250)</option><option value="sticky_left" ${d.placement==='sticky_left'?'selected':''}>Left Sticky (160x600)</option><option value="sticky_right" ${d.placement==='sticky_right'?'selected':''}>Right Sticky (160x600)</option><option value="after_p_1" ${d.placement==='after_p_1'?'selected':''}>After Para 1</option><option value="after_p_2" ${d.placement==='after_p_2'?'selected':''}>After Para 2</option><option value="after_p_3" ${d.placement==='after_p_3'?'selected':''}>After Para 3</option></select></div><div><input class="schema-input ad-exclude-input" value="${d.exclude||''}" placeholder="Excl. slugs"></div></div></div>`); }
 
-// Sidebar Media
+// Sidebar Media (Fix DragDrop)
 async function loadSidebarMedia(){
     const g=document.getElementById('sidebar-media-grid'); g.innerHTML='...';
     try {
