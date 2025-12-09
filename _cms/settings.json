@@ -10,8 +10,18 @@
   "customCss": "",
   "customHeadJs": "",
   "verifications": [],
-  "headerMenu": [],
-  "footerMenu": [],
+  "headerMenu": [
+    {
+      "label": "Home",
+      "link": "google.com"
+    }
+  ],
+  "footerMenu": [
+    {
+      "label": "Privacy",
+      "link": "privacy.com"
+    }
+  ],
   "socialLinks": [
     {
       "label": "fa-telegram",
