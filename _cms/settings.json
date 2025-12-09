@@ -12,7 +12,16 @@
   "verifications": [],
   "headerMenu": [],
   "footerMenu": [],
-  "socialLinks": [],
+  "socialLinks": [
+    {
+      "label": "fa-telegram",
+      "link": "https://telegram.com"
+    },
+    {
+      "label": "fa-instagram",
+      "link": "https://telegram.com"
+    }
+  ],
   "ads": [
     {
       "code": "",
