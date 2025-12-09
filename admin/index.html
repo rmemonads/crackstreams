@@ -4,58 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <!-- LOGIN SCREEN -->
-    <div id="login-view" class="view active">
+    <div id="login-view" class="view">
         <div class="login-box">
-            <h2><i class="fa-solid fa-layer-group"></i> CMS Login</h2>
+            <h2><i class="fa-solid fa-bolt"></i> CMS Login</h2>
             <form id="login-form">
                 <div class="input-group">
-                    <label>GitHub Personal Access Token</label>
+                    <label>GitHub Token (PAT)</label>
                     <input type="password" id="gh-token" required>
                 </div>
                 <div class="input-group">
                     <label>Repo Owner</label>
-                    <input type="text" id="gh-owner" required>
+                    <input type="text" id="gh-owner" placeholder="e.g. ashikuzzaman" required>
                 </div>
                 <div class="input-group">
                     <label>Repo Name</label>
-                    <input type="text" id="gh-repo" required>
+                    <input type="text" id="gh-repo" placeholder="e.g. the-influencer-report" required>
                 </div>
-                <button type="submit" class="btn-primary">Connect</button>
+                <button type="submit" class="btn-primary">Login & Save</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP STRUCTURE -->
+    <!-- MAIN APP -->
     <div id="app-view" class="view">
         
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
+        <!-- MAIN SIDEBAR (Navigation) -->
+        <aside class="sidebar collapsed-on-mobile">
             <div class="brand">
-                <i class="fa-solid fa-bolt"></i> <span class="brand-text">InfluencerCMS</span>
-                <button id="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
+                <i class="fa-solid fa-layer-group"></i> <span>Dashboard</span>
             </div>
             <nav>
-                <button onclick="switchPanel('dashboard')" class="nav-item active" title="Blog Posts">
-                    <i class="fa-solid fa-thumbtack"></i> <span class="nav-text">Posts</span>
+                <button onclick="switchPanel('dashboard')" class="nav-item active">
+                    <i class="fa-solid fa-thumbtack"></i> Posts
                 </button>
-                <button onclick="switchPanel('pages')" class="nav-item" title="Pages">
-                    <i class="fa-solid fa-file"></i> <span class="nav-text">Pages</span>
+                <button onclick="switchPanel('pages')" class="nav-item">
+                    <i class="fa-solid fa-file"></i> Pages
                 </button>
-                <button onclick="switchPanel('media')" class="nav-item" title="Media Library">
-                    <i class="fa-solid fa-images"></i> <span class="nav-text">Media</span>
-                </button>
-                <button id="nav-logout" class="nav-item logout" title="Logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> <span class="nav-text">Logout</span>
+                <!-- Media is now INSIDE the editor, but we keep a full view option too -->
+                <button id="nav-logout" class="nav-item logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </button>
             </nav>
         </aside>
@@ -63,146 +57,124 @@
         <!-- CONTENT AREA -->
         <main class="content-area">
 
-            <!-- 1. POSTS DASHBOARD -->
-            <div id="panel-dashboard" class="panel active">
+            <!-- POSTS LIST -->
+            <div id="panel-dashboard" class="panel">
                 <div class="panel-header">
                     <h2>Blog Posts</h2>
-                    <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> Add New Post</button>
+                    <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> New Post</button>
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="posts-list-body">
-                            <!-- Injected via JS -->
-                        </tbody>
+                        <thead><tr><th>Title</th><th>Path</th><th>Actions</th></tr></thead>
+                        <tbody id="posts-list-body"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 2. PAGES DASHBOARD -->
+            <!-- PAGES LIST -->
             <div id="panel-pages" class="panel">
                 <div class="panel-header">
                     <h2>Pages</h2>
-                    <button class="btn-primary" onclick="createNew('page')"><i class="fa-solid fa-plus"></i> Add New Page</button>
+                    <button class="btn-primary" onclick="createNew('page')"><i class="fa-solid fa-plus"></i> New Page</button>
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Slug</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pages-list-body">
-                            <!-- Injected via JS -->
-                        </tbody>
+                        <thead><tr><th>Title</th><th>Path</th><th>Actions</th></tr></thead>
+                        <tbody id="pages-list-body"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 3. MEDIA LIBRARY -->
-            <div id="panel-media" class="panel">
-                <div class="panel-header">
-                    <h2>Media Library</h2>
-                    <button class="btn-primary" onclick="loadMediaLibrary()"><i class="fa-solid fa-rotate"></i> Refresh</button>
-                </div>
-                
-                <div class="media-uploader">
-                    <div id="media-dropzone" class="drop-zone-large">
-                        <i class="fa-solid fa-cloud-arrow-up fa-3x"></i>
-                        <p>Drag & Drop images here to upload</p>
-                        <input type="file" id="media-upload-input" multiple hidden>
-                    </div>
-                </div>
-
-                <div id="media-gallery" class="media-grid">
-                    <!-- Images injected here -->
-                </div>
-            </div>
-
-            <!-- 4. EDITOR (Shared for Pages & Posts) -->
+            <!-- EDITOR (The Core) -->
             <div id="panel-editor" class="panel">
-                <div class="panel-header">
-                    <h2 id="editor-heading">Edit Content</h2>
-                    <div class="actions">
-                        <span id="live-link-container" class="hidden"></span>
-                        <button class="btn-secondary" onclick="cancelEdit()">Cancel</button>
-                        <button class="btn-primary" id="save-btn"><i class="fa-solid fa-paper-plane"></i> Publish</button>
+                <div class="editor-header">
+                    <div class="editor-title-row">
+                        <input type="text" id="meta-title" placeholder="Add Title Here..." class="title-input">
+                        <div class="editor-actions">
+                            <span id="live-link-container" class="hidden"></span>
+                            <button class="btn-secondary" onclick="exitEditor()">Close</button>
+                            <button class="btn-primary" id="save-btn">Publish</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="editor-layout">
-                    <!-- LEFT COLUMN: SETTINGS -->
-                    <div class="editor-sidebar">
-                        <div class="accordion-item">
-                            <h3>General Info</h3>
-                            <div class="form-group">
-                                <label>Title</label>
-                                <input type="text" id="meta-title">
-                            </div>
-                            <div class="form-group">
-                                <label>Slug (URL)</label>
-                                <input type="text" id="meta-slug">
-                            </div>
-                            <div class="form-group">
-                                <label>Author</label>
-                                <input type="text" id="meta-author" value="Md Ashikuzzaman">
-                            </div>
+                    
+                    <!-- LEFT SIDEBAR (SETTINGS + MEDIA) -->
+                    <div class="editor-sidebar-column">
+                        
+                        <!-- Tabs -->
+                        <div class="sidebar-tabs">
+                            <button class="tab-btn active" onclick="switchSidebarTab('settings')"><i class="fa-solid fa-gear"></i> Settings</button>
+                            <button class="tab-btn" onclick="switchSidebarTab('media')"><i class="fa-solid fa-image"></i> Media</button>
                         </div>
 
-                        <div class="accordion-item">
-                            <h3>SEO & Schema</h3>
+                        <!-- Tab: Settings -->
+                        <div id="tab-settings" class="sidebar-content active">
+                            <div class="form-group">
+                                <label>Slug (URL Part)</label>
+                                <input type="text" id="meta-slug">
+                            </div>
                             <div class="form-group">
                                 <label>Description</label>
                                 <textarea id="meta-desc" rows="3"></textarea>
                             </div>
                             <div class="form-group">
+                                <label>Author</label>
+                                <input type="text" id="meta-author" value="Md Ashikuzzaman">
+                            </div>
+                            
+                            <hr class="divider">
+                            
+                            <div class="form-group">
                                 <label>Schema Type</label>
                                 <select id="schema-selector">
-                                    <option value="Article">Article (Default)</option>
+                                    <option value="Article">Article</option>
                                     <option value="Review">Review</option>
-                                    <option value="FAQPage">FAQ Page</option>
-                                    <option value="HowTo">How To</option>
+                                    <option value="HowTo">HowTo</option>
+                                    <option value="FAQPage">FAQPage</option>
                                     <option value="Product">Product</option>
-                                    <option value="VideoObject">Video</option>
                                 </select>
                             </div>
-                            <!-- Dynamic Schema Fields Container -->
                             <div id="dynamic-schema-fields" class="schema-box"></div>
+
+                            <div class="form-group">
+                                <label>Featured Image URL</label>
+                                <input type="text" id="meta-banner" placeholder="https://...">
+                                <img id="banner-preview" class="hidden" style="width:100%; margin-top:5px; border-radius:4px;">
+                            </div>
                         </div>
 
-                        <div class="accordion-item">
-                            <h3>Featured Image</h3>
-                            <div class="form-group">
-                                <input type="text" id="meta-banner" placeholder="Image URL">
-                                <button class="btn-small" onclick="switchPanel('media')">Select from Media</button>
+                        <!-- Tab: Media (Canva Style) -->
+                        <div id="tab-media" class="sidebar-content">
+                            <div class="media-drop-area" id="sidebar-dropzone">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <p>Drop files to Upload</p>
+                                <input type="file" id="sidebar-file-input" multiple hidden>
                             </div>
-                            <img id="banner-preview" src="" style="width:100%; display:none; margin-top:10px; border-radius:4px;">
+                            <div id="sidebar-media-grid" class="sidebar-grid">
+                                <!-- Images load here -->
+                            </div>
+                            <button class="btn-small full-width" onclick="loadSidebarMedia()">Refresh Media</button>
                         </div>
+
                     </div>
 
-                    <!-- RIGHT COLUMN: TINYMCE -->
-                    <div class="editor-main">
+                    <!-- RIGHT COLUMN: EDITOR -->
+                    <div class="editor-main-column">
                         <textarea id="tinymce-editor"></textarea>
                     </div>
+
                 </div>
             </div>
 
         </main>
     </div>
 
+    <!-- Notification -->
     <div id="toast" class="toast"></div>
-    <div id="loading-overlay" class="loading-overlay hidden">
-        <div class="spinner"></div>
-    </div>
+    <!-- Spinner -->
+    <div id="loading-overlay" class="loading-overlay hidden"><div class="spinner"></div></div>
 
     <script src="app.js"></script>
 </body>
