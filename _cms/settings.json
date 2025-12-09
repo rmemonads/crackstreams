@@ -24,12 +24,16 @@
   ],
   "socialLinks": [
     {
-      "label": "fa-telegram",
+      "label": "fa-brands fa-telegram",
       "link": "https://telegram.com"
     },
     {
-      "label": "fa-instagram",
+      "label": "fa-brands fa-instagram",
       "link": "https://telegram.com"
+    },
+    {
+      "label": "",
+      "link": ""
     }
   ],
   "ads": [
