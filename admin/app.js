@@ -402,7 +402,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const bodyContent = tinymce.activeEditor.getContent();
     
     const isCustomCanonical = document.querySelector('input[name="canonical"]:checked').value === 'custom';
-    let canonicalUrl = `https://crackstreams.help/blog/${newSlug}/`;
+    let canonicalUrl = `https://theinfluencerreport.org/blog/${newSlug}/`;
     if (isCustomCanonical) {
         canonicalUrl = document.getElementById('post-canonical-custom').value;
     }
