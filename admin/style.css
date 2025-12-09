@@ -14,8 +14,6 @@ body { background: var(--bg-dark); color: var(--text-main); height: 100vh; overf
 button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .hidden { display: none !important; }
 .view { display: none; width: 100%; height: 100%; }
-
-/* Fix Logic */
 .view#login-view { align-items: center; justify-content: center; } 
 .view.active { display: flex; }
 
@@ -25,18 +23,25 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
 .input-group input { width: 100%; padding: 0.8rem; background: #252525; border: 1px solid var(--border); color: #fff; border-radius: 4px; }
 
-/* SIDEBAR & NAVIGATION */
+/* SIDEBAR - MINI MODE */
 .sidebar { width: 220px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: width 0.3s ease; flex-shrink: 0; }
-.sidebar.collapsed { width: 0; border: none; overflow: hidden; }
+.sidebar.collapsed { width: 60px; } /* Collapsed but visible */
 
-.brand { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); height: 60px; }
+.brand { padding: 0 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); height: 60px; }
 .brand-text { font-size: 1.1rem; color: var(--primary); font-weight: bold; white-space: nowrap; overflow: hidden; }
+.sidebar.collapsed .brand-text { display: none; }
+.sidebar.collapsed .brand { justify-content: center; padding: 0; }
+
 .icon-btn { background: transparent; color: var(--text-muted); font-size: 1.2rem; padding: 5px; }
 .icon-btn:hover { color: white; }
 
-.nav-item { padding: 15px 20px; width: 100%; text-align: left; background: transparent; color: var(--text-muted); display: flex; gap: 12px; align-items: center; font-size: 0.95rem; white-space: nowrap; overflow: hidden; }
+.nav-item { padding: 15px 20px; width: 100%; text-align: left; background: transparent; color: var(--text-muted); display: flex; gap: 15px; align-items: center; font-size: 0.95rem; white-space: nowrap; overflow: hidden; }
 .nav-item:hover, .nav-item.active { background: var(--bg-hover); color: white; border-left: 3px solid var(--primary); }
-.logout { margin-top: auto; color: #ff6666; }
+.sidebar.collapsed .nav-item { padding: 15px; justify-content: center; border-left: none; }
+.sidebar.collapsed .nav-item span { display: none; }
+.sidebar.collapsed .nav-item:hover, .sidebar.collapsed .nav-item.active { border-left: none; background: var(--bg-hover); color: var(--primary); }
+
+.nav-spacer { flex: 1; } /* Pushes settings/logout down */
 
 .content-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-dark); overflow: hidden; position: relative; }
 
@@ -48,6 +53,13 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .wp-table th, .wp-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
 .wp-table th { background: #252525; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; }
 .wp-table tr:hover { background: var(--bg-hover); }
+
+/* SETTINGS GRID */
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.settings-card { background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 6px; }
+.full-width-card { grid-column: 1 / -1; }
+.settings-card h3 { color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 1rem; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
 /* EDITOR LAYOUT */
 #panel-editor { padding: 0; overflow: hidden; }
@@ -72,7 +84,7 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .editor-wrapper { flex: 1; display: flex; flex-direction: column; min-height: 400px; }
 .tox-tinymce { border: none !important; flex: 1; }
 
-/* SCHEMA SECTION (Bottom) */
+/* SCHEMA SECTION */
 .schema-wrapper { background: #1a1a1a; border-top: 1px solid var(--border); padding: 20px; }
 .schema-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .schema-header h3 { font-size: 1rem; color: var(--text-muted); }
@@ -80,35 +92,35 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .schema-controls select { padding: 5px; background: #333; color: white; border: 1px solid #444; border-radius: 4px; }
 
 .schema-block { background: #252525; border: 1px solid #333; border-radius: 4px; padding: 15px; margin-bottom: 15px; position: relative; }
-.block-header { font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; justify-content: space-between; }
+.block-header { font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 .remove-schema-btn { color: var(--danger); font-size: 0.8rem; }
+.switch-label { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: #fff; cursor: pointer; }
 
 .schema-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
 .schema-full-row { margin-bottom: 8px; }
 .schema-label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 3px; }
 .schema-input { width: 100%; padding: 8px; background: #121212; border: 1px solid #444; color: white; border-radius: 3px; font-size: 0.85rem; }
 
-/* FAQ & Repeater Styles */
+/* Repeater */
 .repeater-container { border-left: 2px solid #444; padding-left: 10px; margin-top: 10px; }
 .repeater-item { background: #1e1e1e; padding: 10px; margin-bottom: 8px; border-radius: 3px; position: relative; }
 .repeater-remove { position: absolute; top: 5px; right: 5px; color: #666; font-size: 0.8rem; }
 .repeater-remove:hover { color: var(--danger); }
 .add-repeater-btn { background: #333; color: var(--primary); width: 100%; padding: 5px; font-size: 0.8rem; margin-top: 5px; border: 1px dashed #444; }
-.add-repeater-btn:hover { background: #252525; border-color: var(--primary); }
 
 /* Form Elements */
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
-.form-group input, .form-group textarea { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px; font-size: 0.9rem; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px; font-size: 0.9rem; }
 
-/* Featured Image Dropzone */
+/* Featured Drop */
 .image-drop-wrapper { position: relative; border: 1px solid #444; border-radius: 4px; overflow: hidden; }
 .image-drop-wrapper input { border: none; border-bottom: 1px solid #444; border-radius: 0; }
 .image-drop-wrapper.dragover .drop-overlay { display: flex; }
 .drop-overlay { display: none; position: absolute; inset: 0; background: rgba(0, 170, 255, 0.2); backdrop-filter: blur(2px); align-items: center; justify-content: center; font-weight: bold; color: white; pointer-events: none; }
 #banner-preview { width: 100%; display: block; max-height: 150px; object-fit: cover; }
 
-/* Sidebar Media Gallery */
+/* Media Gallery */
 .media-drop-area { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
 .media-drop-area:hover { border-color: var(--primary); background: #202020; }
 .sidebar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -118,13 +130,12 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .side-media-item::after { content: 'Copy Link'; position: absolute; inset: 0; background: rgba(0,0,0,0.7); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; transition: 0.2s; font-weight: bold; }
 .side-media-item:hover::after { opacity: 1; }
 
-/* Buttons & Utils */
+/* Utils */
 .btn-primary { background: var(--primary); color: white; padding: 8px 16px; border-radius: 4px; font-weight: 600; }
 .btn-secondary { background: #444; color: white; padding: 8px 16px; border-radius: 4px; }
 .btn-xs { padding: 4px 10px; font-size: 0.8rem; }
 .btn-small { padding: 6px; width: 100%; background: #333; color: white; border-radius: 4px; margin-top: 10px; }
 .full-width { width: 100%; }
-
 .toast { position: fixed; bottom: 20px; right: 20px; background: #222; border-left: 4px solid var(--primary); color: white; padding: 15px; border-radius: 4px; transform: translateY(100px); transition: 0.3s; z-index: 9999; }
 .toast.show { transform: translateY(0); }
 .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; }
