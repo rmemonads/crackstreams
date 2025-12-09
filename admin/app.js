@@ -1,61 +1,78 @@
 /**
- * SERVERLESS CMS LOGIC - UPDATED FOR TINYMCE CLOUD
+ * ULTIMATE SERVERLESS CMS
+ * Supports: Posts, Pages, Media Library, Dynamic Schema, Sidebar Toggle
  */
 
-// --- State Management ---
+// --- STATE ---
 const state = {
     token: localStorage.getItem('gh_token'),
     owner: localStorage.getItem('gh_owner'),
     repo: localStorage.getItem('gh_repo'),
+    currentType: 'post', // 'post' or 'page'
     currentSlug: null,
     currentSha: null,
-    editorInitialized: false // New flag to track editor status
+    editorInitialized: false
 };
 
-// --- DOM Elements ---
-const views = {
+const DOM = {
     login: document.getElementById('login-view'),
-    app: document.getElementById('app-view')
+    app: document.getElementById('app-view'),
+    sidebar: document.getElementById('sidebar'),
+    panels: {
+        dashboard: document.getElementById('panel-dashboard'),
+        pages: document.getElementById('panel-pages'),
+        media: document.getElementById('panel-media'),
+        editor: document.getElementById('panel-editor')
+    },
+    tables: {
+        posts: document.getElementById('posts-list-body'),
+        pages: document.getElementById('pages-list-body')
+    }
 };
 
-const panels = {
-    dashboard: document.getElementById('dashboard-panel'),
-    editor: document.getElementById('editor-panel')
-};
-
-// --- Initialization ---
+// --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
-    if (state.token && state.owner && state.repo) {
+    if (state.token) {
         initApp();
     } else {
-        switchView('login');
+        DOM.login.classList.add('active');
     }
+    
+    // Schema Change Listener
+    document.getElementById('schema-selector').addEventListener('change', (e) => {
+        renderSchemaInputs(e.target.value);
+    });
+
+    // Media Drag & Drop
+    setupMediaUploader();
 });
 
-// --- Authentication ---
+// --- SIDEBAR TOGGLE ---
+document.getElementById('sidebar-toggle').addEventListener('click', () => {
+    DOM.sidebar.classList.toggle('collapsed');
+});
+
+// --- AUTH ---
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const token = document.getElementById('gh-token').value.trim();
-    const owner = document.getElementById('gh-owner').value.trim();
-    const repo = document.getElementById('gh-repo').value.trim();
+    const t = document.getElementById('gh-token').value.trim();
+    const o = document.getElementById('gh-owner').value.trim();
+    const r = document.getElementById('gh-repo').value.trim();
 
     try {
-        const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-            headers: { 'Authorization': `token ${token}` }
+        const res = await fetch(`https://api.github.com/repos/${o}/${r}`, {
+            headers: { Authorization: `token ${t}` }
         });
+        if(!res.ok) throw new Error('Invalid Credentials');
+
+        localStorage.setItem('gh_token', t);
+        localStorage.setItem('gh_owner', o);
+        localStorage.setItem('gh_repo', r);
+        state.token = t; state.owner = o; state.repo = r;
         
-        if (!response.ok) throw new Error('Repository not found or access denied');
-
-        localStorage.setItem('gh_token', token);
-        localStorage.setItem('gh_owner', owner);
-        localStorage.setItem('gh_repo', repo);
-
-        state.token = token;
-        state.owner = owner;
-        state.repo = repo;
-
+        DOM.login.classList.remove('active');
         initApp();
-    } catch (err) {
+    } catch(err) {
         showToast(err.message, true);
     }
 });
@@ -65,535 +82,448 @@ document.getElementById('nav-logout').addEventListener('click', () => {
     location.reload();
 });
 
-// --- Navigation Logic ---
-function switchView(viewName) {
-    Object.values(views).forEach(el => el.classList.remove('active'));
-    views[viewName].classList.add('active');
+// --- NAVIGATION ---
+function initApp() {
+    DOM.app.classList.add('active');
+    switchPanel('dashboard');
 }
 
-function showDashboard() {
-    panels.editor.classList.remove('active');
-    panels.dashboard.classList.add('active');
-    document.getElementById('nav-dashboard').classList.add('active');
-    document.getElementById('nav-create').classList.remove('active');
-    loadArticles();
+function switchPanel(name) {
+    // Hide all panels
+    Object.values(DOM.panels).forEach(p => p.classList.remove('active'));
+    // Show target
+    DOM.panels[name].classList.add('active');
+    
+    // Update Sidebar Active State
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    // Simple matching for nav items
+    const navMap = { 'dashboard': 0, 'pages': 1, 'media': 2 };
+    if(navMap[name] !== undefined) {
+        document.querySelectorAll('.nav-item')[navMap[name]].classList.add('active');
+    }
+
+    if(name === 'dashboard') loadPosts();
+    if(name === 'pages') loadPages();
+    if(name === 'media') loadMediaLibrary();
 }
 
-function showEditor(isNew = true) {
-    // 1. Swap Views FIRST
-    panels.dashboard.classList.remove('active');
-    panels.editor.classList.add('active');
-    document.getElementById('nav-create').classList.toggle('active', isNew);
-    document.getElementById('nav-dashboard').classList.remove('active');
+function createNew(type) {
+    state.currentType = type;
+    state.currentSlug = null;
+    state.currentSha = null;
+    
+    // Clear Editor
+    document.getElementById('meta-title').value = '';
+    document.getElementById('meta-slug').value = '';
+    document.getElementById('meta-desc').value = '';
+    document.getElementById('meta-banner').value = '';
+    document.getElementById('banner-preview').style.display = 'none';
+    document.getElementById('live-link-container').classList.add('hidden');
+    
+    // Reset Schema
+    document.getElementById('schema-selector').value = 'Article';
+    renderSchemaInputs('Article');
 
-    // 2. Initialize TinyMCE only after the div is visible
-    if (!state.editorInitialized) {
+    document.getElementById('editor-heading').innerText = type === 'post' ? 'New Blog Post' : 'New Page';
+    
+    switchPanel('editor');
+    initTinyMCE();
+    if(tinymce.activeEditor) tinymce.activeEditor.setContent('');
+    
+    // Auto-slug
+    document.getElementById('meta-title').oninput = (e) => {
+        if(!state.currentSlug) {
+            document.getElementById('meta-slug').value = slugify(e.target.value);
+        }
+    };
+}
+
+function cancelEdit() {
+    if(state.currentType === 'post') switchPanel('dashboard');
+    else switchPanel('pages');
+}
+
+// --- DATA LOADING (WordPress Style) ---
+async function loadPosts() {
+    DOM.tables.posts.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+    try {
+        const data = await githubReq('contents/blog');
+        const folders = data.filter(i => i.type === 'dir');
+        
+        let html = '';
+        for(const f of folders) {
+            // We construct the live link based on conventions
+            const liveLink = `https://theinfluencerreport.org/blog/${f.name}/`;
+            html += `
+            <tr>
+                <td><strong>${f.name}</strong></td>
+                <td><small>Unknown (API limitation)</small></td>
+                <td><span class="status-badge">Published</span></td>
+                <td>
+                    <a href="#" class="action-btn btn-edit" onclick="editContent('post', '${f.name}')">Edit</a>
+                    <a href="${liveLink}" target="_blank" class="action-btn btn-view">View</a>
+                    <a href="#" class="action-btn btn-delete" onclick="deleteContent('post', '${f.name}')">Delete</a>
+                </td>
+            </tr>`;
+        }
+        DOM.tables.posts.innerHTML = html || '<tr><td colspan="4">No posts found.</td></tr>';
+    } catch(e) {
+        DOM.tables.posts.innerHTML = '<tr><td colspan="4">Error loading posts.</td></tr>';
+    }
+}
+
+async function loadPages() {
+    DOM.tables.pages.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+    try {
+        // Fetch root files, filter for HTML files that are NOT index.html of the main site (optional check)
+        // Note: Managing root pages in a flat repo is tricky. 
+        // Better convention: check for folders in root that have index.html, OR specific html files.
+        // For this CMS, let's assume "Pages" are folders in the root or a 'pages' folder. 
+        // Let's stick to: Pages are folders in the ROOT, excluding 'blog', 'admin', 'images'.
+        
+        const data = await githubReq('contents');
+        const exclude = ['blog', 'admin', 'images', 'css', 'js', '.git'];
+        const folders = data.filter(i => i.type === 'dir' && !exclude.includes(i.name));
+
+        let html = '';
+        for(const f of folders) {
+             const liveLink = `https://theinfluencerreport.org/${f.name}/`;
+             html += `
+            <tr>
+                <td><strong>${f.name}</strong></td>
+                <td>/${f.name}/</td>
+                <td>
+                    <a href="#" class="action-btn btn-edit" onclick="editContent('page', '${f.name}')">Edit</a>
+                    <a href="${liveLink}" target="_blank" class="action-btn btn-view">View</a>
+                    <a href="#" class="action-btn btn-delete" onclick="deleteContent('page', '${f.name}')">Delete</a>
+                </td>
+            </tr>`;
+        }
+        DOM.tables.pages.innerHTML = html || '<tr><td colspan="3">No pages found.</td></tr>';
+    } catch(e) {
+        DOM.tables.pages.innerHTML = '<tr><td colspan="3">Error loading pages.</td></tr>';
+    }
+}
+
+async function editContent(type, slug) {
+    showLoader(true);
+    state.currentType = type;
+    state.currentSlug = slug;
+    document.getElementById('meta-title').oninput = null; // Disable auto-slug
+
+    const path = type === 'post' ? `blog/${slug}/index.html` : `${slug}/index.html`;
+
+    try {
+        const res = await githubReq(`contents/${path}`);
+        const data = await res.json();
+        state.currentSha = data.sha;
+        
+        const content = b64DecodeUnicode(data.content);
+        const doc = new DOMParser().parseFromString(content, 'text/html');
+
+        // Fill Form
+        document.getElementById('meta-title').value = doc.querySelector('title')?.innerText || slug;
+        document.getElementById('meta-slug').value = slug;
+        document.getElementById('meta-desc').value = doc.querySelector('meta[name="description"]')?.content || '';
+        document.getElementById('meta-author').value = doc.querySelector('meta[name="author"]')?.content || '';
+        
+        const banner = doc.querySelector('meta[property="og:image"]')?.content || '';
+        document.getElementById('meta-banner').value = banner;
+        if(banner) {
+            document.getElementById('banner-preview').src = banner;
+            document.getElementById('banner-preview').style.display = 'block';
+        }
+
+        // Schema Parse
+        const script = doc.querySelector('script[type="application/ld+json"]');
+        if(script) {
+            const json = JSON.parse(script.innerText);
+            document.getElementById('schema-selector').value = json['@type'] || 'Article';
+            renderSchemaInputs(json['@type'], json);
+        } else {
+            renderSchemaInputs('Article');
+        }
+
+        // Editor
+        switchPanel('editor');
         initTinyMCE();
-        state.editorInitialized = true;
-    } else {
-        // If already initialized, just ensure it's clean
-        if(tinymce.activeEditor) tinymce.activeEditor.setContent('');
-    }
+        const body = doc.querySelector('.article-content')?.innerHTML || '';
+        setTimeout(() => tinymce.activeEditor.setContent(body), 500);
 
-    if (isNew) {
-        resetEditor();
+        // Show Live Link
+        const link = type === 'post' ? `https://theinfluencerreport.org/blog/${slug}/` : `https://theinfluencerreport.org/${slug}/`;
+        const linkContainer = document.getElementById('live-link-container');
+        linkContainer.innerHTML = `<a href="${link}" target="_blank" class="btn-small">View Live <i class="fa-solid fa-external-link"></i></a>`;
+        linkContainer.classList.remove('hidden');
+
+    } catch(e) {
+        showToast("Error loading content", true);
+    } finally {
+        showLoader(false);
     }
 }
 
+// --- DYNAMIC SCHEMA SYSTEM ---
+function renderSchemaInputs(type, existingData = {}) {
+    const container = document.getElementById('dynamic-schema-fields');
+    container.innerHTML = ''; // Clear
+
+    let fields = [];
+
+    // Define Inputs per Schema Type
+    if(type === 'Review') {
+        fields = [
+            { id: 'reviewItem', label: 'Item Name', val: existingData.itemReviewed?.name },
+            { id: 'reviewRating', label: 'Rating (1-5)', val: existingData.reviewRating?.ratingValue }
+        ];
+    } else if (type === 'FAQPage') {
+        // Simplified FAQ: Just a helper text for now, or dynamic add row logic
+        container.innerHTML = '<p style="font-size:0.8rem; color:#888;">FAQ Schema will be auto-generated from headers in your content.</p>';
+        return; 
+    } else if (type === 'HowTo') {
+         fields = [{ id: 'howtoSteps', label: 'Total Steps', val: existingData.totalTime }];
+    } else if (type === 'Product') {
+        fields = [
+            { id: 'prodPrice', label: 'Price', val: existingData.offers?.price },
+            { id: 'prodCurrency', label: 'Currency', val: existingData.offers?.priceCurrency || 'USD' }
+        ];
+    }
+
+    // Generate HTML
+    fields.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'schema-field';
+        div.innerHTML = `
+            <label>${f.label}</label>
+            <input type="text" class="schema-input" data-key="${f.id}" value="${f.val || ''}">
+        `;
+        container.appendChild(div);
+    });
+}
+
+function buildSchemaJSON() {
+    const type = document.getElementById('schema-selector').value;
+    const title = document.getElementById('meta-title').value;
+    const img = document.getElementById('meta-banner').value;
+    const date = new Date().toISOString();
+
+    let json = {
+        "@context": "https://schema.org",
+        "@type": type,
+        "headline": title,
+        "image": [img],
+        "datePublished": date,
+        "dateModified": date
+    };
+
+    // Grab dynamic inputs
+    const inputs = document.querySelectorAll('.schema-input');
+    inputs.forEach(inp => {
+        if(inp.dataset.key === 'reviewItem') json.itemReviewed = { "@type": "Thing", "name": inp.value };
+        if(inp.dataset.key === 'reviewRating') json.reviewRating = { "@type": "Rating", "ratingValue": inp.value };
+        if(inp.dataset.key === 'prodPrice') json.offers = { "@type": "Offer", "price": inp.value };
+    });
+
+    return JSON.stringify(json, null, 4);
+}
+
+// --- MEDIA LIBRARY (CANVA STYLE) ---
+async function loadMediaLibrary() {
+    const grid = document.getElementById('media-gallery');
+    grid.innerHTML = '<p>Loading media...</p>';
+    
+    try {
+        const res = await githubReq('contents/images');
+        const data = await res.json();
+        
+        // Filter images
+        const images = data.filter(f => f.name.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+        
+        grid.innerHTML = '';
+        images.forEach(img => {
+            const url = img.download_url; // Use CDN or raw
+            // Construct cleaner URL if possible, e.g. https://<user>.github.io/<repo>/images/name
+            const publicUrl = `https://${state.owner.toLowerCase()}.github.io/${state.repo}/images/${img.name}`;
+            
+            const div = document.createElement('div');
+            div.className = 'media-item';
+            div.onclick = () => {
+                navigator.clipboard.writeText(publicUrl);
+                showToast("URL Copied to Clipboard!");
+            };
+            div.innerHTML = `
+                <img src="${url}" loading="lazy">
+                <div class="media-overlay"><i class="fa-solid fa-copy"></i> Copy URL</div>
+            `;
+            grid.appendChild(div);
+        });
+
+    } catch(e) {
+        grid.innerHTML = '<p>No images found or error loading.</p>';
+    }
+}
+
+function setupMediaUploader() {
+    const dz = document.getElementById('media-dropzone');
+    const inp = document.getElementById('media-upload-input');
+
+    dz.addEventListener('click', () => inp.click());
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = '#00aaff'; });
+    dz.addEventListener('dragleave', () => dz.style.borderColor = '#333');
+    dz.addEventListener('drop', async e => {
+        e.preventDefault();
+        dz.style.borderColor = '#333';
+        handleFiles(e.dataTransfer.files);
+    });
+    inp.addEventListener('change', () => handleFiles(inp.files));
+}
+
+async function handleFiles(files) {
+    if(!files.length) return;
+    showLoader(true);
+    let count = 0;
+    
+    for(const file of files) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        await new Promise(resolve => {
+            reader.onload = async () => {
+                const b64 = reader.result.split(',')[1];
+                const name = `images/${Date.now()}_${file.name.replace(/\s/g,'_')}`;
+                await githubReq(`contents/${name}`, 'PUT', {
+                    message: `Upload ${name}`,
+                    content: b64
+                });
+                count++;
+                resolve();
+            }
+        });
+    }
+    showLoader(false);
+    showToast(`Uploaded ${count} files.`);
+    loadMediaLibrary();
+}
+
+// --- SAVING ---
+document.getElementById('save-btn').addEventListener('click', async () => {
+    const title = document.getElementById('meta-title').value;
+    const slug = document.getElementById('meta-slug').value;
+    if(!title || !slug) return showToast("Title/Slug required", true);
+
+    showLoader(true);
+    
+    // Determine path
+    const folder = state.currentType === 'post' ? `blog/${slug}` : `${slug}`;
+    const path = `${folder}/index.html`;
+
+    // Template Injection
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <meta name="description" content="${document.getElementById('meta-desc').value}">
+    <meta name="author" content="${document.getElementById('meta-author').value}">
+    <link rel="canonical" href="https://theinfluencerreport.org/${state.currentType === 'post' ? 'blog/' : ''}${slug}/">
+    <meta property="og:image" content="${document.getElementById('meta-banner').value}">
+    
+    <!-- Schema -->
+    <script type="application/ld+json">${buildSchemaJSON()}</script>
+
+    <!-- Styles (Adjust paths based on depth) -->
+    <link rel="stylesheet" href="${state.currentType === 'post' ? '../' : ''}article.css">
+    <style>body{font-family:sans-serif;line-height:1.6;color:#333;max-width:800px;margin:0 auto;padding:20px;}</style>
+</head>
+<body>
+    <header>
+        <a href="/">Home</a> ${state.currentType === 'post' ? '/ <a href="/blog/">Blog</a>' : ''} / <span>${slug}</span>
+    </header>
+    <main>
+        <h1>${title}</h1>
+        <img src="${document.getElementById('meta-banner').value}" style="max-width:100%;height:auto;">
+        <div class="article-content">
+            ${tinymce.activeEditor.getContent()}
+        </div>
+    </main>
+</body>
+</html>`;
+
+    try {
+        // Rename check
+        if(state.currentSlug && state.currentSlug !== slug) {
+            const oldPath = state.currentType === 'post' ? `blog/${state.currentSlug}/index.html` : `${state.currentSlug}/index.html`;
+            await githubReq(oldPath, 'DELETE', { message: 'Rename delete', sha: state.currentSha });
+            state.currentSha = null;
+        }
+
+        const body = {
+            message: `Save ${state.currentType} ${slug}`,
+            content: b64EncodeUnicode(html)
+        };
+        if(state.currentSha && state.currentSlug === slug) body.sha = state.currentSha;
+
+        await githubReq(`contents/${path}`, 'PUT', body);
+        showToast("Published Successfully!");
+        
+        // Show Live Link immediately
+        const link = `https://theinfluencerreport.org/${state.currentType === 'post' ? 'blog/' : ''}${slug}/`;
+        document.getElementById('live-link-container').innerHTML = `<a href="${link}" target="_blank" class="btn-small">View Live</a>`;
+        document.getElementById('live-link-container').classList.remove('hidden');
+
+    } catch(e) {
+        showToast("Error saving: " + e.message, true);
+    } finally {
+        showLoader(false);
+    }
+});
+
+async function deleteContent(type, slug) {
+    if(!confirm('Delete this?')) return;
+    const path = type === 'post' ? `blog/${slug}/index.html` : `${slug}/index.html`;
+    
+    // We need SHA to delete. Fetch it first.
+    try {
+        const res = await githubReq(`contents/${path}`);
+        const data = await res.json();
+        await githubReq(`contents/${path}`, 'DELETE', { message: 'Delete', sha: data.sha });
+        showToast("Deleted.");
+        if(type === 'post') loadPosts(); else loadPages();
+    } catch(e) { console.error(e); }
+}
+
+
+// --- UTILS ---
 function initTinyMCE() {
+    if(state.editorInitialized) return;
     tinymce.init({
         selector: '#tinymce-editor',
         height: '100%',
         skin: 'oxide-dark',
         content_css: 'dark',
-        body_class: 'article-content',
-        // Plugins from your Cloud Account
-        plugins: [
-            'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 
-            'searchreplace', 'table', 'visualblocks', 'wordcount', 'checklist', 'mediaembed', 
-            'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 
-            'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'ai', 'mentions', 
-            'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 
-            'inlinecss', 'markdown'
-        ],
-        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-        tinycomments_mode: 'embedded',
-        ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('AI not configured')),
+        plugins: 'image link media table codesample lists wordcount accordion',
+        toolbar: 'undo redo | blocks | bold italic | align | bullist numlist | link image',
     });
+    state.editorInitialized = true;
 }
 
-function initApp() {
-    switchView('app');
-    showDashboard();
-    setupDragDrop();
+function showLoader(show) { document.getElementById('loading-overlay').classList.toggle('hidden', !show); }
+function showToast(msg, err=false) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.style.borderLeftColor = err ? 'red' : '#00aaff';
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 3000);
 }
+function slugify(t) { return t.toLowerCase().replace(/[^\w-]+/g,'-'); }
 
-// --- GitHub API Helpers ---
-function b64EncodeUnicode(str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-        function toSolidBytes(match, p1) {
-            return String.fromCharCode('0x' + p1);
-    }));
+// Helpers
+async function githubReq(end, method='GET', body=null) {
+    const opts = { method, headers: { Authorization: `token ${state.token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' } };
+    if(body) opts.body = JSON.stringify(body);
+    const r = await fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/${end}`, opts);
+    if(!r.ok && method !== 'GET') throw await r.json();
+    return r;
 }
-
-function b64DecodeUnicode(str) {
-    return decodeURIComponent(atob(str).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-}
-
-async function githubReq(endpoint, method = 'GET', body = null) {
-    const options = {
-        method,
-        headers: {
-            'Authorization': `token ${state.token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        }
-    };
-    if (body) options.body = JSON.stringify(body);
-    
-    const res = await fetch(`https://api.github.com/repos/${state.owner}/${state.repo}/${endpoint}`, options);
-    return res;
-}
-
-// --- Dashboard Functions ---
-async function loadArticles() {
-    const listEl = document.getElementById('article-list');
-    const spinner = document.getElementById('loading-spinner');
-    
-    listEl.innerHTML = '';
-    spinner.classList.remove('hidden');
-
-    try {
-        const res = await githubReq('contents/blog');
-        if (res.status === 404) {
-            listEl.innerHTML = '<p>No blog folder found. Create your first article!</p>';
-            spinner.classList.add('hidden');
-            return;
-        }
-        
-        const data = await res.json();
-        const folders = data.filter(item => item.type === 'dir');
-
-        if (folders.length === 0) {
-            listEl.innerHTML = '<p>No articles found.</p>';
-            spinner.classList.add('hidden');
-            return;
-        }
-
-        for (const folder of folders) {
-            try {
-                const fileRes = await githubReq(`contents/blog/${folder.name}/index.html`);
-                if (!fileRes.ok) continue;
-
-                const fileData = await fileRes.json();
-                const content = b64DecodeUnicode(fileData.content);
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(content, 'text/html');
-                
-                const title = doc.querySelector('title')?.innerText || folder.name;
-                const dateMeta = doc.querySelector('meta[name="date"]');
-                const dateText = dateMeta ? dateMeta.content : 'Unknown Date';
-
-                const card = document.createElement('div');
-                card.className = 'article-card';
-                card.innerHTML = `
-                    <h3>${title}</h3>
-                    <span class="article-date"><i class="fa-regular fa-calendar"></i> ${dateText}</span>
-                    <div class="card-actions">
-                        <button class="btn-secondary" onclick="editArticle('${folder.name}')">Edit</button>
-                        <button class="btn-danger" onclick="deleteArticle('${folder.name}', '${fileData.sha}')">Delete</button>
-                    </div>
-                `;
-                listEl.appendChild(card);
-            } catch (e) {
-                console.error(`Error loading ${folder.name}`, e);
-            }
-        }
-
-    } catch (err) {
-        showToast('Failed to load articles', true);
-        console.error(err);
-    } finally {
-        spinner.classList.add('hidden');
-    }
-}
-
-// --- Editor Functions ---
-
-function resetEditor() {
-    document.getElementById('editor-title').innerText = "Create New Article";
-    document.getElementById('post-title').value = "";
-    document.getElementById('post-slug').value = "";
-    document.getElementById('post-desc').value = "";
-    document.getElementById('post-banner').value = "";
-    document.getElementById('post-author').value = "Md Ashikuzzaman"; 
-    document.querySelector('input[name="canonical"][value="self"]').checked = true;
-    document.getElementById('post-canonical-custom').classList.add('hidden');
-    document.getElementById('post-canonical-custom').value = "";
-    
-    // Auto-slug listener
-    document.getElementById('post-title').oninput = (e) => {
-        if (!state.currentSlug) { 
-            document.getElementById('post-slug').value = slugify(e.target.value);
-        }
-    };
-
-    // Safe set content
-    if(tinymce.activeEditor) tinymce.activeEditor.setContent('');
-    
-    state.currentSlug = null;
-    state.currentSha = null;
-}
-
-function slugify(text) {
-    return text.toString().toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w\-]+/g, '')
-        .replace(/\-\-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
-}
-
-document.querySelectorAll('input[name="canonical"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-        const customInput = document.getElementById('post-canonical-custom');
-        if (e.target.value === 'custom') {
-            customInput.classList.remove('hidden');
-        } else {
-            customInput.classList.add('hidden');
-        }
-    });
-});
-
-async function editArticle(slug) {
-    showToast("Loading article...");
-    
-    // Switch view FIRST
-    showEditor(false);
-    
-    document.getElementById('editor-title').innerText = "Edit Article";
-    state.currentSlug = slug;
-
-    document.getElementById('post-title').oninput = null;
-
-    try {
-        const res = await githubReq(`contents/blog/${slug}/index.html`);
-        const data = await res.json();
-        state.currentSha = data.sha;
-
-        const content = b64DecodeUnicode(data.content);
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(content, 'text/html');
-
-        // Extract Data
-        document.getElementById('post-title').value = doc.querySelector('title').innerText;
-        document.getElementById('post-slug').value = slug;
-        
-        const descMeta = doc.querySelector('meta[name="description"]');
-        if(descMeta) document.getElementById('post-desc').value = descMeta.content;
-
-        const bannerMeta = doc.querySelector('meta[property="og:image"]');
-        if(bannerMeta) document.getElementById('post-banner').value = bannerMeta.content;
-
-        const authorMeta = doc.querySelector('meta[name="author"]');
-        if(authorMeta) document.getElementById('post-author').value = authorMeta.content;
-
-        const canonicalLink = doc.querySelector('link[rel="canonical"]');
-        if (canonicalLink) {
-            const href = canonicalLink.href;
-            if (href.includes(slug)) {
-                document.querySelector('input[name="canonical"][value="self"]').checked = true;
-                document.getElementById('post-canonical-custom').classList.add('hidden');
-            } else {
-                document.querySelector('input[name="canonical"][value="custom"]').checked = true;
-                document.getElementById('post-canonical-custom').classList.remove('hidden');
-                document.getElementById('post-canonical-custom').value = href;
-            }
-        }
-
-        const scriptTags = doc.querySelectorAll('script[type="application/ld+json"]');
-        scriptTags.forEach(script => {
-            try {
-                const json = JSON.parse(script.innerText);
-                if (json['@type']) {
-                    document.getElementById('post-schema').value = json['@type'];
-                }
-            } catch(e) {}
-        });
-
-        // Content - Wait for TinyMCE to be ready
-        const articleBody = doc.querySelector('.article-content');
-        if (articleBody) {
-            // Small timeout to ensure TinyMCE instance is ready after view switch
-            setTimeout(() => {
-                if(tinymce.activeEditor) tinymce.activeEditor.setContent(articleBody.innerHTML);
-            }, 100);
-        }
-
-    } catch (err) {
-        showToast("Error fetching article details", true);
-        console.error(err);
-    }
-}
-
-// --- Image Upload (Drag & Drop) ---
-function setupDragDrop() {
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-
-    dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-    });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file) handleImageUpload(file);
-    });
-    fileInput.addEventListener('change', (e) => {
-        if(fileInput.files[0]) handleImageUpload(fileInput.files[0]);
-    });
-}
-
-async function handleImageUpload(file) {
-    const status = document.getElementById('upload-status');
-    status.innerText = "Uploading...";
-    
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-        const base64Content = reader.result.split(',')[1];
-        const filename = `images/${Date.now()}-${file.name.replace(/\s/g, '_')}`;
-
-        try {
-            const res = await githubReq(`contents/${filename}`, 'PUT', {
-                message: `Upload image ${filename}`,
-                content: base64Content
-            });
-
-            if (res.ok) {
-                const absUrl = `https://${state.owner.toLowerCase()}.github.io/${state.repo}/${filename}`;
-                document.getElementById('post-banner').value = absUrl;
-                status.innerText = "Upload Complete!";
-                setTimeout(() => status.innerText = "", 2000);
-            } else {
-                throw new Error('Upload failed');
-            }
-        } catch (err) {
-            status.innerText = "Error uploading image.";
-            console.error(err);
-        }
-    };
-}
-
-// --- Save & Publish Logic ---
-document.getElementById('save-btn').addEventListener('click', async () => {
-    const title = document.getElementById('post-title').value;
-    const newSlug = document.getElementById('post-slug').value;
-    const description = document.getElementById('post-desc').value;
-    const authorName = document.getElementById('post-author').value;
-    const bannerUrl = document.getElementById('post-banner').value;
-    const schemaType = document.getElementById('post-schema').value;
-    const bodyContent = tinymce.activeEditor.getContent();
-    
-    const isCustomCanonical = document.querySelector('input[name="canonical"]:checked').value === 'custom';
-    let canonicalUrl = `https://theinfluencerreport.org/blog/${newSlug}/`;
-    if (isCustomCanonical) {
-        canonicalUrl = document.getElementById('post-canonical-custom').value;
-    }
-
-    if (!title || !newSlug) {
-        showToast("Title and Slug are required", true);
-        return;
-    }
-
-    const dateNow = new Date().toISOString();
-    const datePretty = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    
-    const schemaJson = JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": schemaType,
-        "headline": title,
-        "image": [bannerUrl],
-        "datePublished": dateNow,
-        "dateModified": dateNow,
-        "author": [{
-            "@type": "Person",
-            "name": authorName,
-            "url": "https://theinfluencerreport.org/"
-        }]
-    }, null, 4);
-
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- DYNAMIC: Title -->
-    <title>${title}</title>
-    <!-- DYNAMIC: Description -->
-    <meta name="description" content="${description}">
-    <!-- META: Date for CMS Parsing -->
-    <meta name="date" content="${datePretty}">
-    <!-- DYNAMIC: Canonical -->
-    <link rel="canonical" href="${canonicalUrl}">
-    <link rel="icon" href="/theinfluencerreporticon.png" type="image/x-icon">
-    <meta name="author" content="${authorName}"> 
-
-    <!-- DYNAMIC: Banner Image -->
-    <meta property="og:image" content="${bannerUrl}">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://theinfluencerreport.org/blog/${newSlug}/">
-    
-    <!-- DYNAMIC: Schema JSON-LD -->
-    <script type="application/ld+json">
-        ${schemaJson}
-    </script>
-
-    <!-- Preloads -->
-    <link rel="preload" as="image" href="${bannerUrl}" fetchpriority="high">
-    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2" as="font" type="font/woff2" crossorigin>
-
-    <!-- Critical CSS -->
-    <style>
-      @font-face{font-family:'Poppins Fallback';src:local('Arial');ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%}
-      @font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-      @font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-      @font-face{font-family:Poppins;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-    </style>
-
-    <link rel="stylesheet" href="../article.css">
-    <link rel="stylesheet" href="../../fontello.css">
-</head>
-<body>
-    <div class="progress-bar" id="progressBar"></div>
-
-    <header class="site-header">
-        <nav>
-            <a href="/" class="logo">The Influencer Report</a>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/blog/">Blog</a></li>
-                <li><a href="/about/">About</a></li>
-                <li><a href="/contact/">Contact</a></li>
-            </ul>
-            <div class="burger" role="button" aria-label="Open navigation menu">
-                <div class="line1"></div><div class="line2"></div><div class="line3"></div>
-            </div>
-        </nav>
-    </header>
-
-    <main>
-        <section class="blog-header">
-            <div class="breadcrumbs">
-                <a href="/">Home</a> &nbsp;/&nbsp; <a href="/blog/">Blog</a> &nbsp;/&nbsp; 
-                <span id="dynamicBreadcrumbSlug" style="color: var(--primary-color);">${title}</span>
-            </div>
-            
-            <h1 class="blog-title">${title}</h1>
-            
-            <div class="blog-meta">
-                <span>By <span class="author-name">${authorName}</span></span>
-                <span class="meta-separator">•</span>
-                <span id="dynamicDate">${datePretty}</span>
-                <span class="meta-separator">•</span>
-                <span id="dynamicReadingTime">Calculating...</span>
-            </div>
-        </section>
-
-        <div class="banner-container">
-            <img id="dynamicBannerImage" src="${bannerUrl}" alt="${title}" class="banner-image" width="1280" height="720" fetchpriority="high">
-        </div>
-
-        <article class="article-content">
-            ${bodyContent}
-        </article>
-    </main>
-
-    <footer class="site-footer">
-        <div class="footer-container">
-            <nav class="footer-nav">
-                <a href="/disclaimer/">Disclaimer</a>
-                <a href="/terms-and-conditions/">Terms & Conditions</a>
-                <a href="/privacy-policy/">Privacy Policy</a>
-            </nav>
-            <div class="footer-social">
-                <a href="https://x.com/theinfluencer64" target="_blank"><i class="icon-twitter"></i></a>
-                <a href="https://www.instagram.com/the.influencerreport/" target="_blank"><i class="icon-instagram"></i></a>
-                <a href="https://t.me/theinfluencerreport" target="_blank"><i class="icon-telegram"></i></a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 The Influencer Report.</p>
-        </div>
-    </footer>
-
-    <script src="../article.js" defer></script>
-</body>
-</html>`;
-
-    try {
-        showToast("Saving...", false);
-        const encodedContent = b64EncodeUnicode(htmlContent);
-        
-        if (state.currentSlug && state.currentSlug !== newSlug) {
-            await githubReq(`contents/blog/${state.currentSlug}/index.html`, 'DELETE', {
-                message: `Delete old article ${state.currentSlug}`,
-                sha: state.currentSha
-            });
-            state.currentSha = null; 
-        }
-
-        const body = {
-            message: `Update article: ${title}`,
-            content: encodedContent
-        };
-        if (state.currentSha && state.currentSlug === newSlug) {
-            body.sha = state.currentSha;
-        }
-
-        const res = await githubReq(`contents/blog/${newSlug}/index.html`, 'PUT', body);
-        
-        if (res.ok) {
-            showToast("Published Successfully!");
-            setTimeout(showDashboard, 1500);
-        } else {
-            const err = await res.json();
-            throw new Error(err.message);
-        }
-
-    } catch (err) {
-        showToast(`Error: ${err.message}`, true);
-    }
-});
-
-async function deleteArticle(slug, sha) {
-    if(!confirm(`Are you sure you want to delete "${slug}"?`)) return;
-
-    try {
-        const res = await githubReq(`contents/blog/${slug}/index.html`, 'DELETE', {
-            message: `Delete article ${slug}`,
-            sha: sha
-        });
-        if(res.ok) {
-            showToast("Article deleted.");
-            loadArticles();
-        } else {
-            showToast("Failed to delete.", true);
-        }
-    } catch(err) {
-        console.error(err);
-    }
-}
-
-function showToast(msg, isError = false) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.className = `toast show ${isError ? 'error' : ''}`;
-    setTimeout(() => toast.classList.remove('show'), 3000);
-}
+function b64EncodeUnicode(str) { return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode('0x' + p1))); }
+function b64DecodeUnicode(str) { return decodeURIComponent(atob(str).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')); }
