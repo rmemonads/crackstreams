@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -69,13 +68,14 @@
                 <div class="panel-header">
                     <h2><i class="fa-solid fa-thumbtack"></i> Blog Posts</h2>
                     <div class="header-actions">
-                        <input type="text" id="post-search" placeholder="Search posts..." class="search-bar" onkeyup="filterTable('posts-list-body', this.value)">
+                        <button id="bulk-del-posts" class="btn-danger hidden" onclick="bulkDelete('post')">Delete Selected</button>
+                        <input type="text" placeholder="Search posts..." class="search-bar" onkeyup="filterTable('posts-list-body', this.value)">
                         <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> New Post</button>
                     </div>
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead><tr><th>Title</th><th>Path</th><th>Actions</th></tr></thead>
+                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('posts-list-body', this)"></th><th>Title</th><th>Actions</th></tr></thead>
                         <tbody id="posts-list-body"></tbody>
                     </table>
                 </div>
@@ -85,11 +85,15 @@
             <div id="panel-pages" class="panel">
                 <div class="panel-header">
                     <h2><i class="fa-solid fa-file"></i> Pages</h2>
-                    <button class="btn-primary" onclick="createNew('page')"><i class="fa-solid fa-plus"></i> New Page</button>
+                    <div class="header-actions">
+                        <button id="bulk-del-pages" class="btn-danger hidden" onclick="bulkDelete('page')">Delete Selected</button>
+                        <input type="text" placeholder="Search pages..." class="search-bar" onkeyup="filterTable('pages-list-body', this.value)">
+                        <button class="btn-primary" onclick="createNew('page')"><i class="fa-solid fa-plus"></i> New Page</button>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead><tr><th>Title</th><th>Path</th><th>Actions</th></tr></thead>
+                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('pages-list-body', this)"></th><th>Title</th><th>Actions</th></tr></thead>
                         <tbody id="pages-list-body"></tbody>
                     </table>
                 </div>
@@ -108,16 +112,19 @@
                         <h3>General Config</h3>
                         <div class="form-group">
                             <label>Site Title</label>
-                            <input type="text" id="set-site-title" placeholder="My Awesome Website">
+                            <input type="text" id="set-site-title">
                         </div>
                         <div class="form-group">
-                            <label>Site URL (Domain)</label>
+                            <label>Site URL (No trailing slash)</label>
                             <input type="text" id="set-site-url" placeholder="https://example.com">
-                            <p class="hint">No trailing slash.</p>
                         </div>
                         <div class="form-group">
                             <label>Favicon URL</label>
-                            <input type="text" id="set-favicon" placeholder="https://.../favicon.ico">
+                            <input type="text" id="set-favicon">
+                        </div>
+                        <div class="form-group">
+                            <label>Copyright Text</label>
+                            <input type="text" id="set-copyright" placeholder="© 2025 All Rights Reserved">
                         </div>
                     </div>
 
@@ -125,59 +132,76 @@
                     <div class="settings-card">
                         <h3>Structure</h3>
                         <div class="form-group">
-                            <label>Homepage (Root index.html)</label>
+                            <label>Homepage (Sets Root index.html)</label>
                             <select id="set-homepage-select">
-                                <option value="">-- Loading Pages --</option>
+                                <option value="">-- Select a Page --</option>
                             </select>
-                            <button class="btn-xs btn-secondary" style="margin-top:5px;" onclick="loadPagesForSelect()">Refresh List</button>
+                            <p class="hint">Selecting a page copies its content to root.</p>
                         </div>
                         <div class="form-group">
                             <label>404 Redirection</label>
-                            <label class="switch-label" style="justify-content: flex-start; margin-top:5px;">
+                            <label class="switch-label">
                                 <input type="checkbox" id="set-404-redirect">
                                 <span class="chk-text">Generate Smart 404.html</span>
                             </label>
                         </div>
                     </div>
 
-                    <!-- Verification -->
+                    <!-- Menus -->
                     <div class="settings-card full-width-card">
-                        <h3>Verification Meta Tags</h3>
-                        <div class="repeater-container" id="meta-verify-container"></div>
+                        <h3>Menus & Socials</h3>
+                        <div class="two-col">
+                            <div>
+                                <label class="schema-label">Header Menu (Label | Link)</label>
+                                <div id="header-menu-container" class="repeater-container"></div>
+                                <button class="add-repeater-btn" onclick="addMenuItem('header-menu-container')">+ Add Link</button>
+                            </div>
+                            <div>
+                                <label class="schema-label">Footer Menu (Label | Link)</label>
+                                <div id="footer-menu-container" class="repeater-container"></div>
+                                <button class="add-repeater-btn" onclick="addMenuItem('footer-menu-container')">+ Add Link</button>
+                            </div>
+                        </div>
+                        <div style="margin-top:15px;">
+                            <label class="schema-label">Social Links (Icon Class | Link)</label>
+                            <div id="social-links-container" class="repeater-container"></div>
+                            <button class="add-repeater-btn" onclick="addSocialItem()">+ Add Social</button>
+                        </div>
+                    </div>
+
+                    <!-- Ads & Verification -->
+                    <div class="settings-card full-width-card">
+                        <h3>Verification & Ads</h3>
+                        <p class="hint">Add meta tags and ad units here.</p>
+                        <div id="meta-verify-container" class="repeater-container"></div>
                         <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Meta Tag</button>
-                    </div>
-
-                    <!-- Analytics -->
-                    <div class="settings-card">
-                        <h3>Analytics</h3>
-                        <div class="form-group">
-                            <label>Google Analytics ID (G-XXXXXXX)</label>
-                            <input type="text" id="set-ga-id">
-                        </div>
-                        <div class="form-group">
-                            <label>AdSense Auto Ads Script</label>
-                            <textarea id="set-adsense-auto" rows="3" placeholder="<script...></script>"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Custom Ads Manager -->
-                    <div class="settings-card full-width-card">
-                        <h3>Custom Ad Units Manager</h3>
-                        <p class="hint">Ad units are injected automatically. Sticky ads will be hidden on mobile if too large.</p>
+                        
+                        <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
+                        
                         <div id="ads-repeater-container"></div>
-                        <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add New Ad Unit</button>
+                        <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add Ad Unit</button>
                     </div>
 
-                    <!-- Custom Code -->
+                    <!-- Analytics/Code -->
                     <div class="settings-card full-width-card">
-                        <h3>Custom Code</h3>
+                        <h3>Analytics & Code</h3>
+                        <div class="two-col">
+                            <div>
+                                <label>Google Analytics ID</label>
+                                <input type="text" id="set-ga-id" placeholder="G-XXXXXX">
+                            </div>
+                            <div>
+                                <label>AdSense Auto Script</label>
+                                <textarea id="set-adsense-auto" rows="1"></textarea>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>Global CSS</label>
                             <textarea id="set-custom-css" rows="4"></textarea>
                         </div>
                         <div class="form-group">
-                            <label>Global Header Scripts</label>
-                            <textarea id="set-custom-head-js" rows="3"></textarea>
+                            <label>Global Head Scripts</label>
+                            <textarea id="set-custom-head-js" rows="4"></textarea>
                         </div>
                     </div>
                 </div>
@@ -201,14 +225,14 @@
                     <!-- LEFT SIDEBAR -->
                     <div class="editor-sidebar-column">
                         <div class="sidebar-tabs">
-                            <button class="tab-btn active" onclick="switchSidebarTab('settings')"><i class="fa-solid fa-gear"></i> Settings</button>
-                            <button class="tab-btn" onclick="switchSidebarTab('media')"><i class="fa-solid fa-image"></i> Media</button>
+                            <button id="tab-btn-settings" class="tab-btn active" onclick="switchSidebarTab('settings')"><i class="fa-solid fa-gear"></i> Settings</button>
+                            <button id="tab-btn-media" class="tab-btn" onclick="switchSidebarTab('media')"><i class="fa-solid fa-image"></i> Media</button>
                         </div>
 
                         <!-- Tab: Settings -->
                         <div id="tab-settings" class="sidebar-content active">
                             <div class="form-group">
-                                <label>Slug (URL)</label>
+                                <label>Slug</label>
                                 <input type="text" id="meta-slug">
                             </div>
                             <div class="form-group">
@@ -224,8 +248,15 @@
                                 <div id="featured-dropzone" class="image-drop-wrapper">
                                     <input type="text" id="meta-banner" placeholder="https://...">
                                     <img id="banner-preview" class="hidden">
-                                    <div class="drop-overlay"><i class="fa-solid fa-upload"></i> Drop Image</div>
+                                    <div class="drop-overlay"><i class="fa-solid fa-upload"></i> Drop to Upload</div>
                                 </div>
+                            </div>
+                            <!-- Breadcrumb Schema Toggle -->
+                            <div class="form-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" id="include-breadcrumb-schema" checked>
+                                    <span class="chk-text">Enable Breadcrumb Schema</span>
+                                </label>
                             </div>
                         </div>
 
@@ -233,28 +264,25 @@
                         <div id="tab-media" class="sidebar-content">
                             <div class="media-drop-area" id="sidebar-dropzone">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p>Drop files to Upload</p>
+                                <p>Drop files or Click to Upload</p>
                                 <input type="file" id="sidebar-file-input" multiple hidden>
                             </div>
                             <div id="sidebar-media-grid" class="sidebar-grid"></div>
-                            <button class="btn-small full-width" onclick="loadSidebarMedia()">Refresh Media</button>
+                            <button class="btn-small full-width" onclick="loadSidebarMedia()">Refresh Gallery</button>
                         </div>
                     </div>
 
                     <!-- RIGHT COLUMN (Editor + Schema) -->
                     <div class="editor-main-column">
-                        
-                        <!-- TinyMCE Wrapper -->
                         <div class="editor-wrapper">
                             <textarea id="tinymce-editor"></textarea>
                         </div>
-
-                        <!-- Schema Wrapper -->
                         <div class="schema-wrapper">
                             <div class="schema-header">
                                 <h3><i class="fa-solid fa-code"></i> Structured Data</h3>
                                 <div class="schema-controls">
                                     <select id="add-schema-type">
+                                        <option value="WebSite">WebSite (Homepage)</option>
                                         <option value="FAQPage">FAQ Page</option>
                                         <option value="Review">Review</option>
                                         <option value="HowTo">HowTo</option>
@@ -265,7 +293,6 @@
                             </div>
                             <div id="schema-container"></div>
                         </div>
-
                     </div>
                 </div>
             </div>
