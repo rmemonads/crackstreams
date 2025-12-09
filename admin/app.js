@@ -1,5 +1,5 @@
 /**
- * SERVERLESS CMS LOGIC
+ * SERVERLESS CMS LOGIC - UPDATED FOR TINYMCE CLOUD
  */
 
 // --- State Management ---
@@ -8,7 +8,8 @@ const state = {
     owner: localStorage.getItem('gh_owner'),
     repo: localStorage.getItem('gh_repo'),
     currentSlug: null,
-    currentSha: null // Required for updating existing files
+    currentSha: null,
+    editorInitialized: false // New flag to track editor status
 };
 
 // --- DOM Elements ---
@@ -29,17 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         switchView('login');
     }
-
-    // Initialize TinyMCE
-    tinymce.init({
-        selector: '#tinymce-editor',
-        height: '100%',
-        skin: 'oxide-dark',
-        content_css: 'dark',
-        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-        body_class: 'article-content' // Matches the site CSS class
-    });
 });
 
 // --- Authentication ---
@@ -49,7 +39,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const owner = document.getElementById('gh-owner').value.trim();
     const repo = document.getElementById('gh-repo').value.trim();
 
-    // Verify Creds
     try {
         const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
             headers: { 'Authorization': `token ${token}` }
@@ -91,14 +80,46 @@ function showDashboard() {
 }
 
 function showEditor(isNew = true) {
+    // 1. Swap Views FIRST
     panels.dashboard.classList.remove('active');
     panels.editor.classList.add('active');
     document.getElementById('nav-create').classList.toggle('active', isNew);
     document.getElementById('nav-dashboard').classList.remove('active');
 
+    // 2. Initialize TinyMCE only after the div is visible
+    if (!state.editorInitialized) {
+        initTinyMCE();
+        state.editorInitialized = true;
+    } else {
+        // If already initialized, just ensure it's clean
+        if(tinymce.activeEditor) tinymce.activeEditor.setContent('');
+    }
+
     if (isNew) {
         resetEditor();
     }
+}
+
+function initTinyMCE() {
+    tinymce.init({
+        selector: '#tinymce-editor',
+        height: '100%',
+        skin: 'oxide-dark',
+        content_css: 'dark',
+        body_class: 'article-content',
+        // Plugins from your Cloud Account
+        plugins: [
+            'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 
+            'searchreplace', 'table', 'visualblocks', 'wordcount', 'checklist', 'mediaembed', 
+            'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 
+            'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'ai', 'mentions', 
+            'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 
+            'inlinecss', 'markdown'
+        ],
+        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+        tinycomments_mode: 'embedded',
+        ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('AI not configured')),
+    });
 }
 
 function initApp() {
@@ -108,7 +129,6 @@ function initApp() {
 }
 
 // --- GitHub API Helpers ---
-// Fix for Unicode/Emoji in Base64
 function b64EncodeUnicode(str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
         function toSolidBytes(match, p1) {
@@ -146,7 +166,6 @@ async function loadArticles() {
     spinner.classList.remove('hidden');
 
     try {
-        // Fetch contents of blog/ folder
         const res = await githubReq('contents/blog');
         if (res.status === 404) {
             listEl.innerHTML = '<p>No blog folder found. Create your first article!</p>';
@@ -155,7 +174,6 @@ async function loadArticles() {
         }
         
         const data = await res.json();
-        // Filter only directories
         const folders = data.filter(item => item.type === 'dir');
 
         if (folders.length === 0) {
@@ -164,9 +182,6 @@ async function loadArticles() {
             return;
         }
 
-        // For each folder, we need to fetch index.html to get the title
-        // Note: Doing this in a loop is not efficient for hundreds of posts, 
-        // but acceptable for a simple CMS.
         for (const folder of folders) {
             try {
                 const fileRes = await githubReq(`contents/blog/${folder.name}/index.html`);
@@ -178,7 +193,6 @@ async function loadArticles() {
                 const doc = parser.parseFromString(content, 'text/html');
                 
                 const title = doc.querySelector('title')?.innerText || folder.name;
-                // Try to find our injected date meta tag, or fallback to something else
                 const dateMeta = doc.querySelector('meta[name="date"]');
                 const dateText = dateMeta ? dateMeta.content : 'Unknown Date';
 
@@ -214,18 +228,19 @@ function resetEditor() {
     document.getElementById('post-slug').value = "";
     document.getElementById('post-desc').value = "";
     document.getElementById('post-banner').value = "";
-    document.getElementById('post-author').value = "Md Ashikuzzaman"; // Default
+    document.getElementById('post-author').value = "Md Ashikuzzaman"; 
     document.querySelector('input[name="canonical"][value="self"]').checked = true;
     document.getElementById('post-canonical-custom').classList.add('hidden');
     document.getElementById('post-canonical-custom').value = "";
     
     // Auto-slug listener
     document.getElementById('post-title').oninput = (e) => {
-        if (!state.currentSlug) { // Only auto-gen if creating new
+        if (!state.currentSlug) { 
             document.getElementById('post-slug').value = slugify(e.target.value);
         }
     };
 
+    // Safe set content
     if(tinymce.activeEditor) tinymce.activeEditor.setContent('');
     
     state.currentSlug = null;
@@ -241,7 +256,6 @@ function slugify(text) {
         .replace(/-+$/, '');
 }
 
-// Handle Canonical Toggle visibility
 document.querySelectorAll('input[name="canonical"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         const customInput = document.getElementById('post-canonical-custom');
@@ -255,11 +269,13 @@ document.querySelectorAll('input[name="canonical"]').forEach(radio => {
 
 async function editArticle(slug) {
     showToast("Loading article...");
+    
+    // Switch view FIRST
     showEditor(false);
+    
     document.getElementById('editor-title').innerText = "Edit Article";
     state.currentSlug = slug;
 
-    // Remove auto-slug listener
     document.getElementById('post-title').oninput = null;
 
     try {
@@ -297,7 +313,6 @@ async function editArticle(slug) {
             }
         }
 
-        // Schema Type extraction (basic regex to find @type inside JSON-LD)
         const scriptTags = doc.querySelectorAll('script[type="application/ld+json"]');
         scriptTags.forEach(script => {
             try {
@@ -308,10 +323,13 @@ async function editArticle(slug) {
             } catch(e) {}
         });
 
-        // Content
+        // Content - Wait for TinyMCE to be ready
         const articleBody = doc.querySelector('.article-content');
         if (articleBody) {
-            tinymce.activeEditor.setContent(articleBody.innerHTML);
+            // Small timeout to ensure TinyMCE instance is ready after view switch
+            setTimeout(() => {
+                if(tinymce.activeEditor) tinymce.activeEditor.setContent(articleBody.innerHTML);
+            }, 100);
         }
 
     } catch (err) {
@@ -326,21 +344,17 @@ function setupDragDrop() {
     const fileInput = document.getElementById('file-input');
 
     dropZone.addEventListener('click', () => fileInput.click());
-
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
     });
-
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-
     dropZone.addEventListener('drop', async (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
         const file = e.dataTransfer.files[0];
         if (file) handleImageUpload(file);
     });
-
     fileInput.addEventListener('change', (e) => {
         if(fileInput.files[0]) handleImageUpload(fileInput.files[0]);
     });
@@ -354,7 +368,7 @@ async function handleImageUpload(file) {
     reader.readAsDataURL(file);
     reader.onload = async () => {
         const base64Content = reader.result.split(',')[1];
-        const filename = `images/${Date.now()}-${file.name.replace(/\s/g, '_')}`; // Upload to root images/ folder
+        const filename = `images/${Date.now()}-${file.name.replace(/\s/g, '_')}`;
 
         try {
             const res = await githubReq(`contents/${filename}`, 'PUT', {
@@ -363,10 +377,6 @@ async function handleImageUpload(file) {
             });
 
             if (res.ok) {
-                const data = await res.json();
-                // GitHub Pages URL (Assumed structure)
-                // Or use raw githubusercontent, but usually pages serves from root
-                // We will construct relative path or absolute path based on Repo
                 const absUrl = `https://${state.owner.toLowerCase()}.github.io/${state.repo}/${filename}`;
                 document.getElementById('post-banner').value = absUrl;
                 status.innerText = "Upload Complete!";
@@ -391,7 +401,6 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const schemaType = document.getElementById('post-schema').value;
     const bodyContent = tinymce.activeEditor.getContent();
     
-    // Canonical Logic
     const isCustomCanonical = document.querySelector('input[name="canonical"]:checked').value === 'custom';
     let canonicalUrl = `https://theinfluencerreport.org/blog/${newSlug}/`;
     if (isCustomCanonical) {
@@ -403,7 +412,6 @@ document.getElementById('save-btn').addEventListener('click', async () => {
         return;
     }
 
-    // Build Schema JSON
     const dateNow = new Date().toISOString();
     const datePretty = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     
@@ -421,7 +429,6 @@ document.getElementById('save-btn').addEventListener('click', async () => {
         }]
     }, null, 4);
 
-    // --- HTML TEMPLATE INJECTION ---
     const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -530,24 +537,18 @@ document.getElementById('save-btn').addEventListener('click', async () => {
 </body>
 </html>`;
 
-    // --- API COMMIT ---
     try {
         showToast("Saving...", false);
         const encodedContent = b64EncodeUnicode(htmlContent);
         
-        // 1. Check if slug changed (Renaming)
         if (state.currentSlug && state.currentSlug !== newSlug) {
-            // Delete old folder (technically delete the file inside it)
-            // GitHub API doesn't allow deleting folders directly, you delete the file
             await githubReq(`contents/blog/${state.currentSlug}/index.html`, 'DELETE', {
                 message: `Delete old article ${state.currentSlug}`,
                 sha: state.currentSha
             });
-            // Reset SHA so the create below acts as new
             state.currentSha = null; 
         }
 
-        // 2. Create/Update new file
         const body = {
             message: `Update article: ${title}`,
             content: encodedContent
@@ -590,7 +591,6 @@ async function deleteArticle(slug, sha) {
     }
 }
 
-// --- Toast Utilities ---
 function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
     toast.innerText = msg;
