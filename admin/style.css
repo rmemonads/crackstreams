@@ -13,7 +13,10 @@ body { background: var(--bg-dark); color: var(--text-main); height: 100vh; overf
 button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .hidden { display: none !important; }
 .view { display: none; width: 100%; height: 100%; }
-.view#login-view { align-items: center; justify-content: center; display: flex; } /* Flex for login */
+
+/* FIX: Removed 'display: flex' from here. It is handled by .view.active now */
+.view#login-view { align-items: center; justify-content: center; } 
+
 .view.active { display: flex; } /* Flex for App */
 
 /* Login */
