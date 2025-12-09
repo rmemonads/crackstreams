@@ -101,60 +101,67 @@
                 <div class="settings-grid">
                     <!-- General -->
                     <div class="settings-card">
-                        <h3>General</h3>
+                        <h3>General Config</h3>
                         <div class="form-group">
                             <label>Site Title</label>
                             <input type="text" id="set-site-title" placeholder="My Awesome Website">
                         </div>
                         <div class="form-group">
+                            <label>Site URL (Domain)</label>
+                            <input type="text" id="set-site-url" placeholder="https://example.com">
+                        </div>
+                        <div class="form-group">
                             <label>Favicon URL</label>
-                            <input type="text" id="set-favicon" placeholder="https://...">
+                            <input type="text" id="set-favicon" placeholder="https://.../favicon.ico">
                         </div>
                     </div>
 
-                    <!-- Analytics -->
+                    <!-- Structure -->
                     <div class="settings-card">
-                        <h3>Analytics (Lazy Load)</h3>
+                        <h3>Structure</h3>
+                        <div class="form-group">
+                            <label>Homepage (Sets Root index.html)</label>
+                            <select id="set-homepage-select">
+                                <option value="">-- Select a Page --</option>
+                            </select>
+                            <p style="font-size:0.75rem; color:#888;">Selecting a page copies its content to root.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>404 Redirection</label>
+                            <label class="switch-label" style="justify-content: flex-start; margin-top:5px;">
+                                <input type="checkbox" id="set-404-redirect">
+                                <span class="chk-text">Generate Smart 404.html</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Verification -->
+                    <div class="settings-card full-width-card">
+                        <h3>Verification Meta Tags (Search Console, Bing)</h3>
+                        <div class="repeater-container" id="meta-verify-container"></div>
+                        <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Meta Tag</button>
+                    </div>
+
+                    <!-- Analytics & Adsense -->
+                    <div class="settings-card">
+                        <h3>Analytics & Auto Ads</h3>
                         <div class="form-group">
                             <label>Google Analytics ID (G-XXXXXXX)</label>
                             <input type="text" id="set-ga-id" placeholder="G-12345678">
-                            <p style="font-size:0.75rem; color:#888; margin-top:5px;">Code runs after scroll, click, or 4 seconds.</p>
+                            <p style="font-size:0.75rem; color:#888;">Lazy loaded (Interaction or 4s delay).</p>
                         </div>
-                    </div>
-
-                    <!-- AdSense -->
-                    <div class="settings-card">
-                        <h3>Google AdSense</h3>
                         <div class="form-group">
-                            <label>Auto Ads Code (Header)</label>
-                            <textarea id="set-adsense-auto" rows="3" placeholder="<script... client=ca-pub...></script>"></textarea>
+                            <label>AdSense Auto Ads Code</label>
+                            <textarea id="set-adsense-auto" rows="3" placeholder="<script...></script>"></textarea>
                         </div>
                     </div>
 
-                    <!-- Custom Ads -->
+                    <!-- Custom Ads Manager -->
                     <div class="settings-card full-width-card">
-                        <h3>Custom Ad Unit</h3>
-                        <div class="form-group">
-                            <label>Ad HTML Code</label>
-                            <textarea id="set-custom-ad-code" rows="3" placeholder="<div>My Ad</div>"></textarea>
-                        </div>
-                        <div class="form-group two-col">
-                            <div>
-                                <label>Placement</label>
-                                <select id="set-ad-placement">
-                                    <option value="none">Disabled</option>
-                                    <option value="below_feature">Below Featured Image</option>
-                                    <option value="after_p_1">After Paragraph 1</option>
-                                    <option value="after_p_2">After Paragraph 2</option>
-                                    <option value="after_p_3">After Paragraph 3</option>
-                                    <option value="end">End of Content</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Exclude Paths (Comma separated)</label>
-                                <input type="text" id="set-ad-exclude" placeholder="contact, privacy-policy">
-                            </div>
-                        </div>
+                        <h3>Custom Ad Units Manager</h3>
+                        <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">Add multiple ad units with specific placements.</p>
+                        <div id="ads-repeater-container"></div>
+                        <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add New Ad Unit</button>
                     </div>
 
                     <!-- Custom Code -->
@@ -229,12 +236,15 @@
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN -->
+                    <!-- RIGHT COLUMN (Editor + Schema) -->
                     <div class="editor-main-column">
+                        
+                        <!-- TinyMCE Wrapper (Larger) -->
                         <div class="editor-wrapper">
                             <textarea id="tinymce-editor"></textarea>
                         </div>
-                        <!-- Schema Wrapper -->
+
+                        <!-- Schema Wrapper (Below Editor) -->
                         <div class="schema-wrapper">
                             <div class="schema-header">
                                 <h3><i class="fa-solid fa-code"></i> Structured Data</h3>
@@ -262,6 +272,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
