@@ -3,7 +3,7 @@
   "siteUrl": "https://crackstreams.help",
   "favicon": "",
   "homepage": "homepage",
-  "enable404": false,
+  "enable404": true,
   "gaId": "",
   "adsenseAuto": "",
   "customCss": "",
