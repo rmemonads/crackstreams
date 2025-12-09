@@ -114,6 +114,8 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .image-drop-wrapper.dragover .drop-overlay { display: flex; }
 .drop-overlay { display: none; position: absolute; inset: 0; background: rgba(0, 170, 255, 0.4); backdrop-filter: blur(2px); align-items: center; justify-content: center; font-weight: bold; color: white; pointer-events: none; z-index: 5; }
 #banner-preview { width: 100%; display: block; max-height: 150px; object-fit: cover; margin-top: 5px; }
+/* Broken Image Fix */
+#banner-preview[src=""], #banner-preview:not([src]) { display: none; }
 
 .media-drop-area { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
 .media-drop-area:hover { border-color: var(--primary); background: #202020; }
