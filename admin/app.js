@@ -60,9 +60,9 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const r = document.getElementById('gh-repo').value.trim();
 
     try {
-        // Test Credentials
+        // Test Credentials - FIX: Use Bearer for compatibility
         const res = await fetch(`https://api.github.com/repos/${o}/${r}`, {
-            headers: { Authorization: `token ${t}` }
+            headers: { Authorization: `Bearer ${t}` }
         });
         if (!res.ok) throw new Error('Repo not found or Token invalid');
 
@@ -87,7 +87,7 @@ async function githubReq(endpoint, method = 'GET', body = null) {
     const opts = {
         method,
         headers: {
-            Authorization: `token ${state.token}`,
+            Authorization: `Bearer ${state.token}`, // FIX: Updated to Bearer
             Accept: 'application/vnd.github.v3+json',
             'Content-Type': 'application/json'
         }
