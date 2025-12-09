@@ -1,5 +1,11 @@
 [
   {
+    "slug": "new-test-post",
+    "type": "post",
+    "title": "New Test Post",
+    "date": "2025-12-09T16:51:23.840Z"
+  },
+  {
     "slug": "test-post-new",
     "type": "post",
     "title": "test-post-new",
