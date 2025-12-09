@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Using TinyMCE with your API Key -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -36,20 +37,22 @@
     <div id="app-view" class="view">
         
         <!-- MAIN SIDEBAR (Navigation) -->
-        <aside class="sidebar collapsed-on-mobile">
+        <aside id="main-sidebar" class="sidebar">
             <div class="brand">
-                <i class="fa-solid fa-layer-group"></i> <span>Dashboard</span>
+                <div class="brand-text">
+                    <i class="fa-solid fa-layer-group"></i> <span>Dashboard</span>
+                </div>
+                <button id="sidebar-toggle-btn" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
             </div>
             <nav>
-                <button onclick="switchPanel('dashboard')" class="nav-item active">
-                    <i class="fa-solid fa-thumbtack"></i> Posts
+                <button id="nav-btn-dashboard" onclick="switchPanel('dashboard')" class="nav-item active">
+                    <i class="fa-solid fa-thumbtack"></i> <span>Posts</span>
                 </button>
-                <button onclick="switchPanel('pages')" class="nav-item">
-                    <i class="fa-solid fa-file"></i> Pages
+                <button id="nav-btn-pages" onclick="switchPanel('pages')" class="nav-item">
+                    <i class="fa-solid fa-file"></i> <span>Pages</span>
                 </button>
-                <!-- Media is now INSIDE the editor, but we keep a full view option too -->
                 <button id="nav-logout" class="nav-item logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
                 </button>
             </nav>
         </aside>
@@ -60,7 +63,7 @@
             <!-- POSTS LIST -->
             <div id="panel-dashboard" class="panel">
                 <div class="panel-header">
-                    <h2>Blog Posts</h2>
+                    <h2><i class="fa-solid fa-thumbtack"></i> Blog Posts</h2>
                     <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> New Post</button>
                 </div>
                 <div class="table-container">
@@ -74,7 +77,7 @@
             <!-- PAGES LIST -->
             <div id="panel-pages" class="panel">
                 <div class="panel-header">
-                    <h2>Pages</h2>
+                    <h2><i class="fa-solid fa-file"></i> Pages</h2>
                     <button class="btn-primary" onclick="createNew('page')"><i class="fa-solid fa-plus"></i> New Page</button>
                 </div>
                 <div class="table-container">
@@ -89,6 +92,7 @@
             <div id="panel-editor" class="panel">
                 <div class="editor-header">
                     <div class="editor-title-row">
+                        <button id="sidebar-expand-btn" class="icon-btn hidden" title="Show Sidebar"><i class="fa-solid fa-bars"></i></button>
                         <input type="text" id="meta-title" placeholder="Add Title Here..." class="title-input">
                         <div class="editor-actions">
                             <span id="live-link-container" class="hidden"></span>
@@ -116,32 +120,21 @@
                                 <input type="text" id="meta-slug">
                             </div>
                             <div class="form-group">
-                                <label>Description</label>
-                                <textarea id="meta-desc" rows="3"></textarea>
+                                <label>Description (SEO)</label>
+                                <textarea id="meta-desc" rows="4"></textarea>
                             </div>
                             <div class="form-group">
                                 <label>Author</label>
                                 <input type="text" id="meta-author" value="Md Ashikuzzaman">
                             </div>
-                            
-                            <hr class="divider">
-                            
-                            <div class="form-group">
-                                <label>Schema Type</label>
-                                <select id="schema-selector">
-                                    <option value="Article">Article</option>
-                                    <option value="Review">Review</option>
-                                    <option value="HowTo">HowTo</option>
-                                    <option value="FAQPage">FAQPage</option>
-                                    <option value="Product">Product</option>
-                                </select>
-                            </div>
-                            <div id="dynamic-schema-fields" class="schema-box"></div>
 
                             <div class="form-group">
-                                <label>Featured Image URL</label>
-                                <input type="text" id="meta-banner" placeholder="https://...">
-                                <img id="banner-preview" class="hidden" style="width:100%; margin-top:5px; border-radius:4px;">
+                                <label>Featured Image (URL or Drop Here)</label>
+                                <div id="featured-dropzone" class="image-drop-wrapper">
+                                    <input type="text" id="meta-banner" placeholder="https://...">
+                                    <img id="banner-preview" class="hidden">
+                                    <div class="drop-overlay"><i class="fa-solid fa-upload"></i> Drop Image</div>
+                                </div>
                             </div>
                         </div>
 
@@ -160,9 +153,36 @@
 
                     </div>
 
-                    <!-- RIGHT COLUMN: EDITOR -->
+                    <!-- RIGHT COLUMN: EDITOR + SCHEMA -->
                     <div class="editor-main-column">
-                        <textarea id="tinymce-editor"></textarea>
+                        
+                        <!-- TinyMCE Area -->
+                        <div class="editor-wrapper">
+                            <textarea id="tinymce-editor"></textarea>
+                        </div>
+
+                        <!-- Advanced Schema Section -->
+                        <div class="schema-wrapper">
+                            <div class="schema-header">
+                                <h3><i class="fa-solid fa-code"></i> Structured Data (Schema.org)</h3>
+                                <div class="schema-controls">
+                                    <select id="add-schema-type">
+                                        <option value="FAQPage">FAQ Page</option>
+                                        <option value="Review">Review</option>
+                                        <option value="HowTo">HowTo</option>
+                                        <option value="Product">Product</option>
+                                    </select>
+                                    <button class="btn-secondary btn-xs" onclick="addSchemaBlock()">+ Add Schema</button>
+                                </div>
+                            </div>
+                            <div id="schema-container">
+                                <!-- Dynamic Schema Blocks go here -->
+                                <div class="schema-block default-block">
+                                    <div class="block-header"><span>Article (Default)</span> <small>Auto-generated from post content</small></div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
