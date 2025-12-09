@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -27,7 +28,7 @@
                     <label>Repo Name</label>
                     <input type="text" id="gh-repo" placeholder="e.g. the-influencer-report" required>
                 </div>
-                <button type="submit" class="btn-primary">Login & Save</button>
+                <button type="submit" class="btn-primary">Login & Initialize</button>
             </form>
         </div>
     </div>
@@ -38,7 +39,7 @@
         <!-- SIDEBAR -->
         <aside id="main-sidebar" class="sidebar">
             <div class="brand">
-                <span class="brand-text">CMS</span>
+                <span class="brand-text">CMS Admin</span>
                 <button id="sidebar-toggle-btn" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
             </div>
             <nav>
@@ -67,7 +68,10 @@
             <div id="panel-dashboard" class="panel">
                 <div class="panel-header">
                     <h2><i class="fa-solid fa-thumbtack"></i> Blog Posts</h2>
-                    <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> New Post</button>
+                    <div class="header-actions">
+                        <input type="text" id="post-search" placeholder="Search posts..." class="search-bar" onkeyup="filterTable('posts-list-body', this.value)">
+                        <button class="btn-primary" onclick="createNew('post')"><i class="fa-solid fa-plus"></i> New Post</button>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
@@ -109,6 +113,7 @@
                         <div class="form-group">
                             <label>Site URL (Domain)</label>
                             <input type="text" id="set-site-url" placeholder="https://example.com">
+                            <p class="hint">No trailing slash.</p>
                         </div>
                         <div class="form-group">
                             <label>Favicon URL</label>
@@ -120,11 +125,11 @@
                     <div class="settings-card">
                         <h3>Structure</h3>
                         <div class="form-group">
-                            <label>Homepage (Sets Root index.html)</label>
+                            <label>Homepage (Root index.html)</label>
                             <select id="set-homepage-select">
-                                <option value="">-- Select a Page --</option>
+                                <option value="">-- Loading Pages --</option>
                             </select>
-                            <p style="font-size:0.75rem; color:#888;">Selecting a page copies its content to root.</p>
+                            <button class="btn-xs btn-secondary" style="margin-top:5px;" onclick="loadPagesForSelect()">Refresh List</button>
                         </div>
                         <div class="form-group">
                             <label>404 Redirection</label>
@@ -137,21 +142,20 @@
 
                     <!-- Verification -->
                     <div class="settings-card full-width-card">
-                        <h3>Verification Meta Tags (Search Console, Bing)</h3>
+                        <h3>Verification Meta Tags</h3>
                         <div class="repeater-container" id="meta-verify-container"></div>
                         <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Meta Tag</button>
                     </div>
 
-                    <!-- Analytics & Adsense -->
+                    <!-- Analytics -->
                     <div class="settings-card">
-                        <h3>Analytics & Auto Ads</h3>
+                        <h3>Analytics</h3>
                         <div class="form-group">
                             <label>Google Analytics ID (G-XXXXXXX)</label>
-                            <input type="text" id="set-ga-id" placeholder="G-12345678">
-                            <p style="font-size:0.75rem; color:#888;">Lazy loaded (Interaction or 4s delay).</p>
+                            <input type="text" id="set-ga-id">
                         </div>
                         <div class="form-group">
-                            <label>AdSense Auto Ads Code</label>
+                            <label>AdSense Auto Ads Script</label>
                             <textarea id="set-adsense-auto" rows="3" placeholder="<script...></script>"></textarea>
                         </div>
                     </div>
@@ -159,7 +163,7 @@
                     <!-- Custom Ads Manager -->
                     <div class="settings-card full-width-card">
                         <h3>Custom Ad Units Manager</h3>
-                        <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">Add multiple ad units with specific placements.</p>
+                        <p class="hint">Ad units are injected automatically. Sticky ads will be hidden on mobile if too large.</p>
                         <div id="ads-repeater-container"></div>
                         <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add New Ad Unit</button>
                     </div>
@@ -169,11 +173,11 @@
                         <h3>Custom Code</h3>
                         <div class="form-group">
                             <label>Global CSS</label>
-                            <textarea id="set-custom-css" rows="4" placeholder=".my-class { color: red; }"></textarea>
+                            <textarea id="set-custom-css" rows="4"></textarea>
                         </div>
                         <div class="form-group">
                             <label>Global Header Scripts</label>
-                            <textarea id="set-custom-head-js" rows="3" placeholder="<script>...</script>"></textarea>
+                            <textarea id="set-custom-head-js" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
@@ -185,6 +189,7 @@
                     <div class="editor-title-row">
                         <input type="text" id="meta-title" placeholder="Add Title Here..." class="title-input">
                         <div class="editor-actions">
+                            <span id="auto-draft-msg" class="draft-status"></span>
                             <span id="live-link-container" class="hidden"></span>
                             <button class="btn-secondary" onclick="exitEditor()">Close</button>
                             <button class="btn-primary" id="save-btn">Publish</button>
@@ -203,7 +208,7 @@
                         <!-- Tab: Settings -->
                         <div id="tab-settings" class="sidebar-content active">
                             <div class="form-group">
-                                <label>Slug</label>
+                                <label>Slug (URL)</label>
                                 <input type="text" id="meta-slug">
                             </div>
                             <div class="form-group">
@@ -239,12 +244,12 @@
                     <!-- RIGHT COLUMN (Editor + Schema) -->
                     <div class="editor-main-column">
                         
-                        <!-- TinyMCE Wrapper (Larger) -->
+                        <!-- TinyMCE Wrapper -->
                         <div class="editor-wrapper">
                             <textarea id="tinymce-editor"></textarea>
                         </div>
 
-                        <!-- Schema Wrapper (Below Editor) -->
+                        <!-- Schema Wrapper -->
                         <div class="schema-wrapper">
                             <div class="schema-header">
                                 <h3><i class="fa-solid fa-code"></i> Structured Data</h3>
@@ -258,19 +263,7 @@
                                     <button class="btn-secondary btn-xs" onclick="addSchemaBlock()">+ Add</button>
                                 </div>
                             </div>
-                            <div id="schema-container">
-                                <!-- Default Article Toggle -->
-                                <div class="schema-block default-block">
-                                    <div class="block-header">
-                                        <span>Article Schema</span>
-                                        <label class="switch-label">
-                                            <input type="checkbox" id="include-article-schema" checked>
-                                            <span class="chk-text">Enable</span>
-                                        </label>
-                                    </div>
-                                    <small style="color:#666;">Auto-generated from content</small>
-                                </div>
-                            </div>
+                            <div id="schema-container"></div>
                         </div>
 
                     </div>
@@ -283,7 +276,10 @@
     <!-- Notification -->
     <div id="toast" class="toast"></div>
     <!-- Spinner -->
-    <div id="loading-overlay" class="loading-overlay hidden"><div class="spinner"></div></div>
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <div id="loading-text" style="color:white; margin-top:10px;">Loading...</div>
+    </div>
 
     <script src="app.js"></script>
 </body>
