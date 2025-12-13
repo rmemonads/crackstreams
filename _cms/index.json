@@ -1,5 +1,11 @@
 [
   {
+    "slug": "test-2",
+    "type": "post",
+    "title": "Test 2",
+    "date": "2025-12-13T15:36:26.572Z"
+  },
+  {
     "slug": "hello-world",
     "type": "post",
     "title": "Hello World",
