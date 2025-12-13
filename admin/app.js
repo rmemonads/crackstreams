@@ -1,87 +1,118 @@
 /**
  * ULTIMATE SERVERLESS CMS
  * Features: DB Sorting, Drag&Drop Fix, Schema+, Ad Sizes, Fontello (Published) / FA (Admin)
+ * FIXED: Breadcrumbs, Layouts, Social Icons, Page Speed (Critical CSS)
  */
 
 const SYSTEM_ASSETS = {
+    // UPDATED WITH REFERENCE STYLE.CSS
     "assets/css/article.css": `
-:root { --primary-color: #00aaff; --background-color: #121212; --surface-color: #1e1e1e; --text-color: #e0e0e0; --text-color-secondary: #a0a0a0; --font-family: 'Poppins', sans-serif; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
-body { font-family: var(--font-family); background-color: var(--background-color); color: var(--text-color); line-height: 1.8; overflow-x: hidden; }
-a { color: var(--primary-color); text-decoration: none; transition: color 0.3s ease; }
-a:hover { text-decoration: underline; }
-.progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 4px; background: linear-gradient(90deg, var(--primary-color), #0077b6); z-index: 1000; transition: width 0.1s linear; }
-.site-header nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; background-color: var(--background-color); border-bottom: 1px solid #2a2a2a; }
-.logo { font-weight: 700; font-size: 1.5rem; color: #fff; text-decoration: none; }
-.nav-links { display: flex; justify-content: space-around; list-style: none; }
-.nav-links li { margin: 0 1rem; }
-.nav-links a { color: var(--text-color); text-decoration: none; font-weight: 600; font-size: 1rem; }
-.burger { display: none; cursor: pointer; }
-.burger div { width: 25px; height: 3px; background-color: var(--text-color); margin: 5px; transition: 0.3s ease; }
-.blog-header { max-width: 800px; margin: 6rem auto 2rem; padding: 0 1.5rem; }
-.breadcrumbs { font-size: 0.85rem; color: var(--text-color-secondary); margin-bottom: 1rem; text-transform: capitalize; display: flex; gap: 0.5rem; }
-.blog-title { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 1.5rem; }
-.blog-meta { display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.9rem; color: var(--text-color-secondary); margin-bottom: 2rem; border-bottom: 1px solid #2a2a2a; padding-bottom: 2rem; }
-.banner-container { max-width: 900px; margin: 0 auto 3rem; padding: 0 1rem; }
-.banner-image { width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #2a2a2a; background: #1e1e1e; }
-.article-content { max-width: 800px; margin: 0 auto 4rem; padding: 0 1.5rem; }
-.article-content p { margin-bottom: 1.8rem; font-size: 1.1rem; color: #dcdcdc; }
-.article-content h2 { font-size: clamp(1.5rem, 4vw, 2rem); margin-top: 3.5rem; margin-bottom: 1.5rem; color: #fff; padding-left: 1rem; border-left: 4px solid var(--primary-color); }
-.article-content h3 { font-size: 1.4rem; margin-top: 2.5rem; margin-bottom: 1rem; color: #fff; }
-.article-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 2rem 0; }
-.author-bio-box { max-width: 800px; margin: 4rem auto; padding: 2rem; background: var(--surface-color); border-radius: 12px; display: flex; align-items: center; gap: 1.5rem; border: 1px solid #2a2a2a; }
-.author-bio-box img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); }
-.site-footer { background: #0c0c0c; color: var(--text-color-secondary); padding: 3rem 5%; margin-top: 4rem; border-top: 1px solid #2a2a2a; }
-.footer-container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem; }
-.footer-nav a, .footer-social a { color: var(--text-color-secondary); margin-right: 1.5rem; }
-@media(max-width: 768px) {
-    .nav-links { position: fixed; right: 0; top: 0; height: 100vh; background: var(--surface-color); flex-direction: column; width: 75%; transform: translateX(100%); transition: 0.5s; z-index: 100; border-left: 1px solid #333; }
-    .nav-active { transform: translateX(0%); }
-    .burger { display: block; z-index: 101; }
-    .blog-header { margin-top: 5rem; }
-}
-/* AD STYLES */
-.ad-unit { margin: 2rem 0; text-align: center; clear: both; }
-.ad-header { margin-top: 20px; margin-bottom: 20px; display: flex; justify-content: center; }
-.ad-sticky-left { position: fixed; top: 100px; left: 10px; width: 160px; height: 600px; z-index: 90; }
-.ad-sticky-right { position: fixed; top: 100px; right: 10px; width: 160px; height: 600px; z-index: 90; }
-.ad-sticky-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; z-index: 999; display: flex; flex-direction:column; align-items:center; padding: 10px; border-top: 1px solid #333; }
-.ad-close { align-self: flex-end; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; padding: 2px 8px; font-size: 12px; margin-bottom: 5px; }
-@media(max-width: 1200px) { .ad-sticky-left, .ad-sticky-right { display: none; } }
-@media(max-width: 768px) { .ad-sticky-footer { height: auto; padding: 5px; } .ad-sticky-footer img { max-width: 100%; height: auto; } }
+:root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#a0a0a0;--font-family:'Poppins','Poppins Fallback',sans-serif}
+a{color:#ff3e00}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
+.progress-bar{position:fixed;top:0;left:0;width:0;height:4px;background:linear-gradient(90deg,var(--primary-color),#0077b6);z-index:1000;transition:width .1s linear}
+.site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a}
+.logo{font-weight:700;font-size:1.5rem;color:#fff}
+.nav-links{display:flex;justify-content:space-around;list-style:none}
+.nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);text-decoration:none;font-weight:600;font-size:1rem;position:relative;transition:color .3s ease}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
+.burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
+.hero{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;overflow:hidden;background-position:center center;background-size:cover;height:40vh;min-height:350px}
+.hero-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:0}
+.hero-content{position:relative;z-index:1;padding:0 1rem}
+.hero-content h1{font-size:4rem;font-weight:700;margin-bottom:1rem;text-shadow:2px 2px 10px rgba(0,0,0,0.5)}.hero-content p{font-size:1.2rem;font-weight:300;max-width:800px;text-shadow:1px 1px 5px rgba(0,0,0,0.5)}
+.article-container{max-width:800px;margin:4rem auto;padding:0 2rem}
+.article-container .intro-paragraph{font-size:1.2rem;font-weight:300;color:#f0f0f0;margin-bottom:2rem;border-left:3px solid var(--primary-color);padding-left:1.5rem}
+.article-container h2{font-size:2.5rem;font-weight:600;margin-top:4rem;margin-bottom:1.5rem;color:#fff;border-bottom:2px solid var(--primary-color);padding-bottom:.5rem;line-height:1.2}
+.article-container h3{font-size:1.8rem;font-weight:600;margin-top:2.5rem;margin-bottom:1rem;color:#f0f0f0}
+.article-container p{margin-bottom:1.5rem;font-size:1.1rem}
+.article-container ul,.article-container ol{margin-left:2rem;margin-bottom:1.5rem}.article-container li{margin-bottom:.75rem;padding-left:.5rem}.article-container strong{color:var(--primary-color);font-weight:600}
+.author-bio{margin-top:5rem;padding:2.5rem;background-color:var(--surface-color);border-radius:15px;display:flex;align-items:center;gap:2rem;border:1px solid #2a2a2a}
+.author-bio img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--primary-color)}
+.author-bio h3{margin-top:0;margin-bottom:.5rem;font-size:1.5rem;color:#fff}.author-bio p{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:1rem}
+.author-bio .social-links a{color:var(--text-color-secondary);font-size:1.5rem;margin-right:1.5rem;transition:color .3s ease,transform .3s ease}.author-bio .social-links a:hover{color:var(--primary-color);transform:scale(1.1)}
+.site-footer{background-color:#0c0c0c;color:var(--text-color-secondary);padding:3rem 5%;margin-top:4rem;border-top:1px solid #2a2a2a}
+.footer-container{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2rem;margin-bottom:2rem}
+.footer-nav a{color:var(--text-color-secondary);text-decoration:none;margin-right:1.5rem;transition:color .3s ease}.footer-nav a:last-child{margin-right:0}.footer-nav a:hover{color:var(--primary-color)}
+.footer-social a{color:var(--text-color-secondary);font-size:1.5rem;margin-left:1rem;transition:color .3s ease,transform .3s ease}.footer-social a:hover{color:var(--primary-color);transform:scale(1.1)}
+.footer-bottom{text-align:center;padding-top:2rem;border-top:1px solid #2a2a2a;font-size:.9rem}
+[data-animate]{opacity:0;transition:opacity .8s ease-out,transform .8s ease-out}.article-container [data-animate]{transform:translateY(40px)}[data-animate].is-visible{opacity:1;transform:translateY(0)}
+.article-image{width:100%;height:auto;border-radius:15px;margin-top:1.5rem;margin-bottom:.75rem;border:1px solid #2a2a2a}figcaption{text-align:center;font-size:.9rem;color:var(--text-color-secondary);font-style:italic;margin-bottom:2rem}
+@media screen and (max-width:768px){body{overflow-x:hidden}.nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100;visibility:hidden}.nav-links li{opacity:0}.burger{display:block;z-index:101}.hero-content h1{font-size:2.5rem}.hero-content p{font-size:1rem}.article-container{padding:0 1rem}.article-container h2{font-size:2rem}.article-container h3{font-size:1.5rem}.author-bio{flex-direction:column;text-align:center}.author-bio img{margin-bottom:1rem}.footer-container{flex-direction:column;align-items:flex-start}.footer-nav{display:flex;flex-direction:column;margin-bottom:1rem}.footer-nav a{margin-right:0;margin-bottom:.5rem}.footer-social a{margin-left:0;margin-right:1.5rem}}
+.nav-active{transform:translateX(0);visibility:visible}.toggle .line1{transform:rotate(-45deg) translate(-5px,6px)}.toggle .line2{opacity:0}.toggle .line3{transform:rotate(45deg) translate(-5px,-6px)}
+@keyframes navLinkFade{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
+/* Ad Styles */
+.ad-unit{margin:2rem 0;text-align:center;clear:both}.ad-sticky-left{position:fixed;top:100px;left:10px;width:160px;height:600px;z-index:90}.ad-sticky-right{position:fixed;top:100px;right:10px;width:160px;height:600px;z-index:90}.ad-sticky-footer{position:fixed;bottom:0;left:0;width:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;padding:10px;border-top:1px solid #333}.ad-close{align-self:flex-end;background:#333;color:#fff;border:1px solid #555;cursor:pointer;padding:2px 8px;font-size:12px;margin-bottom:5px}@media(max-width:1200px){.ad-sticky-left,.ad-sticky-right{display:none}}@media(max-width:768px){.ad-sticky-footer{height:auto;padding:5px}.ad-sticky-footer img{max-width:100%;height:auto}}
 `,
+    // UPDATED WITH REFERENCE SCRIPT.JS (And Fixed Breadcrumb Logic)
     "assets/js/article.js": `
 document.addEventListener('DOMContentLoaded', () => {
-    const lastMod = new Date(document.lastModified);
-    if(document.getElementById('dynamicDate')) document.getElementById('dynamicDate').textContent = lastMod.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    // Breadcrumb Logic - Fixed to show Home > Blog > Post
     const path = window.location.pathname;
     const isPost = path.includes('/blog/');
     const slug = path.split('/').filter(Boolean).pop() || 'Home';
     const crumbSpan = document.getElementById('dynamicBreadcrumbSlug');
+    
     if(crumbSpan) {
-        if(isPost) crumbSpan.innerHTML = '<a href="../blog/" style="color:var(--text-color-secondary)">Blog</a> <span>/</span> ' + slug.replace(/-/g, ' ');
-        else crumbSpan.textContent = slug.replace(/-/g, ' ');
+        if(isPost) {
+            // Fix: Show Blog in the path
+            crumbSpan.innerHTML = '<a href="../" style="color:var(--text-color-secondary)">Blog</a> <span>/</span> ' + slug.replace(/-/g, ' ');
+        } else {
+            crumbSpan.textContent = slug.replace(/-/g, ' ');
+        }
     }
-    const content = document.querySelector('.article-content');
+
+    // Dynamic Date
+    const lastMod = new Date(document.lastModified);
+    if(document.getElementById('dynamicDate')) document.getElementById('dynamicDate').textContent = lastMod.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Reading Time
+    const content = document.querySelector('.article-container');
     if(content && document.getElementById('dynamicReadingTime')) {
         const words = content.innerText.trim().split(/\s+/).length;
         document.getElementById('dynamicReadingTime').textContent = Math.ceil(words / 225) + " Min Read";
     }
-    const bar = document.getElementById('progressBar');
-    if(bar) window.addEventListener('scroll', () => {
-        const st = document.documentElement.scrollTop;
-        const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        bar.style.width = (st / sh) * 100 + "%";
-    });
+
+    // Scroll Progress
+    const progressBar = document.getElementById('progressBar');
+    let ticking = false;
+    const updateProgressBar = () => {
+        const { scrollTop, scrollHeight } = document.documentElement;
+        const scrollableHeight = scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / scrollableHeight) * 100;
+        if(progressBar) progressBar.style.width = scrollPercent + "%";
+        ticking = false;
+    };
+    window.addEventListener('scroll', () => { if (!ticking) { window.requestAnimationFrame(updateProgressBar); ticking = true; } });
+
+    // Mobile Nav
     const burger = document.querySelector('.burger');
     const nav = document.querySelector('.nav-links');
+    const navLinks = document.querySelectorAll('.nav-links li');
     if(burger && nav) {
         burger.addEventListener('click', () => {
             nav.classList.toggle('nav-active');
+            const isActive = nav.classList.contains('nav-active');
+            navLinks.forEach((link, index) => {
+                if (link.style.animation) link.style.animation = '';
+                else link.style.animation = 'navLinkFade 0.5s ease forwards ' + (index / 7 + 0.3) + 's';
+            });
             burger.classList.toggle('toggle');
+            burger.setAttribute('aria-expanded', isActive);
         });
     }
+
+    // Scroll Animations (Wait for fonts)
+    document.fonts.ready.then(() => {
+        const animatedElements = document.querySelectorAll('[data-animate]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { root: null, threshold: 0.1 });
+        animatedElements.forEach(element => observer.observe(element));
+    });
 });
 `
 };
@@ -390,7 +421,11 @@ async function editContent(type, slug) {
 
         switchPanel('editor');
         const savedDraft = localStorage.getItem(`draft_${slug}`);
-        let content = doc.querySelector('.article-content')?.innerHTML || '';
+        // Adjust for article-container class used in new layout
+        let content = doc.querySelector('.article-container')?.innerHTML || '';
+        // Fallback for old content
+        if(!content) content = doc.querySelector('.article-content')?.innerHTML || '';
+
         if(savedDraft && savedDraft !== content) { if(confirm('Restore unsaved draft?')) content = savedDraft; }
 
         initTinyMCE(() => tinymce.activeEditor.setContent(content));
@@ -441,18 +476,21 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const s = state.settings;
     const fullUrl = `${s.siteUrl}/${isPost?'blog/':''}${slug}/`;
     const assetPath = isPost ? '../../assets' : '../assets';
-    // Admin path for fontello: Posts=../../admin/fontello.css, Pages=../admin/fontello.css
+    // Fix: Fontello path relative to output file
     const adminPath = isPost ? '../../admin' : '../admin';
+    const relativeHome = isPost ? '../../' : '../';
     
     const bannerUrl = document.getElementById('meta-banner').value;
-    const bannerHtml = bannerUrl ? `<div class="banner-container"><img id="dynamicBannerImage" class="banner-image" alt="${title}" src="${bannerUrl}"></div>` : '';
+    // Updated Banner Logic: Use Hero Section for background image
+    const heroStyle = bannerUrl ? `style="background-image: url('${bannerUrl}');"` : '';
 
     const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${l.link}">${l.label}</a></li>`).join('');
     const footerLinks = (s.footerMenu || []).map(l => `<a href="${l.link}">${l.label}</a>`).join('');
-    // Use Fontello classes for social icons on published site
     const socialIcons = (s.socialLinks || []).map(l => `<a href="${l.link}"><i class="${l.label}"></i></a>`).join('');
+    
     const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl);
-    const metaDisplay = isPost ? '' : 'style="display:none"';
+    
+    // Logic for hiding meta on Pages if needed (though new design integrates them differently)
     const breadCrumbDisplay = document.getElementById('include-breadcrumb-schema').checked ? '' : 'style="display:none"';
 
     const html = `<!DOCTYPE html>
@@ -465,51 +503,107 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <link rel="icon" href="${s.favicon || ''}">
     <link rel="canonical" href="${fullUrl}">
     <meta property="og:image" content="${bannerUrl}">
+    
+    <!-- Critical CSS & Fonts Preload -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <style>
+      @font-face{font-family:'Poppins Fallback';src:local('Arial');ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%}
+      @font-face{font-family:Poppins;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLDz8Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+      @font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+      @font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+      @font-face{font-family:Poppins;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+      :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#a0a0a0;--font-family:'Poppins','Poppins Fallback',sans-serif}
+    </style>
+
     ${(s.verifications||[]).join('\n')}
-    <link rel="stylesheet" href="${adminPath}/fontello.css">
-    <link rel="stylesheet" href="${assetPath}/css/article.css">
+    
+    <!-- Asynchronous CSS Loading -->
+    <link rel="stylesheet" href="${adminPath}/fontello.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="${assetPath}/css/article.css" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="${adminPath}/fontello.css">
+      <link rel="stylesheet" href="${assetPath}/css/article.css">
+    </noscript>
+
     <style>${s.customCss || ''}</style>
     ${s.customHeadJs || ''}
     ${s.adsenseAuto || ''}
-    ${generateLazyAnalytics()}
+    
+    <!-- Lazy Analytics -->
+    <script>
+      const loadAnalytics = () => {
+        const script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=${s.gaId}';
+        script.async = true;
+        document.head.appendChild(script);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${s.gaId}');
+      };
+      if('${s.gaId}') {
+        window.addEventListener('scroll', loadAnalytics, { once: true });
+        window.addEventListener('mousemove', loadAnalytics, { once: true });
+        window.addEventListener('touchstart', loadAnalytics, { once: true });
+      }
+    </script>
     <script type="application/ld+json">${schemaJson}</script>
 </head>
 <body>
     <div class="progress-bar" id="progressBar"></div>
     <header class="site-header">
         <nav>
-            <a href="${s.siteUrl}" class="logo">${s.siteTitle}</a>
-            <div class="burger"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div>
+            <div class="logo">${s.siteTitle}</div>
             <ul class="nav-links">${headerLinks}</ul>
+            <div class="burger"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div>
         </nav>
     </header>
     ${getAdCode('header_bottom', slug)}
-    <div class="blog-header">
-        <div class="breadcrumbs" ${breadCrumbDisplay}>
-            <a href="${s.siteUrl}">Home</a> <span>/</span> <span id="dynamicBreadcrumbSlug"></span>
-        </div>
-        <h1 class="blog-title">${title}</h1>
-        <div class="blog-meta" ${metaDisplay}>
-            <span class="author-name">By ${document.getElementById('meta-author').value}</span>
-            <span>•</span> <span id="dynamicDate"></span>
-            <span>•</span> <span id="dynamicReadingTime"></span>
-        </div>
-    </div>
-    ${bannerHtml}
-    <article class="article-content">${contentHtml}</article>
-    ${getAdCode('end', slug)}
-    <div class="author-bio-box" ${metaDisplay}>
-        <img src="https://ui-avatars.com/api/?name=${document.getElementById('meta-author').value}&background=0D8ABC&color=fff" alt="Author">
-        <div class="author-info"><h4>${document.getElementById('meta-author').value}</h4><p>Author</p></div>
-    </div>
+    
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" ${heroStyle}>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="breadcrumbs" ${breadCrumbDisplay} style="font-size:0.85rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize;">
+                     <span id="dynamicBreadcrumbSlug"></span>
+                </div>
+                <h1>${title}</h1>
+                <div style="font-size:0.9rem;margin-top:10px;">
+                   By ${document.getElementById('meta-author').value} • <span id="dynamicDate"></span> • <span id="dynamicReadingTime"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <article class="article-container">
+            ${contentHtml}
+            
+            ${getAdCode('end', slug)}
+
+            <!-- Author Bio -->
+            <section class="author-bio" data-animate>
+                <img src="https://ui-avatars.com/api/?name=${document.getElementById('meta-author').value}&background=0D8ABC&color=fff" alt="Author">
+                <div class="author-details">
+                    <h3>About The Author</h3>
+                    <p><strong>${document.getElementById('meta-author').value}</strong> is a writer for ${s.siteTitle}.</p>
+                    <div class="social-links">${socialIcons}</div>
+                </div>
+            </section>
+        </article>
+    </main>
+
     <footer class="site-footer">
         <div class="footer-container">
-            <div class="footer-about">
-                <h3>${s.siteTitle}</h3>
-                <p>${s.copyright || ''}</p>
-                <div class="footer-social">${socialIcons}</div>
-            </div>
-            <div class="footer-nav">${footerLinks}</div>
+            <nav class="footer-nav">${footerLinks}</nav>
+            <div class="footer-social">${socialIcons}</div>
+        </div>
+        <div class="footer-bottom">
+            <p>${s.copyright || ''}</p>
         </div>
     </footer>
     ${getStickyAds(slug)}
@@ -649,7 +743,6 @@ function showLoader(v,t){document.getElementById('loading-overlay').classList.to
 function slugify(t){return t.toLowerCase().replace(/[^\w-]+/g,'-')}
 function b64EncodeUnicode(str){return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,(m,p1)=>String.fromCharCode('0x'+p1)))}
 function b64DecodeUnicode(str){return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''))}
-function generateLazyAnalytics() { return state.settings.gaId ? `<script>(function(){const g="${state.settings.gaId}";function l(){const s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id='+g;s.async=true;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];function G(){dataLayer.push(arguments)}G('js',new Date());G('config',g)}window.addEventListener('scroll',l,{once:true});setTimeout(l,4000)})();</script>` : ''; }
 function exitEditor(){switchPanel(state.currentType==='post'?'dashboard':'pages')}
 
 // UI Repeaters (Fixed)
