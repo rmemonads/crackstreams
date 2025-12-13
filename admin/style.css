@@ -66,6 +66,7 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .repeater-remove { position: absolute; top: 5px; right: 5px; color: #666; font-size: 0.8rem; }
 .add-repeater-btn { background: #333; color: var(--primary); width: 100%; padding: 5px; font-size: 0.8rem; margin-top: 5px; border: 1px dashed #444; cursor: pointer; }
 .menu-row, .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.meta-item-row input { font-family: monospace; font-size: 0.8rem; }
 
 /* AUTHOR CARD */
 .author-card { display: grid; grid-template-columns: 100px 1fr; gap: 15px; margin-bottom: 10px; border: 1px solid #444; background: #252525; padding: 15px; border-radius: 4px; position: relative; }
