@@ -50,9 +50,7 @@
                 <button id="nav-btn-pages" onclick="switchPanel('pages')" class="nav-item">
                     <i class="fa-solid fa-file"></i> <span>Pages</span>
                 </button>
-                
                 <div class="nav-spacer"></div>
-
                 <button id="nav-btn-settings" onclick="switchPanel('settings')" class="nav-item">
                     <i class="fa-solid fa-sliders"></i> <span>Settings</span>
                 </button>
@@ -118,7 +116,7 @@
                         </div>
                         <div class="form-group">
                             <label>Site URL (e.g., https://mysite.com)</label>
-                            <p class="hint">Important: Used for image links & SEO. No trailing slash.</p>
+                            <p class="hint">Important: No trailing slash.</p>
                             <input type="text" id="set-site-url" placeholder="https://username.github.io/repo">
                         </div>
                         <div class="form-group">
@@ -152,7 +150,7 @@
                     <!-- Author Manager -->
                     <div class="settings-card full-width-card">
                         <h3>Author Profiles</h3>
-                        <p class="hint">Set specific social links for each author here.</p>
+                        <p class="hint">Add authors and their specific social media links.</p>
                         <div id="authors-repeater-container"></div>
                         <button class="btn-secondary full-width" onclick="addAuthorItem()">+ Add Author</button>
                     </div>
@@ -163,7 +161,7 @@
                         <div class="two-col">
                             <div>
                                 <label class="schema-label">Header Menu</label>
-                                <p class="hint">Label | Full URL (https://...) or Slug</p>
+                                <p class="hint">Label | Slug or https://...</p>
                                 <div id="header-menu-container" class="repeater-container"></div>
                                 <button class="add-repeater-btn" onclick="addMenuItem('header-menu-container')">+ Add Link</button>
                             </div>
@@ -182,7 +180,7 @@
 
                     <div class="settings-card full-width-card">
                         <h3>Ad Units Manager</h3>
-                        <p class="hint">Leave code empty to disable a specific slot.</p>
+                        <p class="hint">AdSense/Custom HTML.</p>
                         <div id="ads-repeater-container"></div>
                         <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add Ad Unit</button>
                     </div>
@@ -240,7 +238,6 @@
                                 <label>Slug</label>
                                 <input type="text" id="meta-slug">
                             </div>
-                            <!-- Author Selector -->
                             <div class="form-group">
                                 <label>Author</label>
                                 <select id="meta-author-select"></select>
@@ -251,14 +248,12 @@
                             </div>
                             <div class="form-group">
                                 <label>Featured Image</label>
-                                <p class="hint">Will be resized to 800x450 in output.</p>
                                 <div id="featured-dropzone" class="image-drop-wrapper">
                                     <input type="text" id="meta-banner" placeholder="https://...">
                                     <img id="banner-preview" class="hidden">
                                     <div class="drop-overlay"><i class="fa-solid fa-cloud-arrow-up"></i> Drop to Upload</div>
                                 </div>
                             </div>
-                            <!-- Breadcrumb Schema Toggle -->
                             <div class="form-group">
                                 <label class="switch-label">
                                     <input type="checkbox" id="include-breadcrumb-schema" checked>
