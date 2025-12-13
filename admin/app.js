@@ -1,10 +1,10 @@
 /**
- * ULTIMATE SERVERLESS CMS - SPEED OPTIMIZED (100/100 TARGET)
- * Fixes: LCP Preloading, CLS Dimensions, Mixed Content, Aria Labels
+ * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
+ * Features: Mobile Menu CSS Fix, Author Manager, External Links, Left Align Layout, Accurate Reading Time
  */
  
 const SYSTEM_ASSETS = {
-    // 1. PERFORMANCE OPTIMIZED CSS
+    // 1. PERFORMANCE OPTIMIZED CSS (Left Align + Mobile Menu Fix)
     "assets/css/article.css": `
 :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#a0a0a0;--font-family:'Poppins','Poppins Fallback',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
@@ -17,54 +17,65 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .nav-links{display:flex;justify-content:space-around;list-style:none}
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
-/* Header Section */
-.page-header-section{text-align:center;padding:4rem 1rem 2rem;max-width:900px;margin:0 auto}
+
+/* NEW: Left-Aligned Professional Title Layout */
+.page-header-section{text-align:left;padding:3rem 1rem 1rem;max-width:800px;margin:0 auto}
 .breadcrumbs{font-size:0.85rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
-.page-title{font-size:clamp(2rem, 5vw, 3.5rem);font-weight:700;margin-bottom:1rem;line-height:1.2;color:#fff}
-.page-meta{font-size:0.9rem;color:var(--text-color-secondary)}
-/* Featured Image (CLS & LCP OPTIMIZED) */
-.featured-image-container{max-width:900px;margin:0 auto 3rem;padding:0 1rem;text-align:center;aspect-ratio: 16/9; overflow: hidden;}
+.page-title{font-size:clamp(2rem, 5vw, 3rem);font-weight:700;margin-bottom:0.5rem;line-height:1.2;color:#fff}
+.page-meta{font-size:0.9rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:10px;}
+.page-meta img.auth-tiny {width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color);}
+
+/* Featured Image (CLS Optimized) */
+.featured-image-container{max-width:900px;margin:0 auto 3rem;padding:0 1rem;aspect-ratio: 16/9; overflow: hidden;}
 .featured-image{width:100%;height:100%;object-fit:cover;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5);border:1px solid #333}
+
 /* Content */
 .article-container{max-width:800px;margin:0 auto 4rem;padding:0 2rem; min-height: 50vh;}
-.article-container h2{font-size:2rem;font-weight:600;margin-top:3rem;margin-bottom:1.5rem;color:#fff;border-bottom:2px solid var(--primary-color);padding-bottom:.5rem;line-height:1.2}
-.article-container h3{font-size:1.5rem;font-weight:600;margin-top:2rem;margin-bottom:1rem;color:#fff}
-.article-container p{margin-bottom:1.5rem;font-size:1.1rem;color:#d1d1d1}
+.article-container h2{font-size:1.8rem;font-weight:600;margin-top:2.5rem;margin-bottom:1rem;color:#fff;border-left:4px solid var(--primary-color);padding-left:15px;line-height:1.2}
+.article-container h3{font-size:1.4rem;font-weight:600;margin-top:2rem;margin-bottom:1rem;color:#fff}
+.article-container p{margin-bottom:1.5rem;font-size:1.1rem;color:#d1d1d1;line-height:1.8}
 .article-container ul,.article-container ol{margin-left:2rem;margin-bottom:1.5rem}.article-container li{margin-bottom:.75rem;padding-left:.5rem}.article-container strong{color:var(--primary-color);font-weight:600}
-/* Inner Images (Responsive) */
 .article-container img{max-width:100%;height:auto;border-radius:8px;margin:1.5rem 0;display:block}
 .article-container iframe{max-width:100%;}
-/* Next Step Cards */
-.next-step-section{max-width:800px;margin:4rem auto;padding:0 2rem}
-.next-step-section h2{text-align:center;font-size:1.8rem;margin-bottom:2rem}
-.next-step-container{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
-.next-step-card{background-color:var(--surface-color);border:1px solid #2a2a2a;border-radius:12px;padding:1.5rem;text-decoration:none;position:relative;overflow:hidden;transition:transform .3s ease,border-color .3s ease}
-.next-step-card:hover{transform:translateY(-5px);border-color:var(--primary-color)}
-.next-step-card h3{color:var(--text-color);font-size:1.2rem;margin:0}
-/* Author & Footer */
+
+/* Author Box */
 .author-bio{margin-top:4rem;padding:2rem;background-color:var(--surface-color);border-radius:12px;display:flex;align-items:center;gap:1.5rem;border:1px solid #333}
 .author-bio img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-color)}
 .author-bio h3{margin:0 0 .5rem;font-size:1.4rem;color:#fff}.author-bio p{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:1rem}
+
+/* Footer */
 .site-footer{background-color:#0c0c0c;color:var(--text-color-secondary);padding:3rem 5%;margin-top:4rem;border-top:1px solid #2a2a2a}
 .footer-container{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2rem;margin-bottom:2rem}
 .footer-nav a{color:var(--text-color-secondary);margin-right:1.5rem}.footer-nav a:hover{color:var(--primary-color)}
 .footer-social a{color:var(--text-color-secondary);font-size:1.4rem;margin-left:1rem}.footer-social a:hover{color:var(--primary-color)}
 .footer-bottom{text-align:center;padding-top:2rem;border-top:1px solid #2a2a2a;font-size:.9rem}
+
 /* Animation */
 [data-animate]{opacity:0;transition:opacity .6s ease-out,transform .6s ease-out}.article-container [data-animate]{transform:translateY(30px)}[data-animate].is-visible{opacity:1;transform:translateY(0)}
-/* Responsive */
-@media screen and (max-width:768px){.nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100}.nav-links li{opacity:1}.burger{display:block;z-index:101}.page-title{font-size:2.2rem}.article-container{padding:0 1rem}.author-bio{flex-direction:column;text-align:center}.footer-container{flex-direction:column;align-items:flex-start}.footer-nav{display:flex;flex-direction:column;gap:0.5rem}.next-step-container{grid-template-columns:1fr}}
+
+/* Responsive + Mobile Menu CLS Fix */
+@media screen and (max-width:768px){
+    /* Default State: Off Screen */
+    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100}
+    .nav-links li{opacity:1}
+    .burger{display:block;z-index:101}
+    .page-title{font-size:2rem}
+    .article-container{padding:0 1rem}
+    .author-bio{flex-direction:column;text-align:center}
+    .footer-container{flex-direction:column;align-items:flex-start}
+}
 .nav-active{transform:translateX(0)}.toggle .line1{transform:rotate(-45deg) translate(-5px,6px)}.toggle .line2{opacity:0}.toggle .line3{transform:rotate(45deg) translate(-5px,-6px)}
-/* Ad Styles (Min-Height to prevent CLS) */
-.ad-unit{margin:2rem auto;text-align:center;clear:both;max-width:100%;overflow:hidden;min-height:250px;background:#181818;display:flex;align-items:center;justify-content:center;}
+
+/* Ads (Empty = 0 height) */
+.ad-unit{margin:2rem auto;text-align:center;clear:both;max-width:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center;}
 .ad-sticky-left{position:fixed;top:100px;left:10px;width:160px;height:600px;z-index:90}
 .ad-sticky-right{position:fixed;top:100px;right:10px;width:160px;height:600px;z-index:90}
-.ad-sticky-footer{position:fixed;bottom:0;left:0;width:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;padding:10px;border-top:1px solid #333;min-height:100px;}
+.ad-sticky-footer{position:fixed;bottom:0;left:0;width:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;padding:10px;border-top:1px solid #333;}
 .ad-close{align-self:flex-end;background:#333;color:#fff;border:1px solid #555;cursor:pointer;padding:2px 8px;font-size:12px;margin-bottom:5px}
 @media(max-width:1200px){.ad-sticky-left,.ad-sticky-right{display:none}}
 @media(max-width:768px){.ad-sticky-footer{height:auto;padding:5px}.ad-sticky-footer img{max-width:100%;height:auto}}
 `,
-    // 2. JS UTILS
+    // 2. JS UTILS (Accurate Reading Time)
     "assets/js/article.js": `
 document.addEventListener('DOMContentLoaded', () => {
     // Breadcrumbs
@@ -76,13 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if(isPost) crumbSpan.innerHTML = '<a href="../" style="color:var(--text-color-secondary)">Blog</a> <span>/</span> ' + slug.replace(/-/g, ' ');
         else crumbSpan.textContent = slug.replace(/-/g, ' ');
     }
-    // Meta
+    // Meta (Date)
     const lastMod = new Date(document.lastModified);
     if(document.getElementById('dynamicDate')) document.getElementById('dynamicDate').textContent = lastMod.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    
+    // Accurate Reading Time (Strip HTML first)
     const content = document.querySelector('.article-container');
     if(content && document.getElementById('dynamicReadingTime')) {
-        const words = content.innerText.trim().split(/\s+/).length;
-        document.getElementById('dynamicReadingTime').textContent = Math.ceil(words / 225) + " Min Read";
+        const text = content.innerText || "";
+        const wpm = 225;
+        const words = text.trim().split(/\\s+/).length;
+        const time = Math.ceil(words / wpm);
+        document.getElementById('dynamicReadingTime').textContent = time + " Min Read";
     }
     // Progress Bar
     const progressBar = document.getElementById('progressBar');
@@ -168,7 +184,6 @@ async function ensureDirectories() {}
 async function ensureSystemFiles() {
     for (const [path, content] of Object.entries(SYSTEM_ASSETS)) {
         const sha = await getLatestFileSha(path);
-        // Force update to ensure latest Optimized CSS
         await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: sha });
     }
 }
@@ -261,7 +276,7 @@ async function getLatestFileSha(path) {
     try { const res = await githubReq(`contents/${path}`); return res ? (await res.json()).sha : null; } catch (e) { return null; }
 }
 
-// --- SETTINGS (FIXED) ---
+// --- SETTINGS (FIXED with AUTHORS) ---
 async function loadGlobalSettings() {
     try {
         const res = await githubReq('contents/_cms/settings.json');
@@ -293,6 +308,10 @@ function populateSettingsForm() {
     renderRepeater('footer-menu-container', s.footerMenu, 'menu');
     renderRepeater('social-links-container', s.socialLinks, 'social');
     
+    // Authors
+    document.getElementById('authors-repeater-container').innerHTML = '';
+    (s.authors || []).forEach(a => addAuthorItem(a));
+
     document.getElementById('ads-repeater-container').innerHTML = '';
     (s.ads || []).forEach(ad => addAdUnit(ad));
 }
@@ -316,9 +335,20 @@ async function saveGlobalSettings() {
         headerMenu: collectRepeater('header-menu-container', 'menu'),
         footerMenu: collectRepeater('footer-menu-container', 'menu'),
         socialLinks: collectRepeater('social-links-container', 'social'),
+        authors: [],
         ads: []
     };
     
+    // Collect Authors
+    document.querySelectorAll('.author-card').forEach(b => {
+        s.authors.push({
+            id: b.dataset.id || Date.now().toString(),
+            name: b.querySelector('.auth-name').value,
+            image: b.querySelector('.auth-img').value,
+            bio: b.querySelector('.auth-bio').value
+        });
+    });
+
     document.querySelectorAll('.ad-unit-block').forEach(b => {
         s.ads.push({
             code: b.querySelector('.ad-code-input').value,
@@ -349,9 +379,7 @@ async function saveGlobalSettings() {
 async function loadList(type) {
     const tbody = document.getElementById(type === 'post' ? 'posts-list-body' : 'pages-list-body');
     tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
-    
     const items = state.contentIndex.filter(i => i.type === type).sort((a,b) => new Date(b.date) - new Date(a.date));
-    
     if (items.length === 0) { await crawlAndRebuildIndex(type); return; }
     renderTableRows(tbody, items, type);
 }
@@ -363,7 +391,6 @@ async function crawlAndRebuildIndex(type) {
         if(!res) { renderTableRows(document.getElementById(type === 'post' ? 'posts-list-body' : 'pages-list-body'), [], type); return; }
         const data = await res.json();
         const restricted = ['blog', 'images', 'admin', 'css', 'js', '.git', '_cms', 'assets', '404.html', 'index.html'];
-        
         data.filter(item => item.type === 'dir' && !restricted.includes(item.name)).forEach(f => {
             if (!state.contentIndex.find(i => i.slug === f.name)) {
                 state.contentIndex.push({ slug: f.name, type: type, title: f.name, date: new Date().toISOString() });
@@ -379,16 +406,7 @@ function renderTableRows(tbody, items, type) {
         const safeTitle = f.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
         const liveLink = type === 'post' ? `../blog/${f.slug}/` : `../${f.slug}/`;
         const dateStr = new Date(f.date).toLocaleDateString() + ' ' + new Date(f.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        html += `<tr>
-            <td><input type="checkbox" class="chk-${type}" value="${f.slug}" onchange="toggleBulkBtn('${type}')"></td>
-            <td><strong>${safeTitle}</strong><br><small style="color:#666">/${f.slug}</small></td>
-            <td style="font-size:0.8rem">${dateStr}</td>
-            <td>
-                <a href="${liveLink}" target="_blank" class="btn-secondary btn-xs"><i class="fa-solid fa-eye"></i></a>
-                <button class="btn-primary btn-xs" onclick="editContent('${type}', '${f.slug}')"><i class="fa-solid fa-pen"></i></button> 
-                <button class="btn-danger btn-xs" onclick="deleteContent('${type}', '${f.slug}')"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        </tr>`;
+        html += `<tr><td><input type="checkbox" class="chk-${type}" value="${f.slug}" onchange="toggleBulkBtn('${type}')"></td><td><strong>${safeTitle}</strong><br><small style="color:#666">/${f.slug}</small></td><td style="font-size:0.8rem">${dateStr}</td><td><a href="${liveLink}" target="_blank" class="btn-secondary btn-xs"><i class="fa-solid fa-eye"></i></a> <button class="btn-primary btn-xs" onclick="editContent('${type}', '${f.slug}')"><i class="fa-solid fa-pen"></i></button> <button class="btn-danger btn-xs" onclick="deleteContent('${type}', '${f.slug}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
     });
     tbody.innerHTML = html || '<tr><td colspan="4">Empty.</td></tr>';
 }
@@ -407,6 +425,13 @@ function createNew(type) {
     document.getElementById('banner-preview').classList.add('hidden');
     document.getElementById('schema-container').innerHTML = '';
     document.getElementById('live-link-container').classList.add('hidden');
+    
+    // Populate Authors
+    const authSel = document.getElementById('meta-author-select'); authSel.innerHTML = '';
+    (state.settings.authors || []).forEach(a => {
+        authSel.insertAdjacentHTML('beforeend', `<option value="${a.id}">${a.name}</option>`);
+    });
+
     addDefaultArticleSchema(true);
     switchPanel('editor');
     initTinyMCE(() => { if(tinymce.activeEditor) tinymce.activeEditor.setContent(''); });
@@ -432,6 +457,16 @@ async function editContent(type, slug) {
         const img = doc.querySelector('meta[property="og:image"]')?.content || '';
         document.getElementById('meta-banner').value = img;
         if(img) { document.getElementById('banner-preview').src = img; document.getElementById('banner-preview').classList.remove('hidden'); }
+
+        // Author Select
+        const authSel = document.getElementById('meta-author-select'); authSel.innerHTML = '';
+        (state.settings.authors || []).forEach(a => {
+            authSel.insertAdjacentHTML('beforeend', `<option value="${a.id}">${a.name}</option>`);
+        });
+        // Try to match author by name from metadata if no ID saved
+        const currentAuthorName = doc.querySelector('.author-details strong')?.innerText || "Admin";
+        const matched = (state.settings.authors||[]).find(a => a.name === currentAuthorName);
+        if(matched) authSel.value = matched.id;
 
         switchPanel('editor');
         const savedDraft = localStorage.getItem(`draft_${slug}`);
@@ -473,9 +508,13 @@ function handleAutoSave() {
     }
 }
 
+// --- HELPER: MENU & EXTERNAL LINKS ---
 function resolveMenuLink(link, siteUrl) {
     if(!link) return '#';
-    if(link.startsWith('http') || link.startsWith('mailto:') || link.startsWith('tel:') || link.startsWith('#')) return link;
+    // If it starts with http, it is external
+    if(link.match(/^https?:\/\//) || link.startsWith('mailto:') || link.startsWith('tel:') || link.startsWith('#')) return link;
+    
+    // Internal link logic
     const base = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
     const path = link.startsWith('/') ? link.substring(1) : link;
     return `${base}/${path}`;
@@ -503,27 +542,28 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const assetPath = isPost ? '../../assets' : '../assets';
     const adminPath = isPost ? '../../admin' : '../admin';
     
-    const bannerUrl = document.getElementById('meta-banner').value;
+    let bannerUrl = document.getElementById('meta-banner').value;
+    if(bannerUrl.startsWith('http://')) bannerUrl = bannerUrl.replace('http://', 'https://');
     
-    // 2. LCP & CLS FIX: Explicit Dimensions + Preload
-    // We assume 16:9 for Featured Images. CSS object-fit: cover handles the rest, but attributes prevent CLS.
+    // Author Data
+    const authId = document.getElementById('meta-author-select').value;
+    const author = (s.authors || []).find(a => a.id === authId) || { name: 'Admin', bio: 'Editor', image: 'https://ui-avatars.com/api/?name=Admin' };
+    
+    // 2. LCP & CLS FIX: Explicit Dimensions + Preload top of head
     const featuredImgHtml = bannerUrl 
         ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="1200" height="675" class="featured-image" fetchpriority="high" decoding="async"></div>` 
         : '';
-    
-    // Preload Tag
-    const preloadLink = bannerUrl 
-        ? `<link rel="preload" as="image" href="${bannerUrl}">` 
-        : '';
+    const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}">` : '';
 
-    // 3. Accessibility FIX: Aria Labels
+    // 3. Accessibility FIX: Aria Labels & Link Resolution
     const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a></li>`).join('');
     const footerLinks = (s.footerMenu || []).map(l => `<a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a>`).join('');
     const socialIcons = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
     
-    const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl);
+    const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl, author.name);
     const breadCrumbDisplay = document.getElementById('include-breadcrumb-schema').checked ? '' : 'style="display:none"';
 
+    // 4. HTML Generation (Top-level Preload for LCP)
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -536,7 +576,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <meta property="og:title" content="${title.replace(/"/g, '&quot;')}">
     <meta property="og:image" content="${bannerUrl}">
     
-    <!-- LCP Optimization: Preload Banner -->
+    <!-- LCP Optimization: Preload Banner FIRST -->
     ${preloadLink}
     
     <!-- Critical Fonts Preload -->
@@ -607,7 +647,8 @@ document.getElementById('save-btn').addEventListener('click', async () => {
             </div>
             <h1 class="page-title">${title}</h1>
             <div class="page-meta">
-               By ${document.getElementById('meta-author').value} • <span id="dynamicDate"></span> • <span id="dynamicReadingTime"></span>
+               <img src="${author.image}" class="auth-tiny" alt="author">
+               <span>By ${author.name}</span> <span style="margin:0 5px">•</span> <span id="dynamicDate"></span> <span style="margin:0 5px">•</span> <span id="dynamicReadingTime"></span>
             </div>
         </section>
 
@@ -622,10 +663,10 @@ document.getElementById('save-btn').addEventListener('click', async () => {
 
             <!-- Author Bio -->
             <section class="author-bio" data-animate>
-                <img src="https://ui-avatars.com/api/?name=${document.getElementById('meta-author').value}&background=0D8ABC&color=fff" alt="Author">
+                <img src="${author.image}" alt="${author.name}">
                 <div class="author-details">
                     <h3>About The Author</h3>
-                    <p><strong>${document.getElementById('meta-author').value}</strong> is a writer for ${s.siteTitle}.</p>
+                    <p><strong>${author.name}</strong> ${author.bio}</p>
                     <div class="social-links">${socialIcons}</div>
                 </div>
             </section>
@@ -705,21 +746,25 @@ async function bulkDelete(type) {
     loadList(type);
 }
 
-// --- ADS ---
+// --- ADS (Empty String Check) ---
 function getAdCode(place, slug) {
     const ads = state.settings.ads || [];
     const ad = ads.find(a => a.placement === place && !isExcluded(a, slug));
-    return ad ? `<div class="ad-unit">${ad.code}</div>` : '';
+    // Critical Fix: Do not render if empty
+    if(ad && ad.code && ad.code.trim().length > 0) {
+        return `<div class="ad-unit">${ad.code}</div>`;
+    }
+    return '';
 }
 function getStickyAds(slug) {
     const ads = state.settings.ads || [];
     let html = '';
     const l = ads.find(a => a.placement === 'sticky_left' && !isExcluded(a, slug));
-    if(l) html += `<div class="ad-sticky-left">${l.code}</div>`;
+    if(l && l.code.trim()) html += `<div class="ad-sticky-left">${l.code}</div>`;
     const r = ads.find(a => a.placement === 'sticky_right' && !isExcluded(a, slug));
-    if(r) html += `<div class="ad-sticky-right">${r.code}</div>`;
+    if(r && r.code.trim()) html += `<div class="ad-sticky-right">${r.code}</div>`;
     const f = ads.find(a => a.placement === 'sticky_footer' && !isExcluded(a, slug));
-    if(f) html += `<div class="ad-sticky-footer" id="stky-ftr"><button class="ad-close" onclick="document.getElementById('stky-ftr').remove()">Close X</button>${f.code}</div>`;
+    if(f && f.code.trim()) html += `<div class="ad-sticky-footer" id="stky-ftr"><button class="ad-close" onclick="document.getElementById('stky-ftr').remove()">Close X</button>${f.code}</div>`;
     return html;
 }
 function isExcluded(ad, slug) { return ad.exclude && ad.exclude.split(',').map(s=>s.trim()).includes(slug); }
@@ -728,6 +773,7 @@ function injectAds(html, slug) {
     let modified = html;
     ads.forEach(ad => {
         if(isExcluded(ad, slug)) return;
+        if(!ad.code || !ad.code.trim()) return; // Skip empty
         if(ad.placement.startsWith('after_p_')) {
             const pNum = parseInt(ad.placement.split('_')[2]);
             let count = 0;
@@ -754,9 +800,9 @@ function addFaqItem(id,q='',a='') { document.getElementById(id).insertAdjacentHT
 function addStepItem(id, t='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div><label class="schema-label">Step</label><textarea class="schema-input step-text">${t}</textarea></div></div>`); }
 function addDefaultArticleSchema(checked) { document.getElementById('schema-container').insertAdjacentHTML('afterbegin', `<div class="schema-block default-block"><div class="block-header"><span>Article Schema</span><label class="switch-label"><input type="checkbox" id="include-article-schema" ${checked?'checked':''}><span class="chk-text">Enable</span></label></div></div>`); }
 
-function generateFinalSchema(url, headline, image) {
+function generateFinalSchema(url, headline, image, authName) {
     const graph = [];
-    if(document.getElementById('include-article-schema').checked) graph.push({"@type": "Article", "headline": headline, "image": [image], "author": { "@type": "Person", "name": document.getElementById('meta-author').value }, "datePublished": new Date().toISOString(), "dateModified": new Date().toISOString() });
+    if(document.getElementById('include-article-schema').checked) graph.push({"@type": "Article", "headline": headline, "image": [image], "author": { "@type": "Person", "name": authName }, "datePublished": new Date().toISOString(), "dateModified": new Date().toISOString() });
     if(document.getElementById('include-breadcrumb-schema').checked) graph.push({"@type": "BreadcrumbList", "itemListElement": [{"@type":"ListItem","position":1,"name":"Home","item":state.settings.siteUrl},{"@type":"ListItem","position":2,"name":"Blog","item":state.settings.siteUrl+"/blog/"},{"@type":"ListItem","position":3,"name":headline,"item":url}]});
     
     document.querySelectorAll('.schema-block:not(.default-block)').forEach(b => {
@@ -791,7 +837,7 @@ function b64EncodeUnicode(str){return btoa(encodeURIComponent(str).replace(/%([0
 function b64DecodeUnicode(str){return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''))}
 function exitEditor(){switchPanel(state.currentType==='post'?'dashboard':'pages')}
 
-// UI Repeaters (Fixed)
+// UI Repeaters
 function renderRepeater(id, data, type) {
     const c = document.getElementById(id); c.innerHTML = '';
     (data || []).forEach(item => {
@@ -808,11 +854,25 @@ function collectRepeater(id, type) {
     return items;
 }
 function addMetaVerifyItem(val='') { document.getElementById('meta-verify-container').insertAdjacentHTML('beforeend', `<div class="repeater-item meta-item-row"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><input class="schema-input meta-tag-input" value='${val}' placeholder='<meta name="..." content="...">'></div>`); }
-function addMenuItem(id, l='', u='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input item-label" value="${l}" placeholder="Label"><input class="schema-input item-link" value="${u}" placeholder="Link (e.g., about)"></div></div>`); }
+function addMenuItem(id, l='', u='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input item-label" value="${l}" placeholder="Label"><input class="schema-input item-link" value="${u}" placeholder="Link /"></div></div>`); }
 function addSocialItem(l='', u='') { document.getElementById('social-links-container').insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="social-row"><input class="schema-input item-label" value="${l}" placeholder="icon-twitter"><input class="schema-input item-link" value="${u}" placeholder="URL"></div></div>`); }
 function addAdUnit(d={}) { document.getElementById('ads-repeater-container').insertAdjacentHTML('beforeend', `<div class="ad-unit-block"><button class="ad-remove-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button><label class="schema-label">Ad Code</label><textarea class="schema-input ad-code-input" rows="2">${d.code||''}</textarea><div class="ad-meta-row"><div><select class="schema-input ad-place-input"><option value="header_bottom" ${d.placement==='header_bottom'?'selected':''}>Below Header (728x90)</option><option value="sticky_footer" ${d.placement==='sticky_footer'?'selected':''}>Sticky Footer (728x90)</option><option value="end" ${d.placement==='end'?'selected':''}>End Post (300x250)</option><option value="sticky_left" ${d.placement==='sticky_left'?'selected':''}>Left Sticky (160x600)</option><option value="sticky_right" ${d.placement==='sticky_right'?'selected':''}>Right Sticky (160x600)</option><option value="after_p_1" ${d.placement==='after_p_1'?'selected':''}>After Para 1</option><option value="after_p_2" ${d.placement==='after_p_2'?'selected':''}>After Para 2</option><option value="after_p_3" ${d.placement==='after_p_3'?'selected':''}>After Para 3</option></select></div><div><input class="schema-input ad-exclude-input" value="${d.exclude||''}" placeholder="Excl. slugs"></div></div></div>`); }
 
-// Sidebar Media (Fix DragDrop)
+// NEW: Add Author Item
+function addAuthorItem(a={}) {
+    document.getElementById('authors-repeater-container').insertAdjacentHTML('beforeend', 
+    `<div class="author-card" data-id="${a.id||Date.now()}">
+        <button class="repeater-remove" onclick="this.parentElement.remove()">x</button>
+        <img src="${a.image||''}" class="author-img-preview" id="prev-${a.id||'new'}">
+        <div class="author-fields">
+            <input class="schema-input auth-name" value="${a.name||''}" placeholder="Name">
+            <input class="schema-input auth-img" value="${a.image||''}" placeholder="Image URL" oninput="document.getElementById('prev-${a.id||'new'}').src=this.value">
+            <textarea class="schema-input auth-bio" placeholder="Short Bio">${a.bio||''}</textarea>
+        </div>
+    </div>`);
+}
+
+// Sidebar Media
 async function loadSidebarMedia(){
     const g=document.getElementById('sidebar-media-grid'); g.innerHTML='...';
     try {
