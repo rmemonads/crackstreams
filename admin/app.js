@@ -1,10 +1,10 @@
 /**
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
- * Fixes: Mobile Menu CLS, HTTPS Domain, Author Socials, LCP 100 Score
+ * Fixes: Mobile Menu CLS, LCP/Fetch Priority, Dynamic Author Socials, Custom Links
  */
  
 const SYSTEM_ASSETS = {
-    // 1. PERFORMANCE OPTIMIZED CSS (Menu CLS Fixed + High Contrast)
+    // 1. PERFORMANCE OPTIMIZED CSS
     "assets/css/article.css": `
 :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
@@ -12,37 +12,39 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 /* Progress Bar */
 .progress-bar{position:fixed;top:0;left:0;width:0;height:4px;background:linear-gradient(90deg,var(--primary-color),#0077b6);z-index:1000;transition:width .1s linear}
 /* Header */
-.site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a;height: 80px;}
+.site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a;height:80px}
 .logo{font-weight:700;font-size:1.5rem;color:#fff;text-decoration:none}
 .nav-links{display:flex;justify-content:space-around;list-style:none}
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
 
 /* Layout & Text */
-.page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto;}
-.breadcrumbs{font-size:0.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
-.page-title{font-size:clamp(2rem, 5vw, 3rem);font-weight:700;margin-bottom:0.8rem;line-height:1.2;color:#fff}
-.page-meta{font-size:0.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.page-meta img.auth-tiny {width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color);}
+.page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto}
+.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
+.page-title{font-size:clamp(2rem,5vw,3rem);font-weight:700;margin-bottom:.8rem;line-height:1.2;color:#fff}
+.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color)}
 
-/* FIXED: Featured Image - 800px max, Aspect Ratio Preserved */
-.featured-image-container{max-width:var(--content-width);margin:0 auto 2.5rem;aspect-ratio:16/9;overflow:hidden;border-radius:8px;}
-.featured-image{width:100%;height:100%;object-fit:cover;box-shadow:0 8px 25px rgba(0,0,0,0.3);border:1px solid #333}
+/* Featured Image - Optimized */
+.featured-image-container{max-width:var(--content-width);margin:0 auto 2.5rem;aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:#1a1a1a}
+.featured-image{width:100%;height:100%;object-fit:cover;box-shadow:0 8px 25px rgba(0,0,0,.3);border:1px solid #333}
 
 /* Content */
-.article-container{max-width:var(--content-width);margin:0 auto 4rem;min-height:50vh;}
+.article-container{max-width:var(--content-width);margin:0 auto 4rem;min-height:50vh}
 .article-container h2{font-size:1.9rem;font-weight:600;margin-top:2.5rem;margin-bottom:1rem;color:#fff;border-left:4px solid var(--primary-color);padding-left:15px;line-height:1.3}
 .article-container h3{font-size:1.5rem;font-weight:600;margin-top:2rem;margin-bottom:1rem;color:#fff}
 .article-container p{margin-bottom:1.5rem;font-size:1.15rem;color:#d6d6d6;line-height:1.8}
 .article-container ul,.article-container ol{margin-left:2rem;margin-bottom:1.5rem}.article-container li{margin-bottom:.75rem;padding-left:.5rem;color:#d6d6d6;font-size:1.1rem}.article-container strong{color:var(--primary-color);font-weight:600}
 .article-container img{max-width:100%;height:auto;border-radius:8px;margin:2rem 0;display:block}
-.article-container iframe{max-width:100%;}
+.article-container iframe{max-width:100%}
 .article-container blockquote{border-left:4px solid var(--primary-color);background:#1a1a1a;padding:1.5rem;margin:1.5rem 0;font-style:italic;color:#e0e0e0;border-radius:0 8px 8px 0}
 
 /* Author Box */
 .author-bio{margin-top:4rem;padding:2rem;background-color:var(--surface-color);border-radius:12px;display:flex;align-items:center;gap:1.5rem;border:1px solid #333}
 .author-bio img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-color)}
 .author-bio h3{margin:0 0 .5rem;font-size:1.4rem;color:#fff}.author-bio p{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:1rem}
+.author-socials-list a{color:var(--text-color-secondary);font-size:1.2rem;margin-right:10px}
+.author-socials-list a:hover{color:var(--primary-color)}
 
 /* Footer */
 .site-footer{background-color:#0c0c0c;color:var(--text-color-secondary);padding:3rem 5%;margin-top:4rem;border-top:1px solid #2a2a2a}
@@ -56,29 +58,30 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 
 /* Responsive + CLS Fix */
 @media screen and (max-width:850px){
-    .page-header-section, .featured-image-container, .article-container { padding-left: 1.5rem; padding-right: 1.5rem; width: 100%; }
+    .page-header-section,.featured-image-container,.article-container{padding-left:1.5rem;padding-right:1.5rem;width:100%}
 }
 @media screen and (max-width:768px){
-    /* CLS FIX: Force translate off-screen by default */
-    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100;will-change:transform;}
-    .nav-links li{opacity:1}
+    /* CLS FIX: Use display none or fixed offscreen initially without transition on load */
+    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);z-index:100;will-change:transform}
+    /* Only animate when the class is added */
+    .nav-links.nav-active{transform:translateX(0);transition:transform .4s ease-in-out}
     .burger{display:block;z-index:101}
     .page-title{font-size:2rem}
     .author-bio{flex-direction:column;text-align:center}
     .footer-container{flex-direction:column;align-items:flex-start}
 }
-.nav-active{transform:translateX(0)}.toggle .line1{transform:rotate(-45deg) translate(-5px,6px)}.toggle .line2{opacity:0}.toggle .line3{transform:rotate(45deg) translate(-5px,-6px)}
+.toggle .line1{transform:rotate(-45deg) translate(-5px,6px)}.toggle .line2{opacity:0}.toggle .line3{transform:rotate(45deg) translate(-5px,-6px)}
 
-/* Ads (Empty = 0 height) */
-.ad-unit{margin:2rem auto;text-align:center;clear:both;max-width:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center;}
+/* Ads */
+.ad-unit{margin:2rem auto;text-align:center;clear:both;max-width:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}
 .ad-sticky-left{position:fixed;top:100px;left:10px;width:160px;height:600px;z-index:90}
 .ad-sticky-right{position:fixed;top:100px;right:10px;width:160px;height:600px;z-index:90}
-.ad-sticky-footer{position:fixed;bottom:0;left:0;width:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;padding:10px;border-top:1px solid #333;}
+.ad-sticky-footer{position:fixed;bottom:0;left:0;width:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;padding:10px;border-top:1px solid #333}
 .ad-close{align-self:flex-end;background:#333;color:#fff;border:1px solid #555;cursor:pointer;padding:2px 8px;font-size:12px;margin-bottom:5px}
 @media(max-width:1200px){.ad-sticky-left,.ad-sticky-right{display:none}}
 @media(max-width:768px){.ad-sticky-footer{height:auto;padding:5px}.ad-sticky-footer img{max-width:100%;height:auto}}
 `,
-    // 2. JS UTILS (Accurate Reading Time)
+    // 2. JS UTILS
     "assets/js/article.js": `
 document.addEventListener('DOMContentLoaded', () => {
     // Breadcrumbs
@@ -173,7 +176,6 @@ async function initApp() {
     document.getElementById('app-view').classList.add('active');
     
     showLoader(true, "Initializing...");
-    await ensureDirectories();
     await ensureSystemFiles();
     
     showLoader(true, "Loading Data...");
@@ -183,10 +185,10 @@ async function initApp() {
     showLoader(false);
 }
 
-async function ensureDirectories() {}
 async function ensureSystemFiles() {
     for (const [path, content] of Object.entries(SYSTEM_ASSETS)) {
         const sha = await getLatestFileSha(path);
+        // Only update if missing or force update (checksum logic skipped for simplicity, essentially overwriting to ensure fixes)
         await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: sha });
     }
 }
@@ -210,7 +212,6 @@ async function updateContentIndex(slug, type, title, action = 'update') {
     if (action === 'delete') {
         if (idx > -1) state.contentIndex.splice(idx, 1);
     } else {
-        // Keep original date if updating, else new date
         const originalDate = (idx > -1) ? state.contentIndex[idx].date : now;
         const entry = { slug, type, title, date: originalDate, modified: now };
         if (idx > -1) state.contentIndex[idx] = entry;
@@ -281,7 +282,7 @@ async function getLatestFileSha(path) {
     try { const res = await githubReq(`contents/${path}`); return res ? (await res.json()).sha : null; } catch (e) { return null; }
 }
 
-// --- SETTINGS (FIXED with Author Socials) ---
+// --- SETTINGS ---
 async function loadGlobalSettings() {
     try {
         const res = await githubReq('contents/_cms/settings.json');
@@ -353,16 +354,23 @@ async function saveGlobalSettings() {
         ads: []
     };
     
-    // Collect Authors with Socials
+    // Collect Authors with Dynamic Socials
     document.querySelectorAll('.author-card').forEach(b => {
+        const id = b.dataset.id;
+        const socials = [];
+        b.querySelectorAll(`#nested-socials-${id} .mini-row`).forEach(row => {
+            socials.push({
+                icon: row.querySelector('.mini-icon').value,
+                link: row.querySelector('.mini-link').value
+            });
+        });
+
         s.authors.push({
-            id: b.dataset.id || Date.now().toString(),
+            id: id,
             name: b.querySelector('.auth-name').value,
             image: b.querySelector('.auth-img').value,
             bio: b.querySelector('.auth-bio').value,
-            twitter: b.querySelector('.auth-twitter').value,
-            linkedin: b.querySelector('.auth-linkedin').value,
-            website: b.querySelector('.auth-website').value
+            socials: socials 
         });
     });
 
@@ -475,7 +483,6 @@ async function editContent(type, slug) {
         document.getElementById('meta-banner').value = img;
         if(img) { document.getElementById('banner-preview').src = img; document.getElementById('banner-preview').classList.remove('hidden'); }
 
-        // Author Select
         const authSel = document.getElementById('meta-author-select'); authSel.innerHTML = '';
         (state.settings.authors || []).forEach(a => {
             authSel.insertAdjacentHTML('beforeend', `<option value="${a.id}">${a.name}</option>`);
@@ -487,7 +494,13 @@ async function editContent(type, slug) {
         switchPanel('editor');
         const savedDraft = localStorage.getItem(`draft_${slug}`);
         let content = doc.querySelector('.article-container')?.innerHTML || '';
-        if(!content) content = doc.querySelector('.article-content')?.innerHTML || ''; 
+        
+        // Strip out injected ads from content to avoid duplication
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        tempDiv.querySelectorAll('.ad-unit').forEach(el => el.remove());
+        tempDiv.querySelectorAll('.author-bio').forEach(el => el.remove()); // Remove bio if somehow inside
+        content = tempDiv.innerHTML;
 
         if(savedDraft && savedDraft !== content) { 
              if(confirm('Restore unsaved draft?')) content = savedDraft; 
@@ -527,12 +540,18 @@ function handleAutoSave() {
 // --- HELPER: MENU & EXTERNAL LINKS ---
 function resolveMenuLink(link, siteUrl) {
     if(!link) return '#';
-    // If it starts with http, it is external
+    // Allow strict external links or anchor links
     if(link.match(/^https?:\/\//) || link.startsWith('mailto:') || link.startsWith('tel:') || link.startsWith('#')) return link;
+    // Allow loose "www" or domain inputs (treat as external)
+    if(link.includes('.') && !link.startsWith('/')) return 'https://' + link;
     
-    // Internal link logic
+    // Internal Slug Logic
     const base = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
-    const path = link.startsWith('/') ? link.substring(1) : link;
+    let path = link;
+    if(path.startsWith('/')) path = path.substring(1);
+    // If it doesn't end in slash and isn't a file (like .html), add slash
+    if(!path.endsWith('/') && !path.includes('.')) path += '/';
+    
     return `${base}/${path}`;
 }
 
@@ -547,7 +566,6 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const folder = isPost ? `blog/${slug}` : `${slug}`;
     const path = `${folder}/index.html`;
 
-    // 1. Force HTTPS in Content Images
     let contentHtml = tinymce.activeEditor.getContent();
     contentHtml = contentHtml.replace(/src="http:\/\//g, 'src="https://');
     contentHtml = injectAds(contentHtml, slug);
@@ -563,28 +581,32 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     
     // Author Data
     const authId = document.getElementById('meta-author-select').value;
-    const author = (s.authors || []).find(a => a.id === authId) || { name: 'Admin', bio: 'Editor', image: 'https://ui-avatars.com/api/?name=Admin' };
+    const author = (s.authors || []).find(a => a.id === authId) || { name: 'Admin', bio: 'Editor', image: 'https://ui-avatars.com/api/?name=Admin', socials: [] };
     
-    // Author Socials Generation
+    // Dynamic Author Socials Generation
     let authSocialsHtml = '';
-    if(author.twitter) authSocialsHtml += `<a href="${author.twitter}" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>`;
-    if(author.linkedin) authSocialsHtml += `<a href="${author.linkedin}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>`;
-    if(author.website) authSocialsHtml += `<a href="${author.website}" aria-label="Website"><i class="fa-solid fa-globe"></i></a>`;
-    // Fallback to global if no author specifics (optional, but requested to be distinct)
-    if(authSocialsHtml === '') authSocialsHtml = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
+    if(author.socials && author.socials.length > 0) {
+        authSocialsHtml = author.socials.map(soc => `<a href="${soc.link}" aria-label="Social Link"><i class="${soc.icon}"></i></a>`).join('');
+    } else {
+        // Fallback for old data or empty
+        if(author.twitter) authSocialsHtml += `<a href="${author.twitter}" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>`;
+        if(author.linkedin) authSocialsHtml += `<a href="${author.linkedin}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>`;
+        if(author.website) authSocialsHtml += `<a href="${author.website}" aria-label="Website"><i class="fa-solid fa-globe"></i></a>`;
+    }
 
-    // 2. LCP & CLS FIX: Explicit Dimensions + Preload
+    // LCP OPTIMIZATION:
+    // 1. Inline CSS Aspect Ratio for container
+    // 2. Fetchpriority High + decoding async
+    // 3. REMOVED loading="lazy" for banner
     const featuredImgHtml = bannerUrl 
-        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="800" height="450" class="featured-image" fetchpriority="high" decoding="async"></div>` 
+        ? `<div class="featured-image-container" style="aspect-ratio:16/9;"><img src="${bannerUrl}" alt="${title}" width="800" height="450" class="featured-image" fetchpriority="high" decoding="async"></div>` 
         : '';
-    const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}">` : '';
+    const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}" fetchpriority="high">` : '';
 
-    // 3. Accessibility & Links
     const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a></li>`).join('');
     const footerLinks = (s.footerMenu || []).map(l => `<a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a>`).join('');
     const globalSocials = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
     
-    // Date Logic
     const entry = state.contentIndex.find(i => i.slug === slug && i.type === state.currentType);
     const datePublished = entry ? entry.date : new Date().toISOString();
     const dateModified = new Date().toISOString();
@@ -592,7 +614,9 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl, author.name, datePublished, dateModified);
     const breadCrumbDisplay = document.getElementById('include-breadcrumb-schema').checked ? '' : 'style="display:none"';
 
-    // 4. HTML Generation
+    // INLINE CSS for Performance (CLS Fix)
+    const criticalCss = SYSTEM_ASSETS["assets/css/article.css"];
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -605,12 +629,8 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <meta property="og:title" content="${title.replace(/"/g, '&quot;')}">
     <meta property="og:image" content="${bannerUrl}">
     
-    <!-- LCP Optimization: Preload Banner FIRST -->
     ${preloadLink}
     
-    <!-- Critical Fonts Preload -->
-    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
@@ -620,24 +640,21 @@ document.getElementById('save-btn').addEventListener('click', async () => {
       @font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
       @font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
       @font-face{font-family:Poppins;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-      :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
+      
+      /* INLINED SYSTEM CSS FOR LCP/CLS FIX */
+      ${criticalCss}
+      
+      ${s.customCss || ''}
     </style>
 
     ${(s.verifications||[]).join('\n')}
     
-    <!-- CSS Loading -->
     <link rel="stylesheet" href="${adminPath}/fontello.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="${assetPath}/css/article.css" media="print" onload="this.media='all'">
-    <noscript>
-      <link rel="stylesheet" href="${adminPath}/fontello.css">
-      <link rel="stylesheet" href="${assetPath}/css/article.css">
-    </noscript>
+    <noscript><link rel="stylesheet" href="${adminPath}/fontello.css"></noscript>
 
-    <style>${s.customCss || ''}</style>
     ${s.customHeadJs || ''}
     ${s.adsenseAuto || ''}
     
-    <!-- Lazy Analytics -->
     <script>
       const loadAnalytics = () => {
         const script = document.createElement('script');
@@ -669,7 +686,6 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     ${getAdCode('header_bottom', slug)}
     
     <main>
-        <!-- Header Text Section -->
         <section class="page-header-section">
             <div class="breadcrumbs" ${breadCrumbDisplay}>
                  <span id="dynamicBreadcrumbSlug"></span>
@@ -681,22 +697,18 @@ document.getElementById('save-btn').addEventListener('click', async () => {
             </div>
         </section>
 
-        <!-- Featured Image -->
         ${featuredImgHtml}
 
-        <!-- Main Content -->
         <article class="article-container">
             ${contentHtml}
-            
             ${getAdCode('end', slug)}
 
-            <!-- Author Bio -->
             <section class="author-bio" data-animate>
                 <img src="${author.image}" alt="${author.name}" width="100" height="100">
                 <div class="author-details">
                     <h3>About The Author</h3>
                     <p><strong>${author.name}</strong> ${author.bio}</p>
-                    <div class="social-links">${authSocialsHtml}</div>
+                    <div class="author-socials-list">${authSocialsHtml}</div>
                 </div>
             </section>
         </article>
@@ -877,9 +889,7 @@ function collectRepeater(id, type) {
     const items = [];
     const container = document.getElementById(id);
     if(!container) return []; 
-    
     if(type === 'meta') { container.querySelectorAll('.meta-tag-input').forEach(i => { if(i.value) items.push(i.value); }); return items; }
-    
     container.querySelectorAll('.repeater-item').forEach(d => {
         if(type === 'menu' || type === 'social') items.push({ label: d.querySelector('.item-label').value, link: d.querySelector('.item-link').value });
     });
@@ -891,38 +901,59 @@ function addMetaVerifyItem(val='') {
 }
 function addMenuItem(id, l='', u='') { 
     const c = document.getElementById(id);
-    if(c) c.insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input item-label" value="${l}" placeholder="Label"><input class="schema-input item-link" value="${u}" placeholder="Link /"></div></div>`); 
+    if(c) c.insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input item-label" value="${l}" placeholder="Label"><input class="schema-input item-link" value="${u}" placeholder="Slug or https://..."></div></div>`); 
 }
 function addSocialItem(l='', u='') { 
     const c = document.getElementById('social-links-container');
-    if(c) c.insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="social-row"><input class="schema-input item-label" value="${l}" placeholder="icon-twitter"><input class="schema-input item-link" value="${u}" placeholder="URL"></div></div>`); 
+    if(c) c.insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="social-row"><input class="schema-input item-label" value="${l}" placeholder="icon class (fa-brands fa-twitter)"><input class="schema-input item-link" value="${u}" placeholder="URL"></div></div>`); 
 }
 function addAdUnit(d={}) { 
     const c = document.getElementById('ads-repeater-container');
     if(c) c.insertAdjacentHTML('beforeend', `<div class="ad-unit-block"><button class="ad-remove-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button><label class="schema-label">Ad Code</label><textarea class="schema-input ad-code-input" rows="2">${d.code||''}</textarea><div class="ad-meta-row"><div><select class="schema-input ad-place-input"><option value="header_bottom" ${d.placement==='header_bottom'?'selected':''}>Below Header (728x90)</option><option value="sticky_footer" ${d.placement==='sticky_footer'?'selected':''}>Sticky Footer (728x90)</option><option value="end" ${d.placement==='end'?'selected':''}>End Post (300x250)</option><option value="sticky_left" ${d.placement==='sticky_left'?'selected':''}>Left Sticky (160x600)</option><option value="sticky_right" ${d.placement==='sticky_right'?'selected':''}>Right Sticky (160x600)</option><option value="after_p_1" ${d.placement==='after_p_1'?'selected':''}>After Para 1</option><option value="after_p_2" ${d.placement==='after_p_2'?'selected':''}>After Para 2</option><option value="after_p_3" ${d.placement==='after_p_3'?'selected':''}>After Para 3</option></select></div><div><input class="schema-input ad-exclude-input" value="${d.exclude||''}" placeholder="Excl. slugs"></div></div></div>`); 
 }
 
-// NEW: Add Author Item with Socials
+// NEW: Add Author Item with Nested Socials
 function addAuthorItem(a={}) {
     const c = document.getElementById('authors-repeater-container');
+    const id = a.id || Date.now();
+    let socialRows = '';
+    
+    // Convert old format to new format if needed
+    let socials = a.socials || [];
+    if(socials.length === 0) {
+        if(a.twitter) socials.push({icon: 'fa-brands fa-twitter', link: a.twitter});
+        if(a.linkedin) socials.push({icon: 'fa-brands fa-linkedin', link: a.linkedin});
+        if(a.website) socials.push({icon: 'fa-solid fa-globe', link: a.website});
+    }
+
+    socials.forEach(s => {
+        socialRows += `<div class="mini-row"><input class="mini-icon" value="${s.icon}" placeholder="Icon (fa-brands...)"><input class="mini-link" value="${s.link}" placeholder="URL"><button class="mini-btn-remove" onclick="this.parentElement.remove()">x</button></div>`;
+    });
+
     if(c) c.insertAdjacentHTML('beforeend', 
-    `<div class="author-card" data-id="${a.id||Date.now()}">
+    `<div class="author-card" data-id="${id}">
         <button class="repeater-remove" onclick="this.parentElement.remove()">x</button>
-        <img src="${a.image||''}" class="author-img-preview" id="prev-${a.id||'new'}">
+        <img src="${a.image||''}" class="author-img-preview" id="prev-${id}">
         <div class="author-fields">
             <input class="schema-input auth-name" value="${a.name||''}" placeholder="Name">
-            <input class="schema-input auth-img" value="${a.image||''}" placeholder="Image URL" oninput="document.getElementById('prev-${a.id||'new'}').src=this.value">
+            <input class="schema-input auth-img" value="${a.image||''}" placeholder="Image URL" oninput="document.getElementById('prev-${id}').src=this.value">
             <textarea class="schema-input auth-bio" placeholder="Short Bio">${a.bio||''}</textarea>
-            <div class="author-socials">
-                <input class="schema-input auth-twitter" value="${a.twitter||''}" placeholder="Twitter URL">
-                <input class="schema-input auth-linkedin" value="${a.linkedin||''}" placeholder="LinkedIn URL">
-                <input class="schema-input auth-website" value="${a.website||''}" placeholder="Website URL">
+            
+            <div class="nested-repeater-container" id="nested-socials-${id}">
+                <label class="schema-label">Author Socials</label>
+                ${socialRows}
             </div>
+            <button class="btn-xs btn-secondary" onclick="addAuthorSocialRow('${id}')">+ Social Link</button>
         </div>
     </div>`);
 }
 
-// Sidebar Media - FIXED: Use Site URL
+function addAuthorSocialRow(id) {
+    const c = document.getElementById(`nested-socials-${id}`);
+    if(c) c.insertAdjacentHTML('beforeend', `<div class="mini-row"><input class="mini-icon" placeholder="Icon (fa-brands...)"><input class="mini-link" placeholder="URL"><button class="mini-btn-remove" onclick="this.parentElement.remove()">x</button></div>`);
+}
+
+// Sidebar Media
 async function loadSidebarMedia(){
     const g=document.getElementById('sidebar-media-grid'); g.innerHTML='...';
     try {
@@ -939,7 +970,6 @@ async function loadSidebarMedia(){
 }
 async function deleteMedia(sha, name) { if(confirm('Delete?')) await githubReq(`contents/images/${name}`, 'DELETE', {message:'del', sha}); loadSidebarMedia(); }
 
-// FIXED: Upload uses Site URL
 function setupFeaturedImageDrop() {
     const w=document.getElementById('featured-dropzone');
     w.ondragover=e=>{e.preventDefault();w.classList.add('dragover')}; w.ondragleave=()=>w.classList.remove('dragover');
@@ -960,7 +990,6 @@ async function uploadFile(f,cb){
         const p=`images/${Date.now()}-${f.name.replace(/\s/g,'-')}`;
         await githubReq(`contents/${p}`,'PUT',{message:'Up',content:b});
         loadSidebarMedia();
-        // Return Custom Domain Link
         const siteUrl = state.settings.siteUrl || `https://${state.owner}.github.io/${state.repo}`;
         if(cb) cb(`${siteUrl}/${p}`);
         showToast('Done');
