@@ -1,10 +1,10 @@
 /**
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
- * Fixes: Settings Saving, Layout Alignment (800px), SEO/CLS 100 Score
+ * Fixes: Mobile Menu CLS, HTTPS Domain, Author Socials, LCP 100 Score
  */
  
 const SYSTEM_ASSETS = {
-    // 1. PERFORMANCE OPTIMIZED CSS (Professional Aligned Layout + High Contrast)
+    // 1. PERFORMANCE OPTIMIZED CSS (Menu CLS Fixed + High Contrast)
     "assets/css/article.css": `
 :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
@@ -18,14 +18,14 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
 
-/* FIXED: Unified Width Layout (Professional 800px column) */
+/* Layout & Text */
 .page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto;}
 .breadcrumbs{font-size:0.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
 .page-title{font-size:clamp(2rem, 5vw, 3rem);font-weight:700;margin-bottom:0.8rem;line-height:1.2;color:#fff}
 .page-meta{font-size:0.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .page-meta img.auth-tiny {width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color);}
 
-/* FIXED: Featured Image - Matches Content Width (No overflow) */
+/* FIXED: Featured Image - 800px max, Aspect Ratio Preserved */
 .featured-image-container{max-width:var(--content-width);margin:0 auto 2.5rem;aspect-ratio:16/9;overflow:hidden;border-radius:8px;}
 .featured-image{width:100%;height:100%;object-fit:cover;box-shadow:0 8px 25px rgba(0,0,0,0.3);border:1px solid #333}
 
@@ -54,13 +54,13 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 /* Animation */
 [data-animate]{opacity:0;transition:opacity .6s ease-out,transform .6s ease-out}.article-container [data-animate]{transform:translateY(30px)}[data-animate].is-visible{opacity:1;transform:translateY(0)}
 
-/* Responsive + Mobile Menu CLS Fix */
+/* Responsive + CLS Fix */
 @media screen and (max-width:850px){
     .page-header-section, .featured-image-container, .article-container { padding-left: 1.5rem; padding-right: 1.5rem; width: 100%; }
 }
 @media screen and (max-width:768px){
-    /* Default State: Off Screen */
-    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100}
+    /* CLS FIX: Force translate off-screen by default */
+    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100;will-change:transform;}
     .nav-links li{opacity:1}
     .burger{display:block;z-index:101}
     .page-title{font-size:2rem}
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lastMod = new Date(document.lastModified);
     if(document.getElementById('dynamicDate')) document.getElementById('dynamicDate').textContent = lastMod.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     
-    // Accurate Reading Time (Strip HTML first)
+    // Accurate Reading Time
     const content = document.querySelector('.article-container');
     if(content && document.getElementById('dynamicReadingTime')) {
         const text = content.innerText || "";
@@ -210,7 +210,9 @@ async function updateContentIndex(slug, type, title, action = 'update') {
     if (action === 'delete') {
         if (idx > -1) state.contentIndex.splice(idx, 1);
     } else {
-        const entry = { slug, type, title, date: now };
+        // Keep original date if updating, else new date
+        const originalDate = (idx > -1) ? state.contentIndex[idx].date : now;
+        const entry = { slug, type, title, date: originalDate, modified: now };
         if (idx > -1) state.contentIndex[idx] = entry;
         else state.contentIndex.unshift(entry);
     }
@@ -279,7 +281,7 @@ async function getLatestFileSha(path) {
     try { const res = await githubReq(`contents/${path}`); return res ? (await res.json()).sha : null; } catch (e) { return null; }
 }
 
-// --- SETTINGS (FIXED with Checks) ---
+// --- SETTINGS (FIXED with Author Socials) ---
 async function loadGlobalSettings() {
     try {
         const res = await githubReq('contents/_cms/settings.json');
@@ -304,7 +306,6 @@ function populateSettingsForm() {
     document.getElementById('set-custom-head-js').value = s.customHeadJs || '';
     document.getElementById('set-404-redirect').checked = s.enable404 || false;
     
-    // Fixed: Check existence
     const vContainer = document.getElementById('meta-verify-container'); 
     if(vContainer) {
         vContainer.innerHTML = '';
@@ -352,13 +353,16 @@ async function saveGlobalSettings() {
         ads: []
     };
     
-    // Collect Authors Safely
+    // Collect Authors with Socials
     document.querySelectorAll('.author-card').forEach(b => {
         s.authors.push({
             id: b.dataset.id || Date.now().toString(),
             name: b.querySelector('.auth-name').value,
             image: b.querySelector('.auth-img').value,
-            bio: b.querySelector('.auth-bio').value
+            bio: b.querySelector('.auth-bio').value,
+            twitter: b.querySelector('.auth-twitter').value,
+            linkedin: b.querySelector('.auth-linkedin').value,
+            website: b.querySelector('.auth-website').value
         });
     });
 
@@ -476,7 +480,6 @@ async function editContent(type, slug) {
         (state.settings.authors || []).forEach(a => {
             authSel.insertAdjacentHTML('beforeend', `<option value="${a.id}">${a.name}</option>`);
         });
-        // Try to match author by name from metadata if no ID saved
         const currentAuthorName = doc.querySelector('.author-details strong')?.innerText || "Admin";
         const matched = (state.settings.authors||[]).find(a => a.name === currentAuthorName);
         if(matched) authSel.value = matched.id;
@@ -544,7 +547,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const folder = isPost ? `blog/${slug}` : `${slug}`;
     const path = `${folder}/index.html`;
 
-    // 1. Force HTTPS in Content Images (Fix Mixed Content)
+    // 1. Force HTTPS in Content Images
     let contentHtml = tinymce.activeEditor.getContent();
     contentHtml = contentHtml.replace(/src="http:\/\//g, 'src="https://');
     contentHtml = injectAds(contentHtml, slug);
@@ -562,22 +565,34 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const authId = document.getElementById('meta-author-select').value;
     const author = (s.authors || []).find(a => a.id === authId) || { name: 'Admin', bio: 'Editor', image: 'https://ui-avatars.com/api/?name=Admin' };
     
-    // 2. LCP & CLS FIX: Explicit Dimensions + Preload top of head
-    // Fixed: Width 800px to match content width
+    // Author Socials Generation
+    let authSocialsHtml = '';
+    if(author.twitter) authSocialsHtml += `<a href="${author.twitter}" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>`;
+    if(author.linkedin) authSocialsHtml += `<a href="${author.linkedin}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>`;
+    if(author.website) authSocialsHtml += `<a href="${author.website}" aria-label="Website"><i class="fa-solid fa-globe"></i></a>`;
+    // Fallback to global if no author specifics (optional, but requested to be distinct)
+    if(authSocialsHtml === '') authSocialsHtml = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
+
+    // 2. LCP & CLS FIX: Explicit Dimensions + Preload
     const featuredImgHtml = bannerUrl 
         ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="800" height="450" class="featured-image" fetchpriority="high" decoding="async"></div>` 
         : '';
     const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}">` : '';
 
-    // 3. Accessibility FIX: Aria Labels & Link Resolution
+    // 3. Accessibility & Links
     const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a></li>`).join('');
     const footerLinks = (s.footerMenu || []).map(l => `<a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a>`).join('');
-    const socialIcons = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
+    const globalSocials = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
     
-    const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl, author.name);
+    // Date Logic
+    const entry = state.contentIndex.find(i => i.slug === slug && i.type === state.currentType);
+    const datePublished = entry ? entry.date : new Date().toISOString();
+    const dateModified = new Date().toISOString();
+
+    const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl, author.name, datePublished, dateModified);
     const breadCrumbDisplay = document.getElementById('include-breadcrumb-schema').checked ? '' : 'style="display:none"';
 
-    // 4. HTML Generation (Top-level Preload for LCP)
+    // 4. HTML Generation
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -681,7 +696,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
                 <div class="author-details">
                     <h3>About The Author</h3>
                     <p><strong>${author.name}</strong> ${author.bio}</p>
-                    <div class="social-links">${socialIcons}</div>
+                    <div class="social-links">${authSocialsHtml}</div>
                 </div>
             </section>
         </article>
@@ -690,7 +705,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <footer class="site-footer">
         <div class="footer-container">
             <nav class="footer-nav">${footerLinks}</nav>
-            <div class="footer-social">${socialIcons}</div>
+            <div class="footer-social">${globalSocials}</div>
         </div>
         <div class="footer-bottom">
             <p>${s.copyright || ''}</p>
@@ -760,14 +775,11 @@ async function bulkDelete(type) {
     loadList(type);
 }
 
-// --- ADS (Empty String Check) ---
+// --- ADS ---
 function getAdCode(place, slug) {
     const ads = state.settings.ads || [];
     const ad = ads.find(a => a.placement === place && !isExcluded(a, slug));
-    // Critical Fix: Do not render if empty
-    if(ad && ad.code && ad.code.trim().length > 0) {
-        return `<div class="ad-unit">${ad.code}</div>`;
-    }
+    if(ad && ad.code && ad.code.trim().length > 0) return `<div class="ad-unit">${ad.code}</div>`;
     return '';
 }
 function getStickyAds(slug) {
@@ -787,7 +799,7 @@ function injectAds(html, slug) {
     let modified = html;
     ads.forEach(ad => {
         if(isExcluded(ad, slug)) return;
-        if(!ad.code || !ad.code.trim()) return; // Skip empty
+        if(!ad.code || !ad.code.trim()) return; 
         if(ad.placement.startsWith('after_p_')) {
             const pNum = parseInt(ad.placement.split('_')[2]);
             let count = 0;
@@ -814,9 +826,9 @@ function addFaqItem(id,q='',a='') { document.getElementById(id).insertAdjacentHT
 function addStepItem(id, t='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div><label class="schema-label">Step</label><textarea class="schema-input step-text">${t}</textarea></div></div>`); }
 function addDefaultArticleSchema(checked) { document.getElementById('schema-container').insertAdjacentHTML('afterbegin', `<div class="schema-block default-block"><div class="block-header"><span>Article Schema</span><label class="switch-label"><input type="checkbox" id="include-article-schema" ${checked?'checked':''}><span class="chk-text">Enable</span></label></div></div>`); }
 
-function generateFinalSchema(url, headline, image, authName) {
+function generateFinalSchema(url, headline, image, authName, datePublished, dateModified) {
     const graph = [];
-    if(document.getElementById('include-article-schema').checked) graph.push({"@type": "Article", "headline": headline, "image": [image], "author": { "@type": "Person", "name": authName }, "datePublished": new Date().toISOString(), "dateModified": new Date().toISOString() });
+    if(document.getElementById('include-article-schema').checked) graph.push({"@type": "Article", "headline": headline, "image": [image], "author": { "@type": "Person", "name": authName }, "datePublished": datePublished, "dateModified": dateModified });
     if(document.getElementById('include-breadcrumb-schema').checked) graph.push({"@type": "BreadcrumbList", "itemListElement": [{"@type":"ListItem","position":1,"name":"Home","item":state.settings.siteUrl},{"@type":"ListItem","position":2,"name":"Blog","item":state.settings.siteUrl+"/blog/"},{"@type":"ListItem","position":3,"name":headline,"item":url}]});
     
     document.querySelectorAll('.schema-block:not(.default-block)').forEach(b => {
@@ -854,7 +866,7 @@ function exitEditor(){switchPanel(state.currentType==='post'?'dashboard':'pages'
 // UI Repeaters
 function renderRepeater(id, data, type) {
     const c = document.getElementById(id); 
-    if(!c) return; // Safety check
+    if(!c) return; 
     c.innerHTML = '';
     (data || []).forEach(item => {
         if(type === 'menu') addMenuItem(id, item.label, item.link);
@@ -864,7 +876,7 @@ function renderRepeater(id, data, type) {
 function collectRepeater(id, type) {
     const items = [];
     const container = document.getElementById(id);
-    if(!container) return []; // Safety check
+    if(!container) return []; 
     
     if(type === 'meta') { container.querySelectorAll('.meta-tag-input').forEach(i => { if(i.value) items.push(i.value); }); return items; }
     
@@ -890,7 +902,7 @@ function addAdUnit(d={}) {
     if(c) c.insertAdjacentHTML('beforeend', `<div class="ad-unit-block"><button class="ad-remove-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button><label class="schema-label">Ad Code</label><textarea class="schema-input ad-code-input" rows="2">${d.code||''}</textarea><div class="ad-meta-row"><div><select class="schema-input ad-place-input"><option value="header_bottom" ${d.placement==='header_bottom'?'selected':''}>Below Header (728x90)</option><option value="sticky_footer" ${d.placement==='sticky_footer'?'selected':''}>Sticky Footer (728x90)</option><option value="end" ${d.placement==='end'?'selected':''}>End Post (300x250)</option><option value="sticky_left" ${d.placement==='sticky_left'?'selected':''}>Left Sticky (160x600)</option><option value="sticky_right" ${d.placement==='sticky_right'?'selected':''}>Right Sticky (160x600)</option><option value="after_p_1" ${d.placement==='after_p_1'?'selected':''}>After Para 1</option><option value="after_p_2" ${d.placement==='after_p_2'?'selected':''}>After Para 2</option><option value="after_p_3" ${d.placement==='after_p_3'?'selected':''}>After Para 3</option></select></div><div><input class="schema-input ad-exclude-input" value="${d.exclude||''}" placeholder="Excl. slugs"></div></div></div>`); 
 }
 
-// NEW: Add Author Item
+// NEW: Add Author Item with Socials
 function addAuthorItem(a={}) {
     const c = document.getElementById('authors-repeater-container');
     if(c) c.insertAdjacentHTML('beforeend', 
@@ -901,24 +913,33 @@ function addAuthorItem(a={}) {
             <input class="schema-input auth-name" value="${a.name||''}" placeholder="Name">
             <input class="schema-input auth-img" value="${a.image||''}" placeholder="Image URL" oninput="document.getElementById('prev-${a.id||'new'}').src=this.value">
             <textarea class="schema-input auth-bio" placeholder="Short Bio">${a.bio||''}</textarea>
+            <div class="author-socials">
+                <input class="schema-input auth-twitter" value="${a.twitter||''}" placeholder="Twitter URL">
+                <input class="schema-input auth-linkedin" value="${a.linkedin||''}" placeholder="LinkedIn URL">
+                <input class="schema-input auth-website" value="${a.website||''}" placeholder="Website URL">
+            </div>
         </div>
     </div>`);
 }
 
-// Sidebar Media
+// Sidebar Media - FIXED: Use Site URL
 async function loadSidebarMedia(){
     const g=document.getElementById('sidebar-media-grid'); g.innerHTML='...';
     try {
         const r = await githubReq('contents/images');
         if(!r) { g.innerHTML='Empty'; return; }
         const data = await r.json();
+        const siteUrl = state.settings.siteUrl || `https://${state.owner}.github.io/${state.repo}`;
+        
         g.innerHTML = data.filter(x=>x.name.match(/\.(jpg|png|webp|gif)$/i)).map(x => 
-            `<div class="side-media-item" onclick="navigator.clipboard.writeText('https://${state.owner}.github.io/${state.repo}/images/${x.name}');showToast('Link Copied!')">
+            `<div class="side-media-item" onclick="navigator.clipboard.writeText('${siteUrl}/images/${x.name}');showToast('Link Copied!')">
                 <img src="${x.download_url}"><button class="side-media-delete" onclick="event.stopPropagation();deleteMedia('${x.sha}','${x.name}')">X</button>
             </div>`).join('');
     } catch(e) { g.innerHTML='Err'; }
 }
 async function deleteMedia(sha, name) { if(confirm('Delete?')) await githubReq(`contents/images/${name}`, 'DELETE', {message:'del', sha}); loadSidebarMedia(); }
+
+// FIXED: Upload uses Site URL
 function setupFeaturedImageDrop() {
     const w=document.getElementById('featured-dropzone');
     w.ondragover=e=>{e.preventDefault();w.classList.add('dragover')}; w.ondragleave=()=>w.classList.remove('dragover');
@@ -931,4 +952,17 @@ function setupSidebarUpload() {
     d.ondrop=e=>{e.preventDefault();d.style.borderColor='#444';if(e.dataTransfer.files.length){showToast('Uploading...');Array.from(e.dataTransfer.files).forEach(f=>uploadFile(f));}}; 
     i.onchange=()=>{showToast('Uploading...');Array.from(i.files).forEach(f=>uploadFile(f));};
 }
-async function uploadFile(f,cb){const r=new FileReader();r.readAsDataURL(f);r.onload=async()=>{const b=r.result.split(',')[1],p=`images/${Date.now()}-${f.name.replace(/\s/g,'-')}`;await githubReq(`contents/${p}`,'PUT',{message:'Up',content:b});loadSidebarMedia();if(cb)cb(`https://${state.owner}.github.io/${state.repo}/${p}`);showToast('Done')};}
+async function uploadFile(f,cb){
+    const r=new FileReader();
+    r.readAsDataURL(f);
+    r.onload=async()=>{
+        const b=r.result.split(',')[1];
+        const p=`images/${Date.now()}-${f.name.replace(/\s/g,'-')}`;
+        await githubReq(`contents/${p}`,'PUT',{message:'Up',content:b});
+        loadSidebarMedia();
+        // Return Custom Domain Link
+        const siteUrl = state.settings.siteUrl || `https://${state.owner}.github.io/${state.repo}`;
+        if(cb) cb(`${siteUrl}/${p}`);
+        showToast('Done');
+    };
+}
