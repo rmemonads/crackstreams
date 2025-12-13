@@ -1,10 +1,10 @@
 /**
- * ULTIMATE SERVERLESS CMS - FIXED & OPTIMIZED
- * Fixes: Menu URLs, Image Aspect Ratio, Output CSS, Drafts, Cache Busting
+ * ULTIMATE SERVERLESS CMS - SPEED OPTIMIZED (100/100 TARGET)
+ * Fixes: LCP Preloading, CLS Dimensions, Mixed Content, Aria Labels
  */
  
 const SYSTEM_ASSETS = {
-    // 1. PROFESSIONAL MODERN CSS (Fixed Image Ratios & Mobile Support)
+    // 1. PERFORMANCE OPTIMIZED CSS
     "assets/css/article.css": `
 :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#a0a0a0;--font-family:'Poppins','Poppins Fallback',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
@@ -12,7 +12,7 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 /* Progress Bar */
 .progress-bar{position:fixed;top:0;left:0;width:0;height:4px;background:linear-gradient(90deg,var(--primary-color),#0077b6);z-index:1000;transition:width .1s linear}
 /* Header */
-.site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a}
+.site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a;height: 80px;}
 .logo{font-weight:700;font-size:1.5rem;color:#fff;text-decoration:none}
 .nav-links{display:flex;justify-content:space-around;list-style:none}
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
@@ -22,16 +22,16 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .breadcrumbs{font-size:0.85rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
 .page-title{font-size:clamp(2rem, 5vw, 3.5rem);font-weight:700;margin-bottom:1rem;line-height:1.2;color:#fff}
 .page-meta{font-size:0.9rem;color:var(--text-color-secondary)}
-/* Featured Image (FIXED: Object Fit) */
-.featured-image-container{max-width:900px;margin:0 auto 3rem;padding:0 1rem;text-align:center}
-.featured-image{width:100%;height:auto;max-height:500px;object-fit:cover;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5);border:1px solid #333}
+/* Featured Image (CLS & LCP OPTIMIZED) */
+.featured-image-container{max-width:900px;margin:0 auto 3rem;padding:0 1rem;text-align:center;aspect-ratio: 16/9; overflow: hidden;}
+.featured-image{width:100%;height:100%;object-fit:cover;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5);border:1px solid #333}
 /* Content */
-.article-container{max-width:800px;margin:0 auto 4rem;padding:0 2rem}
+.article-container{max-width:800px;margin:0 auto 4rem;padding:0 2rem; min-height: 50vh;}
 .article-container h2{font-size:2rem;font-weight:600;margin-top:3rem;margin-bottom:1.5rem;color:#fff;border-bottom:2px solid var(--primary-color);padding-bottom:.5rem;line-height:1.2}
 .article-container h3{font-size:1.5rem;font-weight:600;margin-top:2rem;margin-bottom:1rem;color:#fff}
 .article-container p{margin-bottom:1.5rem;font-size:1.1rem;color:#d1d1d1}
 .article-container ul,.article-container ol{margin-left:2rem;margin-bottom:1.5rem}.article-container li{margin-bottom:.75rem;padding-left:.5rem}.article-container strong{color:var(--primary-color);font-weight:600}
-/* Inner Images Responsive Fix */
+/* Inner Images (Responsive) */
 .article-container img{max-width:100%;height:auto;border-radius:8px;margin:1.5rem 0;display:block}
 .article-container iframe{max-width:100%;}
 /* Next Step Cards */
@@ -55,10 +55,16 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 /* Responsive */
 @media screen and (max-width:768px){.nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100}.nav-links li{opacity:1}.burger{display:block;z-index:101}.page-title{font-size:2.2rem}.article-container{padding:0 1rem}.author-bio{flex-direction:column;text-align:center}.footer-container{flex-direction:column;align-items:flex-start}.footer-nav{display:flex;flex-direction:column;gap:0.5rem}.next-step-container{grid-template-columns:1fr}}
 .nav-active{transform:translateX(0)}.toggle .line1{transform:rotate(-45deg) translate(-5px,6px)}.toggle .line2{opacity:0}.toggle .line3{transform:rotate(45deg) translate(-5px,-6px)}
-/* Ad Styles */
-.ad-unit{margin:2rem 0;text-align:center;clear:both;max-width:100%;overflow:hidden;}.ad-sticky-left{position:fixed;top:100px;left:10px;width:160px;height:600px;z-index:90}.ad-sticky-right{position:fixed;top:100px;right:10px;width:160px;height:600px;z-index:90}.ad-sticky-footer{position:fixed;bottom:0;left:0;width:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;padding:10px;border-top:1px solid #333}.ad-close{align-self:flex-end;background:#333;color:#fff;border:1px solid #555;cursor:pointer;padding:2px 8px;font-size:12px;margin-bottom:5px}@media(max-width:1200px){.ad-sticky-left,.ad-sticky-right{display:none}}@media(max-width:768px){.ad-sticky-footer{height:auto;padding:5px}.ad-sticky-footer img{max-width:100%;height:auto}}
+/* Ad Styles (Min-Height to prevent CLS) */
+.ad-unit{margin:2rem auto;text-align:center;clear:both;max-width:100%;overflow:hidden;min-height:250px;background:#181818;display:flex;align-items:center;justify-content:center;}
+.ad-sticky-left{position:fixed;top:100px;left:10px;width:160px;height:600px;z-index:90}
+.ad-sticky-right{position:fixed;top:100px;right:10px;width:160px;height:600px;z-index:90}
+.ad-sticky-footer{position:fixed;bottom:0;left:0;width:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;padding:10px;border-top:1px solid #333;min-height:100px;}
+.ad-close{align-self:flex-end;background:#333;color:#fff;border:1px solid #555;cursor:pointer;padding:2px 8px;font-size:12px;margin-bottom:5px}
+@media(max-width:1200px){.ad-sticky-left,.ad-sticky-right{display:none}}
+@media(max-width:768px){.ad-sticky-footer{height:auto;padding:5px}.ad-sticky-footer img{max-width:100%;height:auto}}
 `,
-    // 2. JS UTILS (Breadcrumb, Dates, Scroll, Lazy)
+    // 2. JS UTILS
     "assets/js/article.js": `
 document.addEventListener('DOMContentLoaded', () => {
     // Breadcrumbs
@@ -162,19 +168,8 @@ async function ensureDirectories() {}
 async function ensureSystemFiles() {
     for (const [path, content] of Object.entries(SYSTEM_ASSETS)) {
         const sha = await getLatestFileSha(path);
-        // Always check content to avoid unnecessary commits? 
-        // For simplicity, we just force update if missing or if we want to enforce versioning
-        // Here we just update to ensure the CMS user has the latest CSS/JS logic
-        if (!sha) {
-             await githubReq(`contents/${path}`, 'PUT', { message: `Init ${path}`, content: b64EncodeUnicode(content) });
-        } else {
-            // Optional: compare content before overwriting to save API calls
-            // For now, we skip overwriting every time to speed up load, unless forced.
-            // But to fix your issue, we MUST update article.css. 
-            // We'll update it once. In production, version this.
-            // For this fix, I'll rely on the user manually re-saving posts or we force update:
-            await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: sha });
-        }
+        // Force update to ensure latest Optimized CSS
+        await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: sha });
     }
 }
 
@@ -230,7 +225,6 @@ function switchSidebarTab(tabName) {
 function setupSidebarEvents() {
     document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
         document.getElementById('main-sidebar').classList.toggle('collapsed');
-        // Mobile Toggle
         if(window.innerWidth <= 768) {
            document.getElementById('main-sidebar').classList.toggle('active-mobile');
         }
@@ -255,7 +249,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 document.getElementById('nav-logout').addEventListener('click', () => { localStorage.clear(); location.reload(); });
 
 async function githubReq(endpoint, method = 'GET', body = null) {
-    // Add cache busting for GET requests to see changes immediately
     const url = `https://api.github.com/repos/${state.owner}/${state.repo}/${endpoint}${method === 'GET' ? '?t='+Date.now() : ''}`;
     const opts = { method, headers: { Authorization: `Bearer ${state.token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
@@ -307,7 +300,7 @@ function populateSettingsForm() {
 async function saveGlobalSettings() {
     showLoader(true, "Saving Settings...");
     let siteUrl = document.getElementById('set-site-url').value.trim();
-    if(siteUrl && siteUrl.endsWith('/')) siteUrl = siteUrl.slice(0, -1); // Normalize URL
+    if(siteUrl && siteUrl.endsWith('/')) siteUrl = siteUrl.slice(0, -1); 
 
     const s = {
         siteTitle: document.getElementById('set-site-title').value,
@@ -383,7 +376,6 @@ async function crawlAndRebuildIndex(type) {
 function renderTableRows(tbody, items, type) {
     let html = '';
     items.forEach(f => {
-        // Sanitize title for display to prevent XSS in admin
         const safeTitle = f.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
         const liveLink = type === 'post' ? `../blog/${f.slug}/` : `../${f.slug}/`;
         const dateStr = new Date(f.date).toLocaleDateString() + ' ' + new Date(f.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -443,12 +435,10 @@ async function editContent(type, slug) {
 
         switchPanel('editor');
         const savedDraft = localStorage.getItem(`draft_${slug}`);
-        // Adjust for article-container class used in new layout
         let content = doc.querySelector('.article-container')?.innerHTML || '';
-        if(!content) content = doc.querySelector('.article-content')?.innerHTML || ''; // Fallback
+        if(!content) content = doc.querySelector('.article-content')?.innerHTML || ''; 
 
         if(savedDraft && savedDraft !== content) { 
-            // Simple check to see if draft is vastly different
              if(confirm('Restore unsaved draft?')) content = savedDraft; 
         }
 
@@ -483,18 +473,15 @@ function handleAutoSave() {
     }
 }
 
-// --- HELPER: URL RESOLVER (FIXED MENU URLS) ---
 function resolveMenuLink(link, siteUrl) {
     if(!link) return '#';
     if(link.startsWith('http') || link.startsWith('mailto:') || link.startsWith('tel:') || link.startsWith('#')) return link;
-    // Ensure siteUrl has no trailing slash
     const base = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
-    // Ensure link has no leading slash
     const path = link.startsWith('/') ? link.substring(1) : link;
     return `${base}/${path}`;
 }
 
-// --- PUBLISH ---
+// --- PUBLISH (OPTIMIZED GENERATOR) ---
 document.getElementById('save-btn').addEventListener('click', async () => {
     const title = document.getElementById('meta-title').value;
     const slug = document.getElementById('meta-slug').value;
@@ -505,26 +492,34 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const folder = isPost ? `blog/${slug}` : `${slug}`;
     const path = `${folder}/index.html`;
 
+    // 1. Force HTTPS in Content Images (Fix Mixed Content)
     let contentHtml = tinymce.activeEditor.getContent();
+    contentHtml = contentHtml.replace(/src="http:\/\//g, 'src="https://');
     contentHtml = injectAds(contentHtml, slug);
 
     const s = state.settings;
-    // Force absolute URLs to fix the 404 menu issue
     const fullUrl = resolveMenuLink((isPost?'blog/':'')+slug, s.siteUrl);
     
-    // Relative paths for assets (Filesystem safe)
     const assetPath = isPost ? '../../assets' : '../assets';
     const adminPath = isPost ? '../../admin' : '../admin';
     
     const bannerUrl = document.getElementById('meta-banner').value;
+    
+    // 2. LCP & CLS FIX: Explicit Dimensions + Preload
+    // We assume 16:9 for Featured Images. CSS object-fit: cover handles the rest, but attributes prevent CLS.
     const featuredImgHtml = bannerUrl 
-        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" class="featured-image" fetchpriority="high"></div>` 
+        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="1200" height="675" class="featured-image" fetchpriority="high" decoding="async"></div>` 
+        : '';
+    
+    // Preload Tag
+    const preloadLink = bannerUrl 
+        ? `<link rel="preload" as="image" href="${bannerUrl}">` 
         : '';
 
-    // Fix Menu Links by resolving them absolutely
+    // 3. Accessibility FIX: Aria Labels
     const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a></li>`).join('');
     const footerLinks = (s.footerMenu || []).map(l => `<a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a>`).join('');
-    const socialIcons = (s.socialLinks || []).map(l => `<a href="${l.link}"><i class="${l.label}"></i></a>`).join('');
+    const socialIcons = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
     
     const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl);
     const breadCrumbDisplay = document.getElementById('include-breadcrumb-schema').checked ? '' : 'style="display:none"';
@@ -541,7 +536,10 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <meta property="og:title" content="${title.replace(/"/g, '&quot;')}">
     <meta property="og:image" content="${bannerUrl}">
     
-    <!-- Critical CSS & Fonts Preload -->
+    <!-- LCP Optimization: Preload Banner -->
+    ${preloadLink}
+    
+    <!-- Critical Fonts Preload -->
     <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -558,7 +556,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
 
     ${(s.verifications||[]).join('\n')}
     
-    <!-- Asynchronous CSS Loading -->
+    <!-- CSS Loading -->
     <link rel="stylesheet" href="${adminPath}/fontello.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="${assetPath}/css/article.css" media="print" onload="this.media='all'">
     <noscript>
