@@ -35,15 +35,33 @@ document.addEventListener('DOMContentLoaded', () => {
             ticking = true;
         }
     });
-    // Mobile Nav
+    // Mobile Nav Logic (Refined)
     const burger = document.querySelector('.burger');
     const nav = document.querySelector('.nav-links');
+    const closeBtn = document.querySelector('.nav-close-btn');
+    
+    function closeMenu() {
+        if(nav) nav.classList.remove('nav-active');
+    }
+    
     if(burger && nav) {
+        // Add close button to nav if not present (for redundancy)
+        if(!document.querySelector('.nav-close-btn')) {
+            const btn = document.createElement('button');
+            btn.className = 'nav-close-btn';
+            btn.innerHTML = '&times;';
+            btn.onclick = closeMenu;
+            nav.appendChild(btn);
+        }
+        
         burger.addEventListener('click', () => {
             nav.classList.toggle('nav-active');
-            burger.classList.toggle('toggle');
         });
+        
+        // Close on link click
+        nav.querySelectorAll('a').forEach(l => l.addEventListener('click', closeMenu));
     }
+    
     // Animations
     document.fonts.ready.then(() => {
         const observer = new IntersectionObserver((entries) => {
