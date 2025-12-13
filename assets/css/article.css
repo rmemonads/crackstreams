@@ -11,14 +11,14 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
 
-/* FIXED: Unified Width Layout (Professional 800px column) */
+/* Layout & Text */
 .page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto;}
 .breadcrumbs{font-size:0.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
 .page-title{font-size:clamp(2rem, 5vw, 3rem);font-weight:700;margin-bottom:0.8rem;line-height:1.2;color:#fff}
 .page-meta{font-size:0.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .page-meta img.auth-tiny {width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color);}
 
-/* FIXED: Featured Image - Matches Content Width (No overflow) */
+/* FIXED: Featured Image - 800px max, Aspect Ratio Preserved */
 .featured-image-container{max-width:var(--content-width);margin:0 auto 2.5rem;aspect-ratio:16/9;overflow:hidden;border-radius:8px;}
 .featured-image{width:100%;height:100%;object-fit:cover;box-shadow:0 8px 25px rgba(0,0,0,0.3);border:1px solid #333}
 
@@ -47,13 +47,13 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 /* Animation */
 [data-animate]{opacity:0;transition:opacity .6s ease-out,transform .6s ease-out}.article-container [data-animate]{transform:translateY(30px)}[data-animate].is-visible{opacity:1;transform:translateY(0)}
 
-/* Responsive + Mobile Menu CLS Fix */
+/* Responsive + CLS Fix */
 @media screen and (max-width:850px){
     .page-header-section, .featured-image-container, .article-container { padding-left: 1.5rem; padding-right: 1.5rem; width: 100%; }
 }
 @media screen and (max-width:768px){
-    /* Default State: Off Screen */
-    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100}
+    /* CLS FIX: Force translate off-screen by default */
+    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100;will-change:transform;}
     .nav-links li{opacity:1}
     .burger{display:block;z-index:101}
     .page-title{font-size:2rem}
