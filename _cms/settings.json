@@ -40,19 +40,28 @@
       "id": "1765647914127",
       "name": "Games",
       "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9zI4cub-hhiOJCLg6MWAufwOMXWJNiX1WYA&s",
-      "bio": "testing another"
+      "bio": "testing another",
+      "twitter": "hhhshs.com",
+      "linkedin": "",
+      "website": ""
     },
     {
       "id": "1765649022051",
       "name": "A% Khan",
       "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTojzx2PwWxg7_mfipg_qxvOstWcWxzWEMFpA&s",
-      "bio": "fsdgdg"
+      "bio": "fsdgdg",
+      "twitter": "",
+      "linkedin": "",
+      "website": ""
     },
     {
       "id": "1765649049563",
       "name": "DDDFFF",
       "image": "https://upload.wikimedia.org/wikipedia/en/thumb/2/24/Hello_World_%28Pinguini_Tattici_Nucleari_album%29.jpg/250px-Hello_World_%28Pinguini_Tattici_Nucleari_album%29.jpg",
-      "bio": "sdsdgdggg"
+      "bio": "sdsdgdggg",
+      "twitter": "",
+      "linkedin": "",
+      "website": ""
     }
   ],
   "ads": []
