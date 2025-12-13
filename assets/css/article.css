@@ -13,7 +13,7 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
 /* Mobile Close Button */
-.nav-close-btn { display: none; position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 2rem; cursor: pointer; }
+.nav-close-btn { display: none; position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1; }
 
 /* Layout & Text */
 .page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto}
@@ -22,13 +22,14 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color)}
 
-/* Featured Image - CLS Fixed (Container enforces aspect ratio, Image fills it) */
+/* Featured Image - CLS Fixed via Padding Hack (Height 0 + Padding-Bottom) */
 .featured-image-container{
     max-width:var(--content-width);
     margin:0 auto 2.5rem;
     position: relative;
     width: 100%;
-    aspect-ratio: 16/9;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
     overflow:hidden;
     border-radius:8px;
     background:#1a1a1a;
@@ -74,12 +75,13 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 
 /* Responsive + Mobile Menu Professional Style */
 @media screen and (max-width:850px){
-    .page-header-section,.featured-image-container,.article-container{padding-left:1.5rem;padding-right:1.5rem;width:100%}
+    /* Reduced padding to 1rem per request */
+    .page-header-section,.featured-image-container,.article-container{padding-left:1rem;padding-right:1rem;width:100%}
 }
 @media screen and (max-width:768px){
     .nav-links{
         position:fixed;top:0;right:0;width:100%;height:100vh;
-        background:rgba(18,18,18,0.95);backdrop-filter:blur(10px);
+        background:rgba(18,18,18,0.98);backdrop-filter:blur(10px);
         display:flex;flex-direction:column;align-items:center;justify-content:center;
         transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         z-index:2000;will-change:transform;
@@ -89,7 +91,11 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
     .nav-links li{margin:0;opacity:0;transform:translateY(20px);transition:all 0.4s ease 0.1s}
     .nav-links.nav-active li{opacity:1;transform:translateY(0)}
     .nav-links a{font-size:1.5rem;font-weight:700}
+    
     .burger{display:block;z-index:2001}
+    /* Hide burger when active to show close button clearly */
+    .burger.toggle { opacity: 0; pointer-events: none; }
+    
     .nav-close-btn{display:block}
     
     .page-title{font-size:2rem}
