@@ -4,21 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
-    <!-- Font Awesome for Admin UI Only -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <!-- LOGIN SCREEN -->
-    <div id="login-view" class="view">
+    <div id="login-view" class="view active">
         <div class="login-box">
             <h2><i class="fa-solid fa-lock"></i> CMS Login</h2>
             <form id="login-form">
                 <div class="input-group">
                     <label>GitHub Token (PAT)</label>
-                    <input type="password" id="gh-token" required>
+                    <input type="password" id="gh-token" required autocomplete="current-password">
                 </div>
                 <div class="input-group">
                     <label>Repo Owner</label>
@@ -28,7 +29,7 @@
                     <label>Repo Name</label>
                     <input type="text" id="gh-repo" placeholder="e.g. the-influencer-report" required>
                 </div>
-                <button type="submit" class="btn-primary">Login & Initialize</button>
+                <button type="submit" class="btn-primary full-width">Login & Initialize</button>
             </form>
         </div>
     </div>
@@ -65,7 +66,7 @@
         <main class="content-area">
 
             <!-- POSTS LIST -->
-            <div id="panel-dashboard" class="panel">
+            <div id="panel-dashboard" class="panel active">
                 <div class="panel-header">
                     <h2><i class="fa-solid fa-thumbtack"></i> Blog Posts</h2>
                     <div class="header-actions">
@@ -116,8 +117,8 @@
                             <input type="text" id="set-site-title">
                         </div>
                         <div class="form-group">
-                            <label>Site URL (No trailing slash)</label>
-                            <input type="text" id="set-site-url" placeholder="https://example.com">
+                            <label>Site URL (Include https://, no trailing slash)</label>
+                            <input type="text" id="set-site-url" placeholder="https://username.github.io/repo">
                         </div>
                         <div class="form-group">
                             <label>Favicon URL</label>
