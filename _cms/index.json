@@ -1,6 +1,12 @@
 [
   {
     "slug": "hello-world",
+    "type": "post",
+    "title": "Hello World",
+    "date": "2025-12-13T15:09:20.983Z"
+  },
+  {
+    "slug": "hello-world",
     "type": "page",
     "title": "Hello World",
     "date": "2025-12-13T15:07:32.266Z"
