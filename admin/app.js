@@ -1,6 +1,6 @@
 /**
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
- * Fixes: Mobile Menu CLS, LCP/Fetch Priority, Dynamic Author Socials, Custom Links
+ * Fixes: Mobile Menu Design/CLS, Featured Image CLS, Social URL Logic, Unsaved Warning, API Deprecation
  */
  
 const SYSTEM_ASSETS = {
@@ -8,6 +8,8 @@ const SYSTEM_ASSETS = {
     "assets/css/article.css": `
 :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
+/* API Deprecation Fix: Explicit H1 Reset */
+h1 { font-size: 2.5rem; line-height: 1.2; margin: 0.67em 0; }
 a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var(--primary-color)}
 /* Progress Bar */
 .progress-bar{position:fixed;top:0;left:0;width:0;height:4px;background:linear-gradient(90deg,var(--primary-color),#0077b6);z-index:1000;transition:width .1s linear}
@@ -17,6 +19,8 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .nav-links{display:flex;justify-content:space-around;list-style:none}
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
+/* Mobile Close Button */
+.nav-close-btn { display: none; position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 2rem; cursor: pointer; }
 
 /* Layout & Text */
 .page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto}
@@ -25,9 +29,28 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color)}
 
-/* Featured Image - Optimized */
-.featured-image-container{max-width:var(--content-width);margin:0 auto 2.5rem;aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:#1a1a1a}
-.featured-image{width:100%;height:100%;object-fit:cover;box-shadow:0 8px 25px rgba(0,0,0,.3);border:1px solid #333}
+/* Featured Image - CLS Fixed (Container enforces aspect ratio, Image fills it) */
+.featured-image-container{
+    max-width:var(--content-width);
+    margin:0 auto 2.5rem;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow:hidden;
+    border-radius:8px;
+    background:#1a1a1a;
+    display: block;
+}
+.featured-image{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    box-shadow:0 8px 25px rgba(0,0,0,.3);
+    border:1px solid #333;
+}
 
 /* Content */
 .article-container{max-width:var(--content-width);margin:0 auto 4rem;min-height:50vh}
@@ -56,21 +79,30 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 /* Animation */
 [data-animate]{opacity:0;transition:opacity .6s ease-out,transform .6s ease-out}.article-container [data-animate]{transform:translateY(30px)}[data-animate].is-visible{opacity:1;transform:translateY(0)}
 
-/* Responsive + CLS Fix */
+/* Responsive + Mobile Menu Professional Style */
 @media screen and (max-width:850px){
     .page-header-section,.featured-image-container,.article-container{padding-left:1.5rem;padding-right:1.5rem;width:100%}
 }
 @media screen and (max-width:768px){
-    /* CLS FIX: Use display none or fixed offscreen initially without transition on load */
-    .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);z-index:100;will-change:transform}
-    /* Only animate when the class is added */
-    .nav-links.nav-active{transform:translateX(0);transition:transform .4s ease-in-out}
-    .burger{display:block;z-index:101}
+    .nav-links{
+        position:fixed;top:0;right:0;width:100%;height:100vh;
+        background:rgba(18,18,18,0.95);backdrop-filter:blur(10px);
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index:2000;will-change:transform;
+        gap: 2rem;
+    }
+    .nav-links.nav-active{transform:translateX(0)}
+    .nav-links li{margin:0;opacity:0;transform:translateY(20px);transition:all 0.4s ease 0.1s}
+    .nav-links.nav-active li{opacity:1;transform:translateY(0)}
+    .nav-links a{font-size:1.5rem;font-weight:700}
+    .burger{display:block;z-index:2001}
+    .nav-close-btn{display:block}
+    
     .page-title{font-size:2rem}
     .author-bio{flex-direction:column;text-align:center}
     .footer-container{flex-direction:column;align-items:flex-start}
 }
-.toggle .line1{transform:rotate(-45deg) translate(-5px,6px)}.toggle .line2{opacity:0}.toggle .line3{transform:rotate(45deg) translate(-5px,-6px)}
 
 /* Ads */
 .ad-unit{margin:2rem auto;text-align:center;clear:both;max-width:100%;overflow:hidden;background:transparent;display:flex;align-items:center;justify-content:center}
@@ -119,15 +151,33 @@ document.addEventListener('DOMContentLoaded', () => {
             ticking = true;
         }
     });
-    // Mobile Nav
+    // Mobile Nav Logic (Refined)
     const burger = document.querySelector('.burger');
     const nav = document.querySelector('.nav-links');
+    const closeBtn = document.querySelector('.nav-close-btn');
+    
+    function closeMenu() {
+        if(nav) nav.classList.remove('nav-active');
+    }
+    
     if(burger && nav) {
+        // Add close button to nav if not present (for redundancy)
+        if(!document.querySelector('.nav-close-btn')) {
+            const btn = document.createElement('button');
+            btn.className = 'nav-close-btn';
+            btn.innerHTML = '&times;';
+            btn.onclick = closeMenu;
+            nav.appendChild(btn);
+        }
+        
         burger.addEventListener('click', () => {
             nav.classList.toggle('nav-active');
-            burger.classList.toggle('toggle');
         });
+        
+        // Close on link click
+        nav.querySelectorAll('a').forEach(l => l.addEventListener('click', closeMenu));
     }
+    
     // Animations
     document.fonts.ready.then(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -169,7 +219,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSidebarUpload();
     setupFeaturedImageDrop();
     setInterval(handleAutoSave, 5000);
+    setupUnsavedWarning();
 });
+
+function setupUnsavedWarning() {
+    window.addEventListener('beforeunload', (e) => {
+        if(tinymce.activeEditor && tinymce.activeEditor.isDirty()) {
+            e.preventDefault();
+            e.returnValue = ''; // Chrome requires this
+        }
+    });
+}
 
 async function initApp() {
     document.getElementById('login-view').classList.remove('active');
@@ -188,7 +248,6 @@ async function initApp() {
 async function ensureSystemFiles() {
     for (const [path, content] of Object.entries(SYSTEM_ASSETS)) {
         const sha = await getLatestFileSha(path);
-        // Only update if missing or force update (checksum logic skipped for simplicity, essentially overwriting to ensure fixes)
         await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: sha });
     }
 }
@@ -495,11 +554,10 @@ async function editContent(type, slug) {
         const savedDraft = localStorage.getItem(`draft_${slug}`);
         let content = doc.querySelector('.article-container')?.innerHTML || '';
         
-        // Strip out injected ads from content to avoid duplication
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = content;
         tempDiv.querySelectorAll('.ad-unit').forEach(el => el.remove());
-        tempDiv.querySelectorAll('.author-bio').forEach(el => el.remove()); // Remove bio if somehow inside
+        tempDiv.querySelectorAll('.author-bio').forEach(el => el.remove());
         content = tempDiv.innerHTML;
 
         if(savedDraft && savedDraft !== content) { 
@@ -537,25 +595,30 @@ function handleAutoSave() {
     }
 }
 
-// --- HELPER: MENU & EXTERNAL LINKS ---
+// --- LINK HELPERS ---
 function resolveMenuLink(link, siteUrl) {
     if(!link) return '#';
-    // Allow strict external links or anchor links
+    // Strict external/protocol check
     if(link.match(/^https?:\/\//) || link.startsWith('mailto:') || link.startsWith('tel:') || link.startsWith('#')) return link;
-    // Allow loose "www" or domain inputs (treat as external)
+    // Loose external check (if user types google.com)
     if(link.includes('.') && !link.startsWith('/')) return 'https://' + link;
     
-    // Internal Slug Logic
+    // Internal
     const base = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
     let path = link;
     if(path.startsWith('/')) path = path.substring(1);
-    // If it doesn't end in slash and isn't a file (like .html), add slash
     if(!path.endsWith('/') && !path.includes('.')) path += '/';
-    
     return `${base}/${path}`;
 }
 
-// --- PUBLISH (OPTIMIZED GENERATOR) ---
+// FIX: Separate helper for Social Links to avoid appending site URL
+function ensureExternalUrl(link) {
+    if(!link) return '';
+    if(link.match(/^https?:\/\//) || link.startsWith('mailto:') || link.startsWith('tel:')) return link;
+    return 'https://' + link;
+}
+
+// --- PUBLISH ---
 document.getElementById('save-btn').addEventListener('click', async () => {
     const title = document.getElementById('meta-title').value;
     const slug = document.getElementById('meta-slug').value;
@@ -583,29 +646,27 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const authId = document.getElementById('meta-author-select').value;
     const author = (s.authors || []).find(a => a.id === authId) || { name: 'Admin', bio: 'Editor', image: 'https://ui-avatars.com/api/?name=Admin', socials: [] };
     
-    // Dynamic Author Socials Generation
+    // Dynamic Author Socials
     let authSocialsHtml = '';
     if(author.socials && author.socials.length > 0) {
-        authSocialsHtml = author.socials.map(soc => `<a href="${soc.link}" aria-label="Social Link"><i class="${soc.icon}"></i></a>`).join('');
+        authSocialsHtml = author.socials.map(soc => `<a href="${ensureExternalUrl(soc.link)}" aria-label="Social"><i class="${soc.icon}"></i></a>`).join('');
     } else {
-        // Fallback for old data or empty
-        if(author.twitter) authSocialsHtml += `<a href="${author.twitter}" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>`;
-        if(author.linkedin) authSocialsHtml += `<a href="${author.linkedin}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>`;
-        if(author.website) authSocialsHtml += `<a href="${author.website}" aria-label="Website"><i class="fa-solid fa-globe"></i></a>`;
+        // Fallback
+        if(author.twitter) authSocialsHtml += `<a href="${ensureExternalUrl(author.twitter)}" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>`;
+        if(author.linkedin) authSocialsHtml += `<a href="${ensureExternalUrl(author.linkedin)}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>`;
+        if(author.website) authSocialsHtml += `<a href="${ensureExternalUrl(author.website)}" aria-label="Website"><i class="fa-solid fa-globe"></i></a>`;
     }
 
-    // LCP OPTIMIZATION:
-    // 1. Inline CSS Aspect Ratio for container
-    // 2. Fetchpriority High + decoding async
-    // 3. REMOVED loading="lazy" for banner
+    // CLS FIX: Container has aspect ratio + block display. Image has absolute positioning.
     const featuredImgHtml = bannerUrl 
-        ? `<div class="featured-image-container" style="aspect-ratio:16/9;"><img src="${bannerUrl}" alt="${title}" width="800" height="450" class="featured-image" fetchpriority="high" decoding="async"></div>` 
+        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="800" height="450" class="featured-image" fetchpriority="high" decoding="async"></div>` 
         : '';
     const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}" fetchpriority="high">` : '';
 
     const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a></li>`).join('');
     const footerLinks = (s.footerMenu || []).map(l => `<a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a>`).join('');
-    const globalSocials = (s.socialLinks || []).map(l => `<a href="${l.link}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
+    // Use ensureExternalUrl for global socials too
+    const globalSocials = (s.socialLinks || []).map(l => `<a href="${ensureExternalUrl(l.link)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
     
     const entry = state.contentIndex.find(i => i.slug === slug && i.type === state.currentType);
     const datePublished = entry ? entry.date : new Date().toISOString();
@@ -614,7 +675,6 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl, author.name, datePublished, dateModified);
     const breadCrumbDisplay = document.getElementById('include-breadcrumb-schema').checked ? '' : 'style="display:none"';
 
-    // INLINE CSS for Performance (CLS Fix)
     const criticalCss = SYSTEM_ASSETS["assets/css/article.css"];
 
     const html = `<!DOCTYPE html>
@@ -641,7 +701,6 @@ document.getElementById('save-btn').addEventListener('click', async () => {
       @font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
       @font-face{font-family:Poppins;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
       
-      /* INLINED SYSTEM CSS FOR LCP/CLS FIX */
       ${criticalCss}
       
       ${s.customCss || ''}
@@ -727,6 +786,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <script src="${assetPath}/js/article.js" defer></script>
 </body></html>`;
 
+    // Saving process
     try {
         if(state.currentSlug && state.currentSlug !== slug) {
             const oldPath = isPost ? `blog/${state.currentSlug}/index.html` : `${state.currentSlug}/index.html`;
@@ -749,6 +809,9 @@ document.getElementById('save-btn').addEventListener('click', async () => {
         
         await updateContentIndex(slug, state.currentType, title, 'update');
         localStorage.removeItem(`draft_${slug}`);
+        // Reset dirty state for the warning to work correctly next time
+        if(tinymce.activeEditor) tinymce.activeEditor.setDirty(false);
+        
         showToast("Published!");
         document.getElementById('live-link-container').innerHTML = `<a href="${fullUrl}" target="_blank" class="btn-secondary btn-xs" style="color:white;text-decoration:none;">View Live</a>`;
         document.getElementById('live-link-container').classList.remove('hidden');
