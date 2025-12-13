@@ -142,12 +142,21 @@
                         </div>
                     </div>
 
+                    <!-- Author Manager (NEW) -->
+                    <div class="settings-card full-width-card">
+                        <h3>Author Profiles</h3>
+                        <p class="hint">Add authors here. You can select them when writing a post.</p>
+                        <div id="authors-repeater-container"></div>
+                        <button class="btn-secondary full-width" onclick="addAuthorItem()">+ Add Author</button>
+                    </div>
+
                     <!-- Menus -->
                     <div class="settings-card full-width-card">
                         <h3>Menus & Socials</h3>
                         <div class="two-col">
                             <div>
                                 <label class="schema-label">Header Menu (Label | Link)</label>
+                                <p class="hint">Use full URL (https://...) for external sites.</p>
                                 <div id="header-menu-container" class="repeater-container"></div>
                                 <button class="add-repeater-btn" onclick="addMenuItem('header-menu-container')">+ Add Link</button>
                             </div>
@@ -159,23 +168,14 @@
                         </div>
                         <div style="margin-top:15px;">
                             <label class="schema-label">Social Links (Fontello Class | Link)</label>
-                            <p class="hint">Use Fontello classes (e.g., icon-twitter, icon-facebook).</p>
                             <div id="social-links-container" class="repeater-container"></div>
                             <button class="add-repeater-btn" onclick="addSocialItem()">+ Add Social</button>
                         </div>
                     </div>
 
-                    <!-- Verification & Ads -->
-                    <div class="settings-card full-width-card">
-                        <h3>Verification Meta Tags</h3>
-                        <p class="hint">Paste the full meta tag (e.g., &lt;meta name="google-site-verification" content="..." /&gt;)</p>
-                        <div id="meta-verify-container" class="repeater-container"></div>
-                        <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Meta Tag</button>
-                    </div>
-
                     <div class="settings-card full-width-card">
                         <h3>Ad Units Manager</h3>
-                        <p class="hint">Manage sticky and in-content ads. Sizes are recommended.</p>
+                        <p class="hint">If you leave the code empty, no space will be shown.</p>
                         <div id="ads-repeater-container"></div>
                         <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add Ad Unit</button>
                     </div>
@@ -233,13 +233,14 @@
                                 <label>Slug</label>
                                 <input type="text" id="meta-slug">
                             </div>
+                            <!-- Author Selector (NEW) -->
+                            <div class="form-group">
+                                <label>Author</label>
+                                <select id="meta-author-select"></select>
+                            </div>
                             <div class="form-group">
                                 <label>Description (SEO)</label>
                                 <textarea id="meta-desc" rows="4"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Author</label>
-                                <input type="text" id="meta-author" value="Admin">
                             </div>
                             <div class="form-group">
                                 <label>Featured Image</label>
