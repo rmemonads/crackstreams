@@ -9,41 +9,16 @@
   "customCss": "",
   "customHeadJs": "",
   "verifications": [],
-  "headerMenu": [
+  "headerMenu": [],
+  "footerMenu": [],
+  "socialLinks": [],
+  "authors": [
     {
-      "label": "Home",
-      "link": "google.com"
-    },
-    {
-      "label": "Hi",
-      "link": "privace/"
+      "id": "1765647085962",
+      "name": "A Khan",
+      "image": "https://images2.minutemediacdn.com/image/upload/c_crop,w_3840,h_2160,x_0,y_0/v1679344593/images/voltaxMediaLibrary/mmsport/mentalfloss/01gw0bst2k1bt9nz1g6k.jpg",
+      "bio": "Testing Man"
     }
   ],
-  "footerMenu": [
-    {
-      "label": "Privacy",
-      "link": "privacy.com"
-    }
-  ],
-  "socialLinks": [
-    {
-      "label": "icon-telegram",
-      "link": "https://telegram.com"
-    },
-    {
-      "label": "icon-instagram",
-      "link": "https://telegram.com"
-    },
-    {
-      "label": "icon-twitter",
-      "link": "https://telegram.com"
-    }
-  ],
-  "ads": [
-    {
-      "code": "",
-      "placement": "header_bottom",
-      "exclude": ""
-    }
-  ]
+  "ads": []
 }
