@@ -1,6 +1,6 @@
 /**
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
- * Fixes: Mobile Menu Design/CLS, Featured Image CLS, Social URL Logic, Unsaved Warning, API Deprecation, Invalid List Structure
+ * Fixes: Mobile Menu Design/CLS, Featured Image CLS, Social URL Logic, Unsaved Warning, API Deprecation, Invalid List Structure, Sticky Headers, UI Placeholders
  */
  
 const SYSTEM_ASSETS = {
@@ -18,18 +18,22 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .logo{font-weight:700;font-size:1.5rem;color:#fff;text-decoration:none}
 .nav-links{display:flex;justify-content:space-around;list-style:none}
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
-.burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
+.burger{display:none;cursor:pointer;transition:opacity 0.3s ease}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
+/* FIX: Hide Burger when menu active to prevent overlap with close button */
+body.menu-open .burger { opacity: 0; pointer-events: none; }
+
 /* Mobile Close Button */
-.nav-close-btn { display: none; position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1; }
+.nav-close-btn { display: none; position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1; z-index: 2002; }
 
-/* Layout & Text */
-.page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto}
-.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
-.page-title{font-size:clamp(2rem,5vw,3rem);font-weight:700;margin-bottom:.8rem;line-height:1.2;color:#fff}
-.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color)}
+/* Layout & Text & CLS Fixes */
+.page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto; min-height: 200px;}
+.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize; min-height: 1.5em; display:block;}
+.page-title{font-size:clamp(2rem,5vw,3rem);font-weight:700;margin-bottom:.8rem;line-height:1.2;color:#fff; min-height: 1.2em;}
+.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap; min-height: 34px;}
+/* CLS: Reserve space for author image */
+.page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color); background-color: #333; aspect-ratio: 1/1;}
 
-/* Featured Image - CLS Fixed via Padding Hack (Height 0 + Padding-Bottom) */
+/* Featured Image - CLS Fixed via Padding Hack (Height 0 + Padding-Bottom) & Aspect Ratio */
 .featured-image-container{
     max-width:var(--content-width);
     margin:0 auto 2.5rem;
@@ -39,8 +43,9 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
     padding-bottom: 56.25%; /* 16:9 aspect ratio */
     overflow:hidden;
     border-radius:8px;
-    background:#1a1a1a;
+    background:#1a1a1a; /* Placeholder color */
     display: block;
+    aspect-ratio: 16/9;
 }
 .featured-image{
     position: absolute;
@@ -65,7 +70,7 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 
 /* Author Box */
 .author-bio{margin-top:4rem;padding:2rem;background-color:var(--surface-color);border-radius:12px;display:flex;align-items:center;gap:1.5rem;border:1px solid #333}
-.author-bio img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-color)}
+.author-bio img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-color); background: #333; aspect-ratio: 1/1;}
 .author-bio h3{margin:0 0 .5rem;font-size:1.4rem;color:#fff}.author-bio p{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:1rem}
 .author-socials-list a{color:var(--text-color-secondary);font-size:1.2rem;margin-right:10px}
 .author-socials-list a:hover{color:var(--primary-color)}
@@ -100,8 +105,6 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
     .nav-links a{font-size:1.5rem;font-weight:700}
     
     .burger{display:block;z-index:2001}
-    /* Hide burger when active to show close button clearly */
-    .burger.toggle { opacity: 0; pointer-events: none; }
     
     .nav-close-btn{display:block}
     
@@ -157,13 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ticking = true;
         }
     });
-    // Mobile Nav Logic (Refined & Fixed List Structure)
+    // Mobile Nav Logic (Refined & Fixed List Structure & Burger Toggle)
     const burger = document.querySelector('.burger');
     const nav = document.querySelector('.nav-links');
+    const body = document.body;
     
     function closeMenu() {
         if(nav) nav.classList.remove('nav-active');
-        if(burger) burger.classList.remove('toggle');
+        if(body) body.classList.remove('menu-open'); // Logic for hiding burger
     }
     
     if(burger && nav) {
@@ -187,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         burger.addEventListener('click', () => {
             nav.classList.toggle('nav-active');
-            burger.classList.toggle('toggle');
+            body.classList.toggle('menu-open'); // Toggles visibility of burger via CSS
         });
         
         // Close on link click
