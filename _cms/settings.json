@@ -9,15 +9,38 @@
   "customCss": "",
   "customHeadJs": "",
   "verifications": [],
-  "headerMenu": [],
-  "footerMenu": [],
-  "socialLinks": [],
+  "headerMenu": [
+    {
+      "label": "homepage",
+      "link": "google.com"
+    },
+    {
+      "label": "test page",
+      "link": "test.com"
+    }
+  ],
+  "footerMenu": [
+    {
+      "label": "privacy",
+      "link": "whatsapp.com"
+    }
+  ],
+  "socialLinks": [
+    {
+      "label": "icon-twitter",
+      "link": "twitter.com"
+    },
+    {
+      "label": "icon-instagram",
+      "link": "instagram.com"
+    }
+  ],
   "authors": [
     {
-      "id": "1765647621472",
-      "name": "Hteege",
-      "image": "https://img.freepik.com/premium-vector/girl-hi-sticker-messenger_48369-2029.jpg?semt=ais_hybrid&w=740&q=80",
-      "bio": "ggdsfsfs"
+      "id": "1765647914127",
+      "name": "Games",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9zI4cub-hhiOJCLg6MWAufwOMXWJNiX1WYA&s",
+      "bio": "testing another"
     }
   ],
   "ads": []
