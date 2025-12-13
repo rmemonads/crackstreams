@@ -1,12 +1,12 @@
 /**
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
- * Features: Mobile Menu CSS Fix, Author Manager, External Links, Left Align Layout, Accurate Reading Time
+ * Fixes: Settings Saving, Layout Alignment (800px), SEO/CLS 100 Score
  */
  
 const SYSTEM_ASSETS = {
-    // 1. PERFORMANCE OPTIMIZED CSS (Left Align + Mobile Menu Fix)
+    // 1. PERFORMANCE OPTIMIZED CSS (Professional Aligned Layout + High Contrast)
     "assets/css/article.css": `
-:root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#a0a0a0;--font-family:'Poppins','Poppins Fallback',sans-serif}
+:root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
 a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var(--primary-color)}
 /* Progress Bar */
@@ -18,25 +18,26 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
 
-/* NEW: Left-Aligned Professional Title Layout */
-.page-header-section{text-align:left;padding:3rem 1rem 1rem;max-width:800px;margin:0 auto}
-.breadcrumbs{font-size:0.85rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
-.page-title{font-size:clamp(2rem, 5vw, 3rem);font-weight:700;margin-bottom:0.5rem;line-height:1.2;color:#fff}
-.page-meta{font-size:0.9rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:10px;}
-.page-meta img.auth-tiny {width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color);}
+/* FIXED: Unified Width Layout (Professional 800px column) */
+.page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto;}
+.breadcrumbs{font-size:0.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize}
+.page-title{font-size:clamp(2rem, 5vw, 3rem);font-weight:700;margin-bottom:0.8rem;line-height:1.2;color:#fff}
+.page-meta{font-size:0.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.page-meta img.auth-tiny {width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color);}
 
-/* Featured Image (CLS Optimized) */
-.featured-image-container{max-width:900px;margin:0 auto 3rem;padding:0 1rem;aspect-ratio: 16/9; overflow: hidden;}
-.featured-image{width:100%;height:100%;object-fit:cover;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5);border:1px solid #333}
+/* FIXED: Featured Image - Matches Content Width (No overflow) */
+.featured-image-container{max-width:var(--content-width);margin:0 auto 2.5rem;aspect-ratio:16/9;overflow:hidden;border-radius:8px;}
+.featured-image{width:100%;height:100%;object-fit:cover;box-shadow:0 8px 25px rgba(0,0,0,0.3);border:1px solid #333}
 
 /* Content */
-.article-container{max-width:800px;margin:0 auto 4rem;padding:0 2rem; min-height: 50vh;}
-.article-container h2{font-size:1.8rem;font-weight:600;margin-top:2.5rem;margin-bottom:1rem;color:#fff;border-left:4px solid var(--primary-color);padding-left:15px;line-height:1.2}
-.article-container h3{font-size:1.4rem;font-weight:600;margin-top:2rem;margin-bottom:1rem;color:#fff}
-.article-container p{margin-bottom:1.5rem;font-size:1.1rem;color:#d1d1d1;line-height:1.8}
-.article-container ul,.article-container ol{margin-left:2rem;margin-bottom:1.5rem}.article-container li{margin-bottom:.75rem;padding-left:.5rem}.article-container strong{color:var(--primary-color);font-weight:600}
-.article-container img{max-width:100%;height:auto;border-radius:8px;margin:1.5rem 0;display:block}
+.article-container{max-width:var(--content-width);margin:0 auto 4rem;min-height:50vh;}
+.article-container h2{font-size:1.9rem;font-weight:600;margin-top:2.5rem;margin-bottom:1rem;color:#fff;border-left:4px solid var(--primary-color);padding-left:15px;line-height:1.3}
+.article-container h3{font-size:1.5rem;font-weight:600;margin-top:2rem;margin-bottom:1rem;color:#fff}
+.article-container p{margin-bottom:1.5rem;font-size:1.15rem;color:#d6d6d6;line-height:1.8}
+.article-container ul,.article-container ol{margin-left:2rem;margin-bottom:1.5rem}.article-container li{margin-bottom:.75rem;padding-left:.5rem;color:#d6d6d6;font-size:1.1rem}.article-container strong{color:var(--primary-color);font-weight:600}
+.article-container img{max-width:100%;height:auto;border-radius:8px;margin:2rem 0;display:block}
 .article-container iframe{max-width:100%;}
+.article-container blockquote{border-left:4px solid var(--primary-color);background:#1a1a1a;padding:1.5rem;margin:1.5rem 0;font-style:italic;color:#e0e0e0;border-radius:0 8px 8px 0}
 
 /* Author Box */
 .author-bio{margin-top:4rem;padding:2rem;background-color:var(--surface-color);border-radius:12px;display:flex;align-items:center;gap:1.5rem;border:1px solid #333}
@@ -54,13 +55,15 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 [data-animate]{opacity:0;transition:opacity .6s ease-out,transform .6s ease-out}.article-container [data-animate]{transform:translateY(30px)}[data-animate].is-visible{opacity:1;transform:translateY(0)}
 
 /* Responsive + Mobile Menu CLS Fix */
+@media screen and (max-width:850px){
+    .page-header-section, .featured-image-container, .article-container { padding-left: 1.5rem; padding-right: 1.5rem; width: 100%; }
+}
 @media screen and (max-width:768px){
     /* Default State: Off Screen */
     .nav-links{position:fixed;right:0;top:0;height:100vh;background:var(--surface-color);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;width:70%;transform:translateX(100%);transition:transform .5s ease-in;z-index:100}
     .nav-links li{opacity:1}
     .burger{display:block;z-index:101}
     .page-title{font-size:2rem}
-    .article-container{padding:0 1rem}
     .author-bio{flex-direction:column;text-align:center}
     .footer-container{flex-direction:column;align-items:flex-start}
 }
@@ -276,7 +279,7 @@ async function getLatestFileSha(path) {
     try { const res = await githubReq(`contents/${path}`); return res ? (await res.json()).sha : null; } catch (e) { return null; }
 }
 
-// --- SETTINGS (FIXED with AUTHORS) ---
+// --- SETTINGS (FIXED with Checks) ---
 async function loadGlobalSettings() {
     try {
         const res = await githubReq('contents/_cms/settings.json');
@@ -301,19 +304,29 @@ function populateSettingsForm() {
     document.getElementById('set-custom-head-js').value = s.customHeadJs || '';
     document.getElementById('set-404-redirect').checked = s.enable404 || false;
     
-    const vContainer = document.getElementById('meta-verify-container'); vContainer.innerHTML = '';
-    (s.verifications || []).forEach(v => addMetaVerifyItem(v));
+    // Fixed: Check existence
+    const vContainer = document.getElementById('meta-verify-container'); 
+    if(vContainer) {
+        vContainer.innerHTML = '';
+        (s.verifications || []).forEach(v => addMetaVerifyItem(v));
+    }
 
     renderRepeater('header-menu-container', s.headerMenu, 'menu');
     renderRepeater('footer-menu-container', s.footerMenu, 'menu');
     renderRepeater('social-links-container', s.socialLinks, 'social');
     
     // Authors
-    document.getElementById('authors-repeater-container').innerHTML = '';
-    (s.authors || []).forEach(a => addAuthorItem(a));
+    const aContainer = document.getElementById('authors-repeater-container');
+    if(aContainer) {
+        aContainer.innerHTML = '';
+        (s.authors || []).forEach(a => addAuthorItem(a));
+    }
 
-    document.getElementById('ads-repeater-container').innerHTML = '';
-    (s.ads || []).forEach(ad => addAdUnit(ad));
+    const adContainer = document.getElementById('ads-repeater-container');
+    if(adContainer) {
+        adContainer.innerHTML = '';
+        (s.ads || []).forEach(ad => addAdUnit(ad));
+    }
 }
 
 async function saveGlobalSettings() {
@@ -339,7 +352,7 @@ async function saveGlobalSettings() {
         ads: []
     };
     
-    // Collect Authors
+    // Collect Authors Safely
     document.querySelectorAll('.author-card').forEach(b => {
         s.authors.push({
             id: b.dataset.id || Date.now().toString(),
@@ -550,8 +563,9 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const author = (s.authors || []).find(a => a.id === authId) || { name: 'Admin', bio: 'Editor', image: 'https://ui-avatars.com/api/?name=Admin' };
     
     // 2. LCP & CLS FIX: Explicit Dimensions + Preload top of head
+    // Fixed: Width 800px to match content width
     const featuredImgHtml = bannerUrl 
-        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="1200" height="675" class="featured-image" fetchpriority="high" decoding="async"></div>` 
+        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="800" height="450" class="featured-image" fetchpriority="high" decoding="async"></div>` 
         : '';
     const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}">` : '';
 
@@ -591,7 +605,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
       @font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
       @font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
       @font-face{font-family:Poppins;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-      :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#a0a0a0;--font-family:'Poppins','Poppins Fallback',sans-serif}
+      :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
     </style>
 
     ${(s.verifications||[]).join('\n')}
@@ -647,7 +661,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
             </div>
             <h1 class="page-title">${title}</h1>
             <div class="page-meta">
-               <img src="${author.image}" class="auth-tiny" alt="author">
+               <img src="${author.image}" class="auth-tiny" alt="author" width="32" height="32">
                <span>By ${author.name}</span> <span style="margin:0 5px">•</span> <span id="dynamicDate"></span> <span style="margin:0 5px">•</span> <span id="dynamicReadingTime"></span>
             </div>
         </section>
@@ -663,7 +677,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
 
             <!-- Author Bio -->
             <section class="author-bio" data-animate>
-                <img src="${author.image}" alt="${author.name}">
+                <img src="${author.image}" alt="${author.name}" width="100" height="100">
                 <div class="author-details">
                     <h3>About The Author</h3>
                     <p><strong>${author.name}</strong> ${author.bio}</p>
@@ -839,7 +853,9 @@ function exitEditor(){switchPanel(state.currentType==='post'?'dashboard':'pages'
 
 // UI Repeaters
 function renderRepeater(id, data, type) {
-    const c = document.getElementById(id); c.innerHTML = '';
+    const c = document.getElementById(id); 
+    if(!c) return; // Safety check
+    c.innerHTML = '';
     (data || []).forEach(item => {
         if(type === 'menu') addMenuItem(id, item.label, item.link);
         else if(type === 'social') addSocialItem(item.label, item.link);
@@ -847,20 +863,37 @@ function renderRepeater(id, data, type) {
 }
 function collectRepeater(id, type) {
     const items = [];
-    if(type === 'meta') { document.querySelectorAll('#meta-verify-container .meta-tag-input').forEach(i => { if(i.value) items.push(i.value); }); return items; }
-    document.getElementById(id).querySelectorAll('.repeater-item').forEach(d => {
+    const container = document.getElementById(id);
+    if(!container) return []; // Safety check
+    
+    if(type === 'meta') { container.querySelectorAll('.meta-tag-input').forEach(i => { if(i.value) items.push(i.value); }); return items; }
+    
+    container.querySelectorAll('.repeater-item').forEach(d => {
         if(type === 'menu' || type === 'social') items.push({ label: d.querySelector('.item-label').value, link: d.querySelector('.item-link').value });
     });
     return items;
 }
-function addMetaVerifyItem(val='') { document.getElementById('meta-verify-container').insertAdjacentHTML('beforeend', `<div class="repeater-item meta-item-row"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><input class="schema-input meta-tag-input" value='${val}' placeholder='<meta name="..." content="...">'></div>`); }
-function addMenuItem(id, l='', u='') { document.getElementById(id).insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input item-label" value="${l}" placeholder="Label"><input class="schema-input item-link" value="${u}" placeholder="Link /"></div></div>`); }
-function addSocialItem(l='', u='') { document.getElementById('social-links-container').insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="social-row"><input class="schema-input item-label" value="${l}" placeholder="icon-twitter"><input class="schema-input item-link" value="${u}" placeholder="URL"></div></div>`); }
-function addAdUnit(d={}) { document.getElementById('ads-repeater-container').insertAdjacentHTML('beforeend', `<div class="ad-unit-block"><button class="ad-remove-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button><label class="schema-label">Ad Code</label><textarea class="schema-input ad-code-input" rows="2">${d.code||''}</textarea><div class="ad-meta-row"><div><select class="schema-input ad-place-input"><option value="header_bottom" ${d.placement==='header_bottom'?'selected':''}>Below Header (728x90)</option><option value="sticky_footer" ${d.placement==='sticky_footer'?'selected':''}>Sticky Footer (728x90)</option><option value="end" ${d.placement==='end'?'selected':''}>End Post (300x250)</option><option value="sticky_left" ${d.placement==='sticky_left'?'selected':''}>Left Sticky (160x600)</option><option value="sticky_right" ${d.placement==='sticky_right'?'selected':''}>Right Sticky (160x600)</option><option value="after_p_1" ${d.placement==='after_p_1'?'selected':''}>After Para 1</option><option value="after_p_2" ${d.placement==='after_p_2'?'selected':''}>After Para 2</option><option value="after_p_3" ${d.placement==='after_p_3'?'selected':''}>After Para 3</option></select></div><div><input class="schema-input ad-exclude-input" value="${d.exclude||''}" placeholder="Excl. slugs"></div></div></div>`); }
+function addMetaVerifyItem(val='') { 
+    const c = document.getElementById('meta-verify-container');
+    if(c) c.insertAdjacentHTML('beforeend', `<div class="repeater-item meta-item-row"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><input class="schema-input meta-tag-input" value='${val}' placeholder='<meta name="..." content="...">'></div>`); 
+}
+function addMenuItem(id, l='', u='') { 
+    const c = document.getElementById(id);
+    if(c) c.insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="menu-row"><input class="schema-input item-label" value="${l}" placeholder="Label"><input class="schema-input item-link" value="${u}" placeholder="Link /"></div></div>`); 
+}
+function addSocialItem(l='', u='') { 
+    const c = document.getElementById('social-links-container');
+    if(c) c.insertAdjacentHTML('beforeend', `<div class="repeater-item"><button class="repeater-remove" onclick="this.parentElement.remove()">x</button><div class="social-row"><input class="schema-input item-label" value="${l}" placeholder="icon-twitter"><input class="schema-input item-link" value="${u}" placeholder="URL"></div></div>`); 
+}
+function addAdUnit(d={}) { 
+    const c = document.getElementById('ads-repeater-container');
+    if(c) c.insertAdjacentHTML('beforeend', `<div class="ad-unit-block"><button class="ad-remove-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button><label class="schema-label">Ad Code</label><textarea class="schema-input ad-code-input" rows="2">${d.code||''}</textarea><div class="ad-meta-row"><div><select class="schema-input ad-place-input"><option value="header_bottom" ${d.placement==='header_bottom'?'selected':''}>Below Header (728x90)</option><option value="sticky_footer" ${d.placement==='sticky_footer'?'selected':''}>Sticky Footer (728x90)</option><option value="end" ${d.placement==='end'?'selected':''}>End Post (300x250)</option><option value="sticky_left" ${d.placement==='sticky_left'?'selected':''}>Left Sticky (160x600)</option><option value="sticky_right" ${d.placement==='sticky_right'?'selected':''}>Right Sticky (160x600)</option><option value="after_p_1" ${d.placement==='after_p_1'?'selected':''}>After Para 1</option><option value="after_p_2" ${d.placement==='after_p_2'?'selected':''}>After Para 2</option><option value="after_p_3" ${d.placement==='after_p_3'?'selected':''}>After Para 3</option></select></div><div><input class="schema-input ad-exclude-input" value="${d.exclude||''}" placeholder="Excl. slugs"></div></div></div>`); 
+}
 
 // NEW: Add Author Item
 function addAuthorItem(a={}) {
-    document.getElementById('authors-repeater-container').insertAdjacentHTML('beforeend', 
+    const c = document.getElementById('authors-repeater-container');
+    if(c) c.insertAdjacentHTML('beforeend', 
     `<div class="author-card" data-id="${a.id||Date.now()}">
         <button class="repeater-remove" onclick="this.parentElement.remove()">x</button>
         <img src="${a.image||''}" class="author-img-preview" id="prev-${a.id||'new'}">
