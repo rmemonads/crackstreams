@@ -130,9 +130,9 @@
                         </div>
                     </div>
 
-                    <!-- Structure -->
+                    <!-- SEO & Verification -->
                     <div class="settings-card">
-                        <h3>Structure</h3>
+                        <h3>SEO & Verification</h3>
                         <div class="form-group">
                             <label>404 Redirection</label>
                             <label class="switch-label">
@@ -140,9 +140,16 @@
                                 <span class="chk-text">Generate Smart 404.html</span>
                             </label>
                         </div>
+                        <div class="form-group">
+                            <label>Site Verification Tags</label>
+                            <p class="hint">Google/Bing meta tags</p>
+                            <!-- FIXED: Added missing container -->
+                            <div id="meta-verify-container" class="repeater-container"></div>
+                            <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Meta Tag</button>
+                        </div>
                     </div>
 
-                    <!-- Author Manager (NEW) -->
+                    <!-- Author Manager -->
                     <div class="settings-card full-width-card">
                         <h3>Author Profiles</h3>
                         <p class="hint">Add authors here. You can select them when writing a post.</p>
