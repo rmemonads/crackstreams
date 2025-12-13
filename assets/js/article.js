@@ -35,13 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ticking = true;
         }
     });
-    // Mobile Nav Logic (Refined & Fixed List Structure)
+    // Mobile Nav Logic (Refined & Fixed List Structure & Burger Toggle)
     const burger = document.querySelector('.burger');
     const nav = document.querySelector('.nav-links');
+    const body = document.body;
     
     function closeMenu() {
         if(nav) nav.classList.remove('nav-active');
-        if(burger) burger.classList.remove('toggle');
+        if(body) body.classList.remove('menu-open'); // Logic for hiding burger
     }
     
     if(burger && nav) {
@@ -65,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         burger.addEventListener('click', () => {
             nav.classList.toggle('nav-active');
-            burger.classList.toggle('toggle');
+            body.classList.toggle('menu-open'); // Toggles visibility of burger via CSS
         });
         
         // Close on link click
