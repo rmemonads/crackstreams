@@ -28,11 +28,11 @@
   "socialLinks": [
     {
       "label": "icon-twitter",
-      "link": "twitter.com"
+      "link": "https://twitter.com"
     },
     {
       "label": "icon-instagram",
-      "link": "instagram.com"
+      "link": "https://twitter.com"
     }
   ],
   "authors": [
@@ -60,7 +60,12 @@
       "name": "DDDFFF",
       "image": "https://upload.wikimedia.org/wikipedia/en/thumb/2/24/Hello_World_%28Pinguini_Tattici_Nucleari_album%29.jpg/250px-Hello_World_%28Pinguini_Tattici_Nucleari_album%29.jpg",
       "bio": "sdsdgdggg",
-      "socials": []
+      "socials": [
+        {
+          "icon": "ico",
+          "link": ""
+        }
+      ]
     }
   ],
   "ads": []
