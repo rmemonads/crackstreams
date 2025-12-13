@@ -9,13 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if(isPost) crumbSpan.innerHTML = '<a href="../" style="color:var(--text-color-secondary)">Blog</a> <span>/</span> ' + slug.replace(/-/g, ' ');
         else crumbSpan.textContent = slug.replace(/-/g, ' ');
     }
-    // Meta
+    // Meta (Date)
     const lastMod = new Date(document.lastModified);
     if(document.getElementById('dynamicDate')) document.getElementById('dynamicDate').textContent = lastMod.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    
+    // Accurate Reading Time (Strip HTML first)
     const content = document.querySelector('.article-container');
     if(content && document.getElementById('dynamicReadingTime')) {
-        const words = content.innerText.trim().split(/s+/).length;
-        document.getElementById('dynamicReadingTime').textContent = Math.ceil(words / 225) + " Min Read";
+        const text = content.innerText || "";
+        const wpm = 225;
+        const words = text.trim().split(/\s+/).length;
+        const time = Math.ceil(words / wpm);
+        document.getElementById('dynamicReadingTime').textContent = time + " Min Read";
     }
     // Progress Bar
     const progressBar = document.getElementById('progressBar');
