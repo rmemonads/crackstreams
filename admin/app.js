@@ -2,7 +2,7 @@
  * ULTIMATE SERVERLESS CMS
  * Features: DB Sorting, Drag&Drop Fix, Schema+, Ad Sizes, Fontello, Critical CSS, Standard Featured Image
  */
-
+ 
 const SYSTEM_ASSETS = {
     // 1. PROFESSIONAL MODERN CSS (No Background Hero, Standard Img, Dark Mode)
     "assets/css/article.css": `
