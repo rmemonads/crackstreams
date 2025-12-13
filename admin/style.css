@@ -68,11 +68,14 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .menu-row, .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .meta-item-row input { font-family: monospace; font-size: 0.8rem; }
 
-/* AUTHOR CARD */
+/* AUTHOR CARD & NESTED REPEATERS */
 .author-card { display: grid; grid-template-columns: 100px 1fr; gap: 15px; margin-bottom: 10px; border: 1px solid #444; background: #252525; padding: 15px; border-radius: 4px; position: relative; }
 .author-img-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #000; border: 1px solid #555; }
 .author-fields { display: flex; flex-direction: column; gap: 8px; }
-.author-socials { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 5px; }
+.nested-repeater-container { margin-top: 5px; border-top: 1px dotted #444; padding-top: 8px; }
+.mini-row { display: flex; gap: 5px; margin-bottom: 5px; align-items: center; }
+.mini-row input { flex: 1; padding: 5px; font-size: 0.8rem; }
+.mini-btn-remove { color: var(--danger); background: transparent; font-size: 0.9rem; }
 
 /* AD UNITS */
 .ad-unit-block { background: #252525; padding: 15px; margin-bottom: 15px; border: 1px solid #444; border-radius: 4px; position: relative; }
