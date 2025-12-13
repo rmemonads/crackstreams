@@ -27,7 +27,7 @@
                 </div>
                 <div class="input-group">
                     <label>Repo Name</label>
-                    <input type="text" id="gh-repo" placeholder="e.g. the-influencer-report" required>
+                    <input type="text" id="gh-repo" placeholder="e.g. my-website" required>
                 </div>
                 <button type="submit" class="btn-primary full-width">Login & Initialize</button>
             </form>
@@ -117,7 +117,8 @@
                             <input type="text" id="set-site-title">
                         </div>
                         <div class="form-group">
-                            <label>Site URL (Include https://, no trailing slash)</label>
+                            <label>Site URL (e.g., https://mysite.com)</label>
+                            <p class="hint">Important: Used for image links & SEO. No trailing slash.</p>
                             <input type="text" id="set-site-url" placeholder="https://username.github.io/repo">
                         </div>
                         <div class="form-group">
@@ -130,7 +131,7 @@
                         </div>
                     </div>
 
-                    <!-- SEO & Verification -->
+                    <!-- SEO -->
                     <div class="settings-card">
                         <h3>SEO & Verification</h3>
                         <div class="form-group">
@@ -143,7 +144,6 @@
                         <div class="form-group">
                             <label>Site Verification Tags</label>
                             <p class="hint">Google/Bing meta tags</p>
-                            <!-- FIXED: Added missing container -->
                             <div id="meta-verify-container" class="repeater-container"></div>
                             <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Meta Tag</button>
                         </div>
@@ -152,29 +152,29 @@
                     <!-- Author Manager -->
                     <div class="settings-card full-width-card">
                         <h3>Author Profiles</h3>
-                        <p class="hint">Add authors here. You can select them when writing a post.</p>
+                        <p class="hint">Set specific social links for each author here.</p>
                         <div id="authors-repeater-container"></div>
                         <button class="btn-secondary full-width" onclick="addAuthorItem()">+ Add Author</button>
                     </div>
 
                     <!-- Menus -->
                     <div class="settings-card full-width-card">
-                        <h3>Menus & Socials</h3>
+                        <h3>Menus & Global Socials</h3>
                         <div class="two-col">
                             <div>
-                                <label class="schema-label">Header Menu (Label | Link)</label>
-                                <p class="hint">Use full URL (https://...) for external sites.</p>
+                                <label class="schema-label">Header Menu</label>
+                                <p class="hint">Label | Full URL (https://...) or Slug</p>
                                 <div id="header-menu-container" class="repeater-container"></div>
                                 <button class="add-repeater-btn" onclick="addMenuItem('header-menu-container')">+ Add Link</button>
                             </div>
                             <div>
-                                <label class="schema-label">Footer Menu (Label | Link)</label>
+                                <label class="schema-label">Footer Menu</label>
                                 <div id="footer-menu-container" class="repeater-container"></div>
                                 <button class="add-repeater-btn" onclick="addMenuItem('footer-menu-container')">+ Add Link</button>
                             </div>
                         </div>
                         <div style="margin-top:15px;">
-                            <label class="schema-label">Social Links (Fontello Class | Link)</label>
+                            <label class="schema-label">Site Social Links (Footer)</label>
                             <div id="social-links-container" class="repeater-container"></div>
                             <button class="add-repeater-btn" onclick="addSocialItem()">+ Add Social</button>
                         </div>
@@ -182,7 +182,7 @@
 
                     <div class="settings-card full-width-card">
                         <h3>Ad Units Manager</h3>
-                        <p class="hint">If you leave the code empty, no space will be shown.</p>
+                        <p class="hint">Leave code empty to disable a specific slot.</p>
                         <div id="ads-repeater-container"></div>
                         <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add Ad Unit</button>
                     </div>
@@ -240,7 +240,7 @@
                                 <label>Slug</label>
                                 <input type="text" id="meta-slug">
                             </div>
-                            <!-- Author Selector (NEW) -->
+                            <!-- Author Selector -->
                             <div class="form-group">
                                 <label>Author</label>
                                 <select id="meta-author-select"></select>
@@ -251,6 +251,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Featured Image</label>
+                                <p class="hint">Will be resized to 800x450 in output.</p>
                                 <div id="featured-dropzone" class="image-drop-wrapper">
                                     <input type="text" id="meta-banner" placeholder="https://...">
                                     <img id="banner-preview" class="hidden">
