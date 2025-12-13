@@ -67,6 +67,11 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .add-repeater-btn { background: #333; color: var(--primary); width: 100%; padding: 5px; font-size: 0.8rem; margin-top: 5px; border: 1px dashed #444; cursor: pointer; }
 .menu-row, .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+/* AUTHOR CARD */
+.author-card { display: grid; grid-template-columns: 100px 1fr; gap: 15px; margin-bottom: 10px; border: 1px solid #444; background: #252525; padding: 15px; border-radius: 4px; position: relative; }
+.author-img-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #000; border: 1px solid #555; }
+.author-fields { display: flex; flex-direction: column; gap: 8px; }
+
 /* AD UNITS */
 .ad-unit-block { background: #252525; padding: 15px; margin-bottom: 15px; border: 1px solid #444; border-radius: 4px; position: relative; }
 .ad-remove-btn { position: absolute; top: 10px; right: 10px; color: var(--danger); }
@@ -115,7 +120,6 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .image-drop-wrapper.dragover .drop-overlay { display: flex; }
 .drop-overlay { display: none; position: absolute; inset: 0; background: rgba(0, 170, 255, 0.4); backdrop-filter: blur(2px); align-items: center; justify-content: center; font-weight: bold; color: white; pointer-events: none; z-index: 5; }
 #banner-preview { width: 100%; display: block; max-height: 150px; object-fit: cover; margin-top: 5px; }
-/* Broken Image Fix */
 #banner-preview[src=""], #banner-preview:not([src]) { display: none; }
 
 .media-drop-area { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
