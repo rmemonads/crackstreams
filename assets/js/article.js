@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lastMod = new Date(document.lastModified);
     if(document.getElementById('dynamicDate')) document.getElementById('dynamicDate').textContent = lastMod.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     
-    // Accurate Reading Time (Strip HTML first)
+    // Accurate Reading Time
     const content = document.querySelector('.article-container');
     if(content && document.getElementById('dynamicReadingTime')) {
         const text = content.innerText || "";
