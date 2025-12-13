@@ -1,49 +1,68 @@
 /**
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
  * Fixes: Mobile Menu Design/CLS, Featured Image CLS, Social URL Logic, Unsaved Warning, API Deprecation, Invalid List Structure, Sticky Headers, UI Placeholders
+ * Update: Fixed Duplicate CSS injection and Mobile Layout Shift via CSS Reordering.
  */
  
 const SYSTEM_ASSETS = {
     // 1. PERFORMANCE OPTIMIZED CSS
     "assets/css/article.css": `
+/* 1. FONTS (Centralized) */
+@font-face{font-family:'Poppins Fallback';src:local('Arial');ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%}
+@font-face{font-family:Poppins;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLDz8Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Poppins;font-style:normal;font-weight:600;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Poppins;font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+/* 2. VARIABLES & RESET */
 :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
-*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
-/* API Deprecation Fix: Explicit H1 Reset */
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* 3. CRITICAL LAYOUT & CLS FIX (Moved to Top) */
+/* This ensures the mobile width/padding is applied BEFORE painting, preventing the shift */
+@media screen and (max-width:850px){
+    .page-header-section, .featured-image-container, .article-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        width: 100%;
+    }
+}
+
+/* 4. GENERAL STYLES */
+html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
 h1 { font-size: 2.5rem; line-height: 1.2; margin: 0.67em 0; }
 a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var(--primary-color)}
+
 /* Progress Bar */
 .progress-bar{position:fixed;top:0;left:0;width:0;height:4px;background:linear-gradient(90deg,var(--primary-color),#0077b6);z-index:1000;transition:width .1s linear}
+
 /* Header */
 .site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a;height:80px}
 .logo{font-weight:700;font-size:1.5rem;color:#fff;text-decoration:none}
 .nav-links{display:flex;justify-content:space-around;list-style:none}
 .nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
 .burger{display:none;cursor:pointer;transition:opacity 0.3s ease}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
-/* FIX: Hide Burger when menu active to prevent overlap with close button */
 body.menu-open .burger { opacity: 0; pointer-events: none; }
-
-/* Mobile Close Button */
 .nav-close-btn { display: none; position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1; z-index: 2002; }
 
-/* Layout & Text & CLS Fixes */
+/* Page Header & Meta */
 .page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto; min-height: 200px;}
 .breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize; min-height: 1.5em; display:block;}
 .page-title{font-size:clamp(2rem,5vw,3rem);font-weight:700;margin-bottom:.8rem;line-height:1.2;color:#fff; min-height: 1.2em;}
 .page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap; min-height: 34px;}
-/* CLS: Reserve space for author image */
 .page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color); background-color: #333; aspect-ratio: 1/1;}
 
-/* Featured Image - CLS Fixed via Padding Hack (Height 0 + Padding-Bottom) & Aspect Ratio */
+/* Featured Image - CLS Fixed via Aspect Ratio */
 .featured-image-container{
     max-width:var(--content-width);
     margin:0 auto 2.5rem;
     position: relative;
     width: 100%;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: auto;
+    padding-bottom: 56.25%; /* Fallback 16:9 */
     overflow:hidden;
     border-radius:8px;
-    background:#1a1a1a; /* Placeholder color */
+    background:#1a1a1a; 
     display: block;
     aspect-ratio: 16/9;
 }
@@ -58,7 +77,7 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
     border:1px solid #333;
 }
 
-/* Content */
+/* Content Area */
 .article-container{max-width:var(--content-width);margin:0 auto 4rem;min-height:50vh}
 .article-container h2{font-size:1.9rem;font-weight:600;margin-top:2.5rem;margin-bottom:1rem;color:#fff;border-left:4px solid var(--primary-color);padding-left:15px;line-height:1.3}
 .article-container h3{font-size:1.5rem;font-weight:600;margin-top:2rem;margin-bottom:1rem;color:#fff}
@@ -85,11 +104,7 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
 /* Animation */
 [data-animate]{opacity:0;transition:opacity .6s ease-out,transform .6s ease-out}.article-container [data-animate]{transform:translateY(30px)}[data-animate].is-visible{opacity:1;transform:translateY(0)}
 
-/* Responsive + Mobile Menu Professional Style */
-@media screen and (max-width:850px){
-    /* Reduced padding to 1rem per request */
-    .page-header-section,.featured-image-container,.article-container{padding-left:1rem;padding-right:1rem;width:100%}
-}
+/* Mobile Menu Overlay */
 @media screen and (max-width:768px){
     .nav-links{
         position:fixed;top:0;right:0;width:100%;height:100vh;
@@ -105,9 +120,7 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
     .nav-links a{font-size:1.5rem;font-weight:700}
     
     .burger{display:block;z-index:2001}
-    
     .nav-close-btn{display:block}
-    
     .page-title{font-size:2rem}
     .author-bio{flex-direction:column;text-align:center}
     .footer-container{flex-direction:column;align-items:flex-start}
@@ -715,11 +728,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <style>
-      .article-container{max-width:var(--content-width);margin:0 auto 4rem;min-height:50vh}.article-container p{margin-bottom:1.5rem;font-size:1.15rem;color:#d6d6d6;line-height:1.8}@media screen and (max-width:850px){.article-container,.featured-image-container,.page-header-section{padding-left:1rem;padding-right:1rem;width:100%}}:root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}h1{font-size:2.5rem;line-height:1.2;margin:.67em 0}a{color:#ff3e00;text-decoration:none}.progress-bar{position:fixed;top:0;left:0;width:0;height:4px;background:linear-gradient(90deg,var(--primary-color),#0077b6);z-index:1000}.site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a;height:80px}.logo{font-weight:700;font-size:1.5rem;color:#fff;text-decoration:none}.nav-links{display:flex;justify-content:space-around;list-style:none}.nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%)}.burger{display:none}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px}.page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto;min-height:200px}.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize;min-height:1.5em;display:block}.page-title{font-size:clamp(2rem,5vw,3rem);font-weight:700;margin-bottom:.8rem;line-height:1.2;color:#fff;min-height:1.2em}.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:34px}.page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color);background-color:#333;aspect-ratio:1/1}.featured-image-container{max-width:var(--content-width);margin:0 auto 2.5rem;position:relative;width:100%;height:0;padding-bottom:56.25%;overflow:hidden;border-radius:8px;background:#1a1a1a;display:block;aspect-ratio:16/9}.featured-image{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;box-shadow:0 8px 25px rgba(0,0,0,.3);border:1px solid #333}@media screen and (max-width:850px){.featured-image-container,.page-header-section{padding-left:1rem;padding-right:1rem;width:100%}}@media screen and (max-width:768px){.nav-links{position:fixed;top:0;right:0;width:100%;height:100vh;background:rgba(18,18,18,.98);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:translateX(100%);z-index:2000;will-change:transform;gap:2rem}.nav-links li{margin:0;opacity:0;transform:translateY(20px)}.nav-links a{font-size:1.5rem;font-weight:700}.burger{display:block;z-index:2001}.page-title{font-size:2rem}}
-
-      
       ${criticalCss}
-      
       ${s.customCss || ''}
     </style>
 
