@@ -132,28 +132,49 @@ document.addEventListener('DOMContentLoaded', () => {
 `
 };
 
-// --- 2. CORE UTILS (Defined Top-Level for Safety) ---
+// --- 2. CORE UTILS ---
 function showToast(m,e){const t=document.getElementById('toast');t.innerText=m;t.style.borderLeftColor=e?'red':'#00aaff';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 function showLoader(v,t){document.getElementById('loading-overlay').classList.toggle('hidden',!v); if(t)document.getElementById('loading-text').innerText=t;}
 function slugify(t){return t.toLowerCase().replace(/[^\w-]+/g,'-')}
 function b64EncodeUnicode(str){return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,(m,p1)=>String.fromCharCode('0x'+p1)))}
 function b64DecodeUnicode(str){return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''))}
+
 function githubReq(endpoint, method = 'GET', body = null) { 
     const url = `https://api.github.com/repos/${state.owner}/${state.repo}/${endpoint}${method === 'GET' ? '?t='+Date.now() : ''}`; 
     const opts = { method, headers: { Authorization: `Bearer ${state.token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' } }; 
     if (body) opts.body = JSON.stringify(body); 
-    return fetch(url, opts).then(r=>{if(!r.ok && method==='GET' && r.status===404)return null; if(!r.ok) throw new Error('API Error'); return r;}); 
+    return fetch(url, opts).then(async r => {
+        if(!r.ok && method==='GET' && r.status===404) return null; 
+        if(!r.ok) {
+            const err = await r.json().catch(()=>({}));
+            throw new Error(err.message || `API Error ${r.status}`);
+        }
+        return r;
+    }); 
 }
+
 async function getLatestFileSha(path) { try { const res = await githubReq(`contents/${path}`); return res ? (await res.json()).sha : null; } catch (e) { return null; } }
+
 function setupSidebarEvents() { document.getElementById('sidebar-toggle-btn').addEventListener('click', () => { document.getElementById('main-sidebar').classList.toggle('collapsed'); if(window.innerWidth <= 768) document.getElementById('main-sidebar').classList.toggle('active-mobile'); }); }
-function switchPanel(id) { document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.getElementById(`panel-${id}`).classList.add('active'); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); const navId = `nav-btn-${id}`; if(document.getElementById(navId)) document.getElementById(navId).classList.add('active'); if(id === 'dashboard') loadList('post'); if(id === 'pages') loadList('page'); }
+
+function switchPanel(id) { 
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
+    document.getElementById(`panel-${id}`).classList.add('active'); 
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); 
+    const navId = `nav-btn-${id}`; 
+    if(document.getElementById(navId)) document.getElementById(navId).classList.add('active'); 
+    try {
+        if(id === 'dashboard') loadList('post'); 
+        if(id === 'pages') loadList('page'); 
+    } catch(e) { console.error("List load failed:", e); }
+}
+
 function switchSidebarTab(tabName) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.sidebar-content').forEach(c => c.classList.remove('active')); document.getElementById(`tab-btn-${tabName}`).classList.add('active'); document.getElementById(`tab-${tabName}`).classList.add('active'); }
 function resolveMenuLink(link, siteUrl) { if(!link) return '#'; if(link.match(/^https?:\/\//) || link.startsWith('mailto:') || link.startsWith('tel:') || link.startsWith('#')) return link; if(link.includes('.') && !link.startsWith('/')) return 'https://' + link; const base = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl; let path = link; if(path.startsWith('/')) path = path.substring(1); if(!path.endsWith('/') && !path.includes('.')) path += '/'; return `${base}/${path}`; }
 function ensureExternalUrl(link) { if(!link) return ''; if(link.match(/^https?:\/\//) || link.startsWith('mailto:') || link.startsWith('tel:')) return link; return 'https://' + link; }
 function exitEditor(){switchPanel(state.currentType==='post'?'dashboard':'pages')}
 
 // --- 3. INITIALIZATION ---
-// INIT
 document.addEventListener('DOMContentLoaded', () => {
     const t = localStorage.getItem('gh_token'), o = localStorage.getItem('gh_owner'), r = localStorage.getItem('gh_repo');
     if (t && o && r) { state.token = t; state.owner = o; state.repo = r; initApp(); } 
@@ -166,17 +187,18 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const t = document.getElementById('gh-token').value.trim();
     const o = document.getElementById('gh-owner').value.trim();
     const r = document.getElementById('gh-repo').value.trim();
+    showLoader(true, "Verifying...");
     try {
         const res = await fetch(`https://api.github.com/repos/${o}/${r}`, { headers: { Authorization: `Bearer ${t}` } });
-        if (!res.ok) throw new Error('Invalid Credentials');
+        if (!res.ok) throw new Error('Invalid Credentials or Repo Access');
         localStorage.setItem('gh_token', t); localStorage.setItem('gh_owner', o); localStorage.setItem('gh_repo', r);
         state.token = t; state.owner = o; state.repo = r;
         initApp();
     } catch (err) { showToast(err.message, true); }
+    finally { showLoader(false); }
 });
 
 document.getElementById('nav-logout').addEventListener('click', () => { localStorage.clear(); location.reload(); });
-
 function setupUnsavedWarning() { window.addEventListener('beforeunload', (e) => { if(tinymce.activeEditor && tinymce.activeEditor.isDirty()) { e.preventDefault(); e.returnValue = ''; } }); }
 
 async function initApp() {
@@ -188,7 +210,6 @@ async function initApp() {
     } catch (e) {
         showToast("Init Error: " + e.message, true);
         console.error(e);
-        // Fallback to login if init crashes
         document.getElementById('login-view').classList.add('active'); 
         document.getElementById('app-view').classList.remove('active');
     } finally {
@@ -198,10 +219,19 @@ async function initApp() {
 
 async function ensureSystemFiles() {
     for (const [path, content] of Object.entries(SYSTEM_ASSETS)) {
-        const sha = await getLatestFileSha(path);
-        // Only update if missing (null SHA) to prevent overwriting custom edits, or force update strategy
-        // Here we force update to ensure new CSS features exist
-        await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: sha });
+        try {
+            const res = await githubReq(`contents/${path}`);
+            if (res) {
+                const data = await res.json();
+                const existingContent = b64DecodeUnicode(data.content);
+                // Only update if content is different (avoids 409 conflict loops on init)
+                if (existingContent.trim() !== content.trim()) {
+                    await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: data.sha });
+                }
+            } else {
+                await githubReq(`contents/${path}`, 'PUT', { message: `Init ${path}`, content: b64EncodeUnicode(content) });
+            }
+        } catch (e) { console.warn(`Asset check failed for ${path}:`, e); }
     }
 }
 
@@ -229,6 +259,48 @@ async function loadContentIndex() {
     } catch(e) { console.error(e); state.contentIndex = []; }
 }
 
+// --- 5. DATA TABLES (MISSING FUNCTION ADDED) ---
+function loadList(type) {
+    const tbody = document.getElementById(`${type}s-list-body`);
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    
+    // Sort by date descending
+    const items = state.contentIndex.filter(i => i.type === type).sort((a,b) => new Date(b.date) - new Date(a.date));
+    
+    if(items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#666;">No ${type}s found.</td></tr>`;
+        return;
+    }
+
+    items.forEach(item => {
+        const dateStr = new Date(item.modified || item.date).toLocaleDateString();
+        let catHtml = '';
+        if(type === 'post') {
+            const cats = item.cats || [];
+            if(cats.length > 0) catHtml = cats.map(c => {
+                const n = (state.settings.categories||[]).find(x=>x.slug===c)?.name || c;
+                return `<span style="background:#333;padding:2px 6px;border-radius:3px;font-size:0.75rem;margin-right:4px;">${n}</span>`;
+            }).join('');
+            else catHtml = '<span style="color:#666;font-size:0.8rem;">Uncategorized</span>';
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="checkbox" class="chk-${type}" value="${item.slug}" onchange="toggleBulkBtn('${type}')"></td>
+            <td><strong>${item.title}</strong><br><small style="color:#666">/${item.slug}</small></td>
+            ${type === 'post' ? `<td>${catHtml}</td>` : ''}
+            <td>${dateStr}</td>
+            <td>
+                <button class="btn-primary btn-xs" onclick="editContent('${type}', '${item.slug}')"><i class="fa-solid fa-pen"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    toggleBulkBtn(type);
+}
+
+// --- 6. SETTINGS & REPEATERS (MISSING FUNCTIONS ADDED) ---
 function populateSettingsForm() {
     const s = state.settings || {};
     document.getElementById('set-site-title').value = s.siteTitle || '';
@@ -252,9 +324,128 @@ function populateSettingsForm() {
     renderNewsCatSelect();
 
     const vContainer = document.getElementById('meta-verify-container'); if(vContainer) { vContainer.innerHTML = ''; (s.verifications || []).forEach(v => addMetaVerifyItem(v)); }
-    renderRepeater('header-menu-container', s.headerMenu, 'menu'); renderRepeater('footer-menu-container', s.footerMenu, 'menu'); renderRepeater('social-links-container', s.socialLinks, 'social');
+    renderRepeater('header-menu-container', s.headerMenu, 'menu'); 
+    renderRepeater('footer-menu-container', s.footerMenu, 'menu'); 
+    renderRepeater('social-links-container', s.socialLinks, 'social');
+    
     const aContainer = document.getElementById('authors-repeater-container'); if(aContainer) { aContainer.innerHTML = ''; (s.authors || []).forEach(a => addAuthorItem(a)); }
     const adContainer = document.getElementById('ads-repeater-container'); if(adContainer) { adContainer.innerHTML = ''; (s.ads || []).forEach(ad => addAdUnit(ad)); }
+}
+
+function renderRepeater(containerId, data, type) {
+    const c = document.getElementById(containerId);
+    c.innerHTML = '';
+    (data || []).forEach(item => {
+        if(type === 'menu') addMenuItem(containerId, item.label, item.link);
+        if(type === 'social') addSocialItem(item.label, item.link); // Using label as icon class
+    });
+}
+
+function addMenuItem(containerId, label='', link='') {
+    const html = `
+    <div class="repeater-item menu-row">
+        <button class="repeater-remove" onclick="this.parentElement.remove()">x</button>
+        <input type="text" placeholder="Label" value="${label}" class="menu-label">
+        <input type="text" placeholder="Link / Slug" value="${link}" class="menu-link">
+    </div>`;
+    document.getElementById(containerId).insertAdjacentHTML('beforeend', html);
+}
+
+function addSocialItem(icon='fa-brands fa-twitter', link='') {
+    const html = `
+    <div class="repeater-item social-row">
+        <button class="repeater-remove" onclick="this.parentElement.remove()">x</button>
+        <input type="text" placeholder="Icon Class (fa-brands...)" value="${icon}" class="social-icon">
+        <input type="text" placeholder="Link" value="${link}" class="social-link">
+    </div>`;
+    document.getElementById('social-links-container').insertAdjacentHTML('beforeend', html);
+}
+
+function addAuthorItem(data = {}) {
+    const id = data.id || 'auth-' + Date.now();
+    const html = `
+    <div class="author-card" data-id="${id}">
+        <button class="repeater-remove" style="top:5px;right:5px;" onclick="this.closest('.author-card').remove()">x</button>
+        <div>
+            <img src="${data.image || ''}" class="author-img-preview" id="prev-${id}">
+        </div>
+        <div class="author-fields">
+            <input type="text" class="auth-name" placeholder="Name" value="${data.name || ''}">
+            <input type="text" class="auth-img" placeholder="Image URL" value="${data.image || ''}" onchange="document.getElementById('prev-${id}').src=this.value">
+            <textarea class="auth-bio" placeholder="Short Bio" rows="2">${data.bio || ''}</textarea>
+            <div class="nested-repeater-container" id="nested-socials-${id}">
+                ${(data.socials||[]).map(s => `
+                    <div class="mini-row">
+                        <input type="text" class="mini-icon" placeholder="Icon" value="${s.icon}">
+                        <input type="text" class="mini-link" placeholder="Link" value="${s.link}">
+                        <button class="mini-btn-remove" onclick="this.parentElement.remove()">x</button>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-xs btn-secondary" onclick="addNestedSocial('nested-socials-${id}')">+ Social</button>
+        </div>
+    </div>`;
+    document.getElementById('authors-repeater-container').insertAdjacentHTML('beforeend', html);
+}
+
+function addNestedSocial(containerId) {
+    document.getElementById(containerId).insertAdjacentHTML('beforeend', `
+    <div class="mini-row">
+        <input type="text" class="mini-icon" placeholder="Icon (fa-brands...)">
+        <input type="text" class="mini-link" placeholder="Link">
+        <button class="mini-btn-remove" onclick="this.parentElement.remove()">x</button>
+    </div>`);
+}
+
+function addAdUnit(data = {}) {
+    const html = `
+    <div class="ad-unit-block">
+        <button class="ad-remove-btn" onclick="this.parentElement.remove()">x</button>
+        <textarea class="code-editor ad-code-input" rows="3" placeholder="Paste Ad Code Here...">${data.code || ''}</textarea>
+        <div class="ad-meta-row">
+            <div>
+                <label class="schema-label">Placement</label>
+                <select class="ad-place-input">
+                    <option value="header_bottom" ${data.placement==='header_bottom'?'selected':''}>Header Bottom</option>
+                    <option value="end" ${data.placement==='end'?'selected':''}>End of Content</option>
+                    <option value="after_p_1" ${data.placement==='after_p_1'?'selected':''}>After Para 1</option>
+                    <option value="after_p_3" ${data.placement==='after_p_3'?'selected':''}>After Para 3</option>
+                    <option value="sticky_left" ${data.placement==='sticky_left'?'selected':''}>Sticky Left</option>
+                    <option value="sticky_right" ${data.placement==='sticky_right'?'selected':''}>Sticky Right</option>
+                    <option value="sticky_footer" ${data.placement==='sticky_footer'?'selected':''}>Sticky Footer</option>
+                </select>
+            </div>
+            <div>
+                <label class="schema-label">Exclude Slugs (comma sep)</label>
+                <input type="text" class="ad-exclude-input" value="${data.exclude || ''}">
+            </div>
+        </div>
+    </div>`;
+    document.getElementById('ads-repeater-container').insertAdjacentHTML('beforeend', html);
+}
+
+function addMetaVerifyItem(data = {}) {
+    const html = `
+    <div class="repeater-item meta-item-row">
+        <button class="repeater-remove" onclick="this.parentElement.remove()">x</button>
+        <input type="text" style="width:100%" placeholder='<meta name="..." content="...">' value="${data.replace(/"/g, '&quot;')}" class="meta-val">
+    </div>`;
+    document.getElementById('meta-verify-container').insertAdjacentHTML('beforeend', html);
+}
+
+function collectRepeater(containerId, type) {
+    const items = [];
+    document.querySelectorAll(`#${containerId} .repeater-item`).forEach(row => {
+        if(type === 'menu') {
+            items.push({ label: row.querySelector('.menu-label').value, link: row.querySelector('.menu-link').value });
+        } else if(type === 'social') {
+            items.push({ label: row.querySelector('.social-icon').value, link: row.querySelector('.social-link').value });
+        } else if(type === 'meta') {
+            const val = row.querySelector('.meta-val').value;
+            if(val) items.push(val);
+        }
+    });
+    return items;
 }
 
 async function saveGlobalSettings() {
@@ -304,19 +495,28 @@ async function saveGlobalSettings() {
         
         // Save Robots.txt
         const robSha = await getLatestFileSha('robots.txt');
-        await githubReq('robots.txt', 'PUT', { message: 'Up Robots', content: b64EncodeUnicode(s.robotsTxt), sha: robSha });
+        if (robSha) {
+             // Logic to check difference could go here, but robots usually small
+             await githubReq('robots.txt', 'PUT', { message: 'Up Robots', content: b64EncodeUnicode(s.robotsTxt), sha: robSha });
+        } else {
+             await githubReq('robots.txt', 'PUT', { message: 'Init Robots', content: b64EncodeUnicode(s.robotsTxt) });
+        }
 
         if(s.enable404) {
             const sha404 = await getLatestFileSha('contents/404.html');
             const html404 = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=${s.siteUrl}/"></head><body>Redirecting...</body></html>`;
-            await githubReq('contents/404.html', 'PUT', { message: 'Up 404', content: b64EncodeUnicode(html404), sha: sha404 });
+            if (sha404) {
+                 await githubReq('contents/404.html', 'PUT', { message: 'Up 404', content: b64EncodeUnicode(html404), sha: sha404 });
+            } else {
+                 await githubReq('contents/404.html', 'PUT', { message: 'Init 404', content: b64EncodeUnicode(html404) });
+            }
         }
         showToast('Settings Saved!');
     } catch(e) { showToast(e.message, true); }
     finally { showLoader(false); }
 }
 
-// --- 5. UI LOGIC (Categories & Editor) ---
+// --- 7. UI LOGIC (Categories & Editor) ---
 function toggleCategorySettings() {
     const mode = document.getElementById('set-structure-mode').value;
     document.getElementById('category-settings-wrapper').classList.toggle('hidden', mode !== 'category');
@@ -476,7 +676,7 @@ async function updateContentIndex(slug, type, title, action = 'update', cats = [
     state.indexSha = (await res.json()).content.sha;
 }
 
-// --- 6. PUBLISHING ---
+// --- 8. PUBLISHING ---
 document.getElementById('save-btn').addEventListener('click', async () => {
     const title = document.getElementById('meta-title').value;
     const slug = document.getElementById('meta-slug').value;
@@ -687,7 +887,12 @@ async function generateCategoryPages(s, headerLinks, footerLinks, globalSocials)
         <script src="../../assets/js/article.js" defer></script></body></html>`;
 
         const sha = await getLatestFileSha(path);
-        await githubReq(`contents/${path}`, 'PUT', { message: `Up Cat ${cat.slug}`, content: b64EncodeUnicode(html), sha: sha });
+        if (sha) {
+             // Basic equality check could go here if optimized, but cat pages change often
+             await githubReq(`contents/${path}`, 'PUT', { message: `Up Cat ${cat.slug}`, content: b64EncodeUnicode(html), sha: sha });
+        } else {
+             await githubReq(`contents/${path}`, 'PUT', { message: `Init Cat ${cat.slug}`, content: b64EncodeUnicode(html) });
+        }
     }
 }
 
@@ -832,6 +1037,14 @@ function initTinyMCE(cb) {
         toolbar: 'undo redo | blocks | bold italic | align | bullist numlist | link image media | code', 
         setup: (e) => { e.on('init', cb); e.on('change', () => e.save()); } 
     }); 
+}
+function handleAutoSave() {
+    if(state.currentSlug && tinymce.activeEditor && tinymce.activeEditor.isDirty()) {
+        const content = tinymce.activeEditor.getContent();
+        localStorage.setItem(`draft_${state.currentSlug}`, content);
+        const msg = document.getElementById('auto-draft-msg');
+        if(msg) { msg.innerText = "Draft Saved"; setTimeout(()=>msg.innerText="", 2000); }
+    }
 }
 async function bulkDelete(type) {
     const checked = Array.from(document.querySelectorAll(`.chk-${type}:checked`)).map(c => c.value);
