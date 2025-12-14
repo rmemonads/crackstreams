@@ -1,14 +1,15 @@
 /**
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
- * Fixes: Mobile Menu Design/CLS, Featured Image CLS, Social URL Logic, Unsaved Warning, API Deprecation, Invalid List Structure, Sticky Headers, UI Placeholders
- * Update: Fixed Duplicate CSS injection and Mobile Layout Shift via CSS Reordering.
- * Update 2: FIXED CLS for Featured Image (1200x628), Google Discover Compliance (max-image-preview:large), Aspect Ratio fallback.
+ * Fixes: Layout Shifts by moving ReadTime/Date logic to WRITE TIME (Publishing).
+ * Added: Strict CSS slotting for Titles, Breadcrumbs, and Meta.
+ * Google Discover: 1200x628 Aspect Ratio enforcement.
  */
  
 const SYSTEM_ASSETS = {
-    // 1. PERFORMANCE OPTIMIZED CSS
+    // 1. PERFORMANCE OPTIMIZED CSS (Zero Layout Shift Version)
     "assets/css/article.css": `
-/* 1. FONTS (Centralized) */
+/* 1. FONTS */
+/* swap helps text appear, min-heights below prevent shift when it does */
 @font-face{font-family:'Poppins Fallback';src:local('Arial');ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%}
 @font-face{font-family:Poppins;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLDz8Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -30,7 +31,10 @@ const SYSTEM_ASSETS = {
 
 /* 4. GENERAL STYLES */
 html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
-h1 { font-size: 2.5rem; line-height: 1.2; margin: 0.67em 0; }
+
+/* Title Slotting: Prevent shift when loading font */
+h1 { font-size: 2.5rem; line-height: 1.2; margin: 0.67em 0; min-height: 1.2em; }
+
 a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var(--primary-color)}
 
 /* Progress Bar */
@@ -45,11 +49,13 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 body.menu-open .burger { opacity: 0; pointer-events: none; }
 .nav-close-btn { display: none; position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1; z-index: 2002; }
 
-/* Page Header & Meta */
+/* Page Header & Meta - Pre-reserved Space */
 .page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto; min-height: 200px;}
-.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize; min-height: 1.5em; display:block;}
+/* Breadcrumbs height reserved */
+.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize; min-height: 1.5em; display:block; line-height: 1.5;}
 .page-title{font-size:clamp(2rem,5vw,3rem);font-weight:700;margin-bottom:.8rem;line-height:1.2;color:#fff; min-height: 1.2em;}
-.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap; min-height: 34px;}
+/* Meta container reserved */
+.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap; min-height: 34px; line-height: 1.5;}
 .page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color); background-color: #333; aspect-ratio: 1/1;}
 
 /* Featured Image - STRICT 1200x628 Aspect Ratio (1.91:1) */
@@ -150,31 +156,9 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
 @media(max-width:1200px){.ad-sticky-left,.ad-sticky-right{display:none}}
 @media(max-width:768px){.ad-sticky-footer{height:auto;padding:5px}.ad-sticky-footer img{max-width:100%;height:auto}}
 `,
-    // 2. JS UTILS
+    // 2. JS UTILS - CLEANED (Removed CLS-causing logic)
     "assets/js/article.js": `
 document.addEventListener('DOMContentLoaded', () => {
-    // Breadcrumbs
-    const path = window.location.pathname;
-    const isPost = path.includes('/blog/');
-    const slug = path.split('/').filter(Boolean).pop() || 'Home';
-    const crumbSpan = document.getElementById('dynamicBreadcrumbSlug');
-    if(crumbSpan) {
-        if(isPost) crumbSpan.innerHTML = '<a href="../" style="color:var(--text-color-secondary)">Blog</a> <span>/</span> ' + slug.replace(/-/g, ' ');
-        else crumbSpan.textContent = slug.replace(/-/g, ' ');
-    }
-    // Meta (Date)
-    const lastMod = new Date(document.lastModified);
-    if(document.getElementById('dynamicDate')) document.getElementById('dynamicDate').textContent = lastMod.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    
-    // Accurate Reading Time
-    const content = document.querySelector('.article-container');
-    if(content && document.getElementById('dynamicReadingTime')) {
-        const text = content.innerText || "";
-        const wpm = 225;
-        const words = text.trim().split(/\\s+/).length;
-        const time = Math.ceil(words / wpm);
-        document.getElementById('dynamicReadingTime').textContent = time + " Min Read";
-    }
     // Progress Bar
     const progressBar = document.getElementById('progressBar');
     let ticking = false;
@@ -188,41 +172,37 @@ document.addEventListener('DOMContentLoaded', () => {
             ticking = true;
         }
     });
-    // Mobile Nav Logic (Refined & Fixed List Structure & Burger Toggle)
+
+    // Mobile Nav Logic (Burger Toggle)
     const burger = document.querySelector('.burger');
     const nav = document.querySelector('.nav-links');
     const body = document.body;
     
     function closeMenu() {
         if(nav) nav.classList.remove('nav-active');
-        if(body) body.classList.remove('menu-open'); // Logic for hiding burger
+        if(body) body.classList.remove('menu-open');
     }
     
     if(burger && nav) {
-        // Fix: Wrap button in LI to satisfy strict list structure
         if(!document.querySelector('.nav-close-btn')) {
             const li = document.createElement('li');
             li.style.listStyle = 'none';
             li.style.position = 'absolute';
             li.style.top = '0';
             li.style.right = '0';
-            
             const btn = document.createElement('button');
             btn.className = 'nav-close-btn';
             btn.innerHTML = '&times;';
             btn.setAttribute('aria-label', 'Close Menu');
             btn.onclick = closeMenu;
-            
             li.appendChild(btn);
             nav.appendChild(li);
         }
         
         burger.addEventListener('click', () => {
             nav.classList.toggle('nav-active');
-            body.classList.toggle('menu-open'); // Toggles visibility of burger via CSS
+            body.classList.toggle('menu-open');
         });
-        
-        // Close on link click
         nav.querySelectorAll('a').forEach(l => l.addEventListener('click', closeMenu));
     }
     
@@ -720,6 +700,20 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     const datePublished = entry ? entry.date : new Date().toISOString();
     const dateModified = new Date().toISOString();
 
+    // CLS FIX: CALCULATE READING TIME & DATE NOW (Write Time Strategy)
+    const rawText = tinymce.activeEditor.getBody().textContent || "";
+    const wpm = 225;
+    const words = rawText.trim().split(/\s+/).length;
+    const readTime = Math.ceil(words / wpm) + " Min Read";
+    
+    const dateObj = new Date(datePublished);
+    const dateStr = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    
+    // CLS FIX: GENERATE BREADCRUMBS NOW
+    const breadcrumbHtml = isPost 
+        ? `<a href="../" style="color:var(--text-color-secondary)">Blog</a> <span>/</span> ${slug.replace(/-/g, ' ')}` 
+        : slug.replace(/-/g, ' ');
+
     const schemaJson = generateFinalSchema(fullUrl, title, bannerUrl, author.name, datePublished, dateModified);
     const breadCrumbDisplay = document.getElementById('include-breadcrumb-schema').checked ? '' : 'style="display:none"';
 
@@ -789,12 +783,12 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <main>
         <section class="page-header-section">
             <div class="breadcrumbs" ${breadCrumbDisplay}>
-                 <span id="dynamicBreadcrumbSlug"></span>
+                 ${breadcrumbHtml}
             </div>
             <h1 class="page-title">${title}</h1>
             <div class="page-meta">
                <img src="${author.image}" class="auth-tiny" alt="author" width="32" height="32">
-               <span>By ${author.name}</span> <span style="margin:0 5px">•</span> <span id="dynamicDate"></span> <span style="margin:0 5px">•</span> <span id="dynamicReadingTime"></span>
+               <span>By ${author.name}</span> <span style="margin:0 5px">•</span> ${dateStr} <span style="margin:0 5px">•</span> ${readTime}
             </div>
         </section>
 
