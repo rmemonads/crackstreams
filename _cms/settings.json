@@ -61,6 +61,6 @@
   "newsPubName": "",
   "robotsTxt": "User-agent: *\nDisallow:\nSitemap: https://crackstreams.help/sitemap.xml",
   "sitemapExclude": "",
-  "enableShare": false,
+  "enableShare": true,
   "shareExclude": ""
 }
