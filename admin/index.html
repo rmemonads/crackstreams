@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Serverless CMS</title>
-    <!-- Font Awesome (Admin UI Only) -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Fontello -->
     <link rel="stylesheet" href="fontello.css"> 
@@ -77,7 +77,7 @@
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('posts-list-body', this)"></th><th>Title</th><th>Structure</th><th>Last Updated</th><th>Actions</th></tr></thead>
+                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('posts-list-body', this)"></th><th>Title</th><th>Category</th><th>Last Updated</th><th>Actions</th></tr></thead>
                         <tbody id="posts-list-body"></tbody>
                     </table>
                 </div>
@@ -118,7 +118,7 @@
                         </div>
                         <div class="form-group">
                             <label>Site URL</label>
-                            <p class="hint">No trailing slash (e.g. https://mysite.com)</p>
+                            <p class="hint">No trailing slash (e.g., https://mysite.com)</p>
                             <input type="text" id="set-site-url">
                         </div>
                         <div class="form-group">
@@ -131,22 +131,22 @@
                         </div>
                     </div>
 
-                    <!-- Structure Mode -->
+                    <!-- Structure & Categories -->
                     <div class="settings-card">
                         <h3>Website Structure</h3>
-                        <p class="hint">Choose how posts are organized.</p>
                         <div class="form-group">
-                            <label>Primary Mode</label>
+                            <label>Structure Mode</label>
                             <select id="set-structure-mode" onchange="toggleCategorySettings()">
                                 <option value="blog">Blog Only (Simple)</option>
                                 <option value="category">Categories (Advanced)</option>
                             </select>
                         </div>
+                        
                         <div id="category-settings-wrapper" class="hidden">
                             <hr>
                             <h4>Category Manager</h4>
                             <div class="two-col" style="margin-bottom:10px;">
-                                <input type="text" id="new-cat-name" placeholder="Name (e.g. Tech)">
+                                <input type="text" id="new-cat-name" placeholder="Name (e.g. Technology)">
                                 <button class="btn-secondary" onclick="addCategoryItem()">Add</button>
                             </div>
                             <div id="categories-list" class="simple-list"></div>
@@ -154,12 +154,16 @@
                             <div class="form-group" style="margin-top:15px;">
                                 <label>Google News Category</label>
                                 <select id="set-news-category"><option value="">-- None --</option></select>
-                                <p class="hint">Posts in this category (last 48h) go to sitemap-news.xml</p>
+                                <p class="hint">Posts here (last 48h) go to sitemap-news.xml</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Publication Name</label>
+                                <input type="text" id="set-news-pub-name" placeholder="Exact Google News Name">
                             </div>
                         </div>
                     </div>
 
-                    <!-- SEO & Sitemaps -->
+                    <!-- SEO & Robots -->
                     <div class="settings-card full-width-card">
                         <h3>SEO & Robots</h3>
                         <div class="two-col">
@@ -184,7 +188,7 @@
                         </div>
                     </div>
 
-                    <!-- Social & Share -->
+                    <!-- Social Sharing -->
                     <div class="settings-card full-width-card">
                         <h3>Social Sharing</h3>
                         <div class="form-group">
@@ -201,7 +205,7 @@
 
                     <!-- Menus & Footer -->
                     <div class="settings-card full-width-card">
-                        <h3>Menus</h3>
+                        <h3>Menus & Site Socials</h3>
                         <div class="two-col">
                             <div>
                                 <label class="schema-label">Header Menu</label>
@@ -213,6 +217,11 @@
                                 <div id="footer-menu-container" class="repeater-container"></div>
                                 <button class="add-repeater-btn" onclick="addMenuItem('footer-menu-container')">+ Add Link</button>
                             </div>
+                        </div>
+                        <div style="margin-top:15px;">
+                            <label class="schema-label">Site Social Links (Footer)</label>
+                            <div id="social-links-container" class="repeater-container"></div>
+                            <button class="add-repeater-btn" onclick="addSocialItem()">+ Add Social</button>
                         </div>
                     </div>
 
@@ -243,11 +252,6 @@
                         <div class="form-group">
                             <label>Global Head Scripts</label>
                             <textarea id="set-custom-head-js" rows="4"></textarea>
-                        </div>
-                        <div style="margin-top:15px;">
-                            <label class="schema-label">Site Social Links (Footer)</label>
-                            <div id="social-links-container" class="repeater-container"></div>
-                            <button class="add-repeater-btn" onclick="addSocialItem()">+ Add Social</button>
                         </div>
                     </div>
                     
@@ -288,16 +292,15 @@
                                 <input type="text" id="meta-slug">
                             </div>
                             
-                            <!-- Category Section (Visible only if Structure Mode = Category) -->
+                            <!-- Categories (Toggle Visibility based on Mode) -->
                             <div id="editor-category-section" class="hidden">
                                 <div class="form-group">
                                     <label>Categories (Select Multiple)</label>
                                     <div id="editor-categories-box" class="checkbox-group-box"></div>
                                 </div>
                             </div>
-                            <!-- Blog Only Message -->
                             <div id="editor-blog-message" class="hidden">
-                                <p class="hint"><i class="fa-solid fa-info-circle"></i> Mode: <strong>Blog Only</strong>. Post will appear in /blog/.</p>
+                                <p class="hint"><i class="fa-solid fa-info-circle"></i> Mode: <strong>Blog Only</strong>. Post will be filed under /blog/.</p>
                             </div>
 
                             <div class="form-group">
@@ -311,7 +314,7 @@
                             <div class="form-group">
                                 <label>Canonical URL</label>
                                 <input type="text" id="meta-canonical" placeholder="Leave empty for default">
-                                <p class="hint">Use if re-publishing content.</p>
+                                <p class="hint">Use if re-publishing external content.</p>
                             </div>
                             <div class="form-group">
                                 <label>Featured Image (1200x628)</label>
