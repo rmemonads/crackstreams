@@ -137,17 +137,35 @@ function githubReq(endpoint, method = 'GET', body = null) {
     const url = `https://api.github.com/repos/${state.owner}/${state.repo}/${endpoint}${method === 'GET' ? '?t='+Date.now() : ''}`; 
     const opts = { method, headers: { Authorization: `Bearer ${state.token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' } }; 
     if (body) opts.body = JSON.stringify(body); 
+    
     return fetch(url, opts).then(async r => {
-        if(!r.ok && method==='GET' && r.status===404) return null; 
-        if(!r.ok) {
-            const err = await r.json().catch(()=>({}));
-            throw new Error(err.message || `API Error ${r.status}`);
+        // Explicitly handle 404 for GET requests as "File Not Found" (null) instead of error
+        if (r.status === 404 && method === 'GET') return null; 
+        
+        if (!r.ok) {
+            // Attempt to get error message, safely handle parse errors
+            const errBody = await r.json().catch(() => ({ message: r.statusText }));
+            throw new Error(errBody.message || `API Error ${r.status}`);
         }
         return r;
     }); 
 }
 
-async function getLatestFileSha(path) { try { const res = await githubReq(`contents/${path}`); return res ? (await res.json()).sha : null; } catch (e) { return null; } }
+async function getLatestFileSha(path) { 
+    try { 
+        const res = await githubReq(`contents/${path}`); 
+        // If githubReq returned null (404), return null here
+        if (res === null) return null;
+        
+        const data = await res.json(); 
+        return data.sha; 
+    } catch (e) { 
+        // If it's a real API error (401, 403, 500), THROW it. Don't return null.
+        // Returning null for a 500 error causes the "Update without SHA" bug.
+        console.error(`SHA Fetch Error for ${path}:`, e);
+        throw e; 
+    } 
+}
 
 function setupSidebarEvents() { document.getElementById('sidebar-toggle-btn').addEventListener('click', () => { document.getElementById('main-sidebar').classList.toggle('collapsed'); if(window.innerWidth <= 768) document.getElementById('main-sidebar').classList.toggle('active-mobile'); }); }
 
@@ -301,26 +319,27 @@ function loadList(type) {
 // --- 6. SETTINGS & REPEATERS ---
 function populateSettingsForm() {
     const s = state.settings || {};
-    document.getElementById('set-site-title').value = s.siteTitle || '';
-    document.getElementById('set-site-url').value = s.siteUrl || '';
-    document.getElementById('set-favicon').value = s.favicon || '';
-    document.getElementById('set-copyright').value = s.copyright || '';
-    document.getElementById('set-ga-id').value = s.gaId || '';
+    // Safe assignment with optional chaining
+    if(document.getElementById('set-site-title')) document.getElementById('set-site-title').value = s.siteTitle || '';
+    if(document.getElementById('set-site-url')) document.getElementById('set-site-url').value = s.siteUrl || '';
+    if(document.getElementById('set-favicon')) document.getElementById('set-favicon').value = s.favicon || '';
+    if(document.getElementById('set-copyright')) document.getElementById('set-copyright').value = s.copyright || '';
+    if(document.getElementById('set-ga-id')) document.getElementById('set-ga-id').value = s.gaId || '';
     
-    // ANTI-ADBLOCK ID
+    // ANTI-ADBLOCK ID SAFETY
     if(document.getElementById('set-monetization-auto')) {
         document.getElementById('set-monetization-auto').value = s.adsenseAuto || '';
     }
 
-    document.getElementById('set-custom-css').value = s.customCss || '';
-    document.getElementById('set-custom-head-js').value = s.customHeadJs || '';
-    document.getElementById('set-404-redirect').checked = s.enable404 || false;
-    document.getElementById('set-structure-mode').value = s.structureMode || 'blog';
-    document.getElementById('set-robots-txt').value = s.robotsTxt || "User-agent: *\nDisallow:";
-    document.getElementById('set-sitemap-exclude').value = s.sitemapExclude || '';
-    document.getElementById('set-enable-share').checked = s.enableShare || false;
-    document.getElementById('set-share-exclude').value = s.shareExclude || '';
-    document.getElementById('set-news-pub-name').value = s.newsPubName || '';
+    if(document.getElementById('set-custom-css')) document.getElementById('set-custom-css').value = s.customCss || '';
+    if(document.getElementById('set-custom-head-js')) document.getElementById('set-custom-head-js').value = s.customHeadJs || '';
+    if(document.getElementById('set-404-redirect')) document.getElementById('set-404-redirect').checked = s.enable404 || false;
+    if(document.getElementById('set-structure-mode')) document.getElementById('set-structure-mode').value = s.structureMode || 'blog';
+    if(document.getElementById('set-robots-txt')) document.getElementById('set-robots-txt').value = s.robotsTxt || "User-agent: *\nDisallow:";
+    if(document.getElementById('set-sitemap-exclude')) document.getElementById('set-sitemap-exclude').value = s.sitemapExclude || '';
+    if(document.getElementById('set-enable-share')) document.getElementById('set-enable-share').checked = s.enableShare || false;
+    if(document.getElementById('set-share-exclude')) document.getElementById('set-share-exclude').value = s.shareExclude || '';
+    if(document.getElementById('set-news-pub-name')) document.getElementById('set-news-pub-name').value = s.newsPubName || '';
     
     toggleCategorySettings();
     renderCategoriesList();
@@ -342,6 +361,7 @@ function populateSettingsForm() {
 
 function renderRepeater(containerId, data, type) {
     const c = document.getElementById(containerId);
+    if(!c) return;
     c.innerHTML = '';
     (data || []).forEach(item => {
         if(type === 'menu') addMenuItem(containerId, item.label, item.link);
@@ -466,30 +486,29 @@ function collectRepeater(containerId, type) {
 async function saveGlobalSettings() {
     showLoader(true, "Saving Settings...");
     try {
-        let siteUrl = document.getElementById('set-site-url').value.trim();
+        let siteUrl = document.getElementById('set-site-url')?.value.trim() || '';
         if(siteUrl && siteUrl.endsWith('/')) siteUrl = siteUrl.slice(0, -1); 
-
-        const adsenseEl = document.getElementById('set-monetization-auto');
         
         // Construct new settings object strictly from DOM to avoid pollution
         const newSettings = {
             ...state.settings,
-            siteTitle: document.getElementById('set-site-title').value,
+            siteTitle: document.getElementById('set-site-title')?.value || '',
             siteUrl: siteUrl,
-            favicon: document.getElementById('set-favicon').value,
-            copyright: document.getElementById('set-copyright').value,
-            enable404: document.getElementById('set-404-redirect').checked,
-            gaId: document.getElementById('set-ga-id').value,
-            adsenseAuto: adsenseEl ? adsenseEl.value : '',
-            customCss: document.getElementById('set-custom-css').value,
-            customHeadJs: document.getElementById('set-custom-head-js').value,
-            structureMode: document.getElementById('set-structure-mode').value,
-            newsCategory: document.getElementById('set-news-category').value,
-            newsPubName: document.getElementById('set-news-pub-name').value,
-            robotsTxt: document.getElementById('set-robots-txt').value,
-            sitemapExclude: document.getElementById('set-sitemap-exclude').value,
-            enableShare: document.getElementById('set-enable-share').checked,
-            shareExclude: document.getElementById('set-share-exclude').value,
+            favicon: document.getElementById('set-favicon')?.value || '',
+            copyright: document.getElementById('set-copyright')?.value || '',
+            enable404: document.getElementById('set-404-redirect')?.checked || false,
+            gaId: document.getElementById('set-ga-id')?.value || '',
+            // Optional chaining helps if adblock removed this element
+            adsenseAuto: document.getElementById('set-monetization-auto')?.value || '',
+            customCss: document.getElementById('set-custom-css')?.value || '',
+            customHeadJs: document.getElementById('set-custom-head-js')?.value || '',
+            structureMode: document.getElementById('set-structure-mode')?.value || 'blog',
+            newsCategory: document.getElementById('set-news-category')?.value || '',
+            newsPubName: document.getElementById('set-news-pub-name')?.value || '',
+            robotsTxt: document.getElementById('set-robots-txt')?.value || '',
+            sitemapExclude: document.getElementById('set-sitemap-exclude')?.value || '',
+            enableShare: document.getElementById('set-enable-share')?.checked || false,
+            shareExclude: document.getElementById('set-share-exclude')?.value || '',
             verifications: collectRepeater('meta-verify-container', 'meta'),
             headerMenu: collectRepeater('header-menu-container', 'menu'),
             footerMenu: collectRepeater('footer-menu-container', 'menu'),
@@ -502,27 +521,26 @@ async function saveGlobalSettings() {
             const id = b.dataset.id;
             const socials = [];
             b.querySelectorAll(`#nested-socials-${id} .mini-row`).forEach(row => { 
-                socials.push({ icon: row.querySelector('.mini-icon').value, link: row.querySelector('.mini-link').value }); 
+                socials.push({ icon: row.querySelector('.mini-icon')?.value, link: row.querySelector('.mini-link')?.value }); 
             });
             newSettings.authors.push({ 
                 id: id, 
-                name: b.querySelector('.auth-name').value, 
-                image: b.querySelector('.auth-img').value, 
-                bio: b.querySelector('.auth-bio').value, 
+                name: b.querySelector('.auth-name')?.value, 
+                image: b.querySelector('.auth-img')?.value, 
+                bio: b.querySelector('.auth-bio')?.value, 
                 socials: socials 
             });
         });
         
         document.querySelectorAll('.sponsor-unit-block').forEach(b => { 
             newSettings.ads.push({ 
-                code: b.querySelector('.ad-code-input').value, 
-                placement: b.querySelector('.ad-place-input').value, 
-                exclude: b.querySelector('.ad-exclude-input').value 
+                code: b.querySelector('.ad-code-input')?.value, 
+                placement: b.querySelector('.ad-place-input')?.value, 
+                exclude: b.querySelector('.ad-exclude-input')?.value 
             }); 
         });
 
         // FETCH LATEST SHA BEFORE SAVING to ensure no conflicts
-        // If file doesn't exist, freshSha is null, which is fine for creation.
         const freshSha = await getLatestFileSha('_cms/settings.json');
         
         const body = { message: 'Update Settings', content: b64EncodeUnicode(JSON.stringify(newSettings, null, 2)) };
@@ -555,7 +573,7 @@ async function saveGlobalSettings() {
 
 // --- 7. UI LOGIC (Categories & Editor) ---
 function toggleCategorySettings() {
-    const mode = document.getElementById('set-structure-mode').value;
+    const mode = document.getElementById('set-structure-mode')?.value;
     document.getElementById('category-settings-wrapper').classList.toggle('hidden', mode !== 'category');
 }
 function addCategoryItem() {
@@ -620,7 +638,12 @@ function createNew(type) {
 
     addDefaultArticleSchema(true);
     switchPanel('editor');
-    initTinyMCE(() => { if(tinymce.activeEditor) tinymce.activeEditor.setContent(''); });
+    
+    // Ensure TinyMCE is initialized safely
+    requestAnimationFrame(() => {
+        initTinyMCE(() => { if(tinymce.activeEditor) tinymce.activeEditor.setContent(''); });
+    });
+    
     document.getElementById('meta-title').oninput = function() { if(!state.currentSlug) document.getElementById('meta-slug').value = slugify(this.value); };
     switchSidebarTab('settings');
 }
@@ -678,7 +701,11 @@ async function editContent(type, slug) {
         
         const savedDraft = localStorage.getItem(`draft_${slug}`);
         if(savedDraft && savedDraft !== content) { if(confirm('Restore draft?')) content = savedDraft; }
-        initTinyMCE(() => tinymce.activeEditor.setContent(content));
+        
+        // Init TinyMCE safely
+        requestAnimationFrame(() => {
+            initTinyMCE(() => tinymce.activeEditor.setContent(content));
+        });
         
         // Schema logic
         document.getElementById('schema-container').innerHTML = '';
