@@ -6,8 +6,6 @@
     <title>Ultimate Serverless CMS</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Fontello -->
-    <link rel="stylesheet" href="fontello.css"> 
     <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
@@ -21,7 +19,7 @@
             <form id="login-form">
                 <div class="input-group">
                     <label>GitHub Token (PAT)</label>
-                    <input type="password" id="gh-token" required autocomplete="current-password">
+                    <input type="password" id="gh-token" required autocomplete="current-password" placeholder="ghp_...">
                 </div>
                 <div class="input-group">
                     <label>Repo Owner</label>
@@ -184,6 +182,11 @@
                                     <input type="checkbox" id="set-404-redirect">
                                     <span class="chk-text">Generate Smart 404.html</span>
                                 </label>
+                                <div style="margin-top:10px;">
+                                    <label>Meta Verifications</label>
+                                    <div id="meta-verify-container" class="repeater-container"></div>
+                                    <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Tag</button>
+                                </div>
                             </div>
                         </div>
                     </div>
