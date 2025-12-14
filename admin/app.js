@@ -6,6 +6,7 @@
  * - Inline SVG Social Sharing
  * - Structure Toggle (Blog vs Category)
  * - Fixed: Login/Init Sequence
+ * - Fixed: AdBlockers & SHA Concurrency
  */
 
 // --- 1. CONFIG & ASSETS ---
@@ -259,7 +260,7 @@ async function loadContentIndex() {
     } catch(e) { console.error(e); state.contentIndex = []; }
 }
 
-// --- 5. DATA TABLES (MISSING FUNCTION ADDED) ---
+// --- 5. DATA TABLES ---
 function loadList(type) {
     const tbody = document.getElementById(`${type}s-list-body`);
     if(!tbody) return;
@@ -300,7 +301,7 @@ function loadList(type) {
     toggleBulkBtn(type);
 }
 
-// --- 6. SETTINGS & REPEATERS (MISSING FUNCTIONS ADDED) ---
+// --- 6. SETTINGS & REPEATERS ---
 function populateSettingsForm() {
     const s = state.settings || {};
     document.getElementById('set-site-title').value = s.siteTitle || '';
@@ -308,7 +309,12 @@ function populateSettingsForm() {
     document.getElementById('set-favicon').value = s.favicon || '';
     document.getElementById('set-copyright').value = s.copyright || '';
     document.getElementById('set-ga-id').value = s.gaId || '';
-    document.getElementById('set-adsense-auto').value = s.adsenseAuto || '';
+    
+    // ANTI-ADBLOCK ID
+    if(document.getElementById('set-monetization-auto')) {
+        document.getElementById('set-monetization-auto').value = s.adsenseAuto || '';
+    }
+
     document.getElementById('set-custom-css').value = s.customCss || '';
     document.getElementById('set-custom-head-js').value = s.customHeadJs || '';
     document.getElementById('set-404-redirect').checked = s.enable404 || false;
@@ -329,7 +335,12 @@ function populateSettingsForm() {
     renderRepeater('social-links-container', s.socialLinks, 'social');
     
     const aContainer = document.getElementById('authors-repeater-container'); if(aContainer) { aContainer.innerHTML = ''; (s.authors || []).forEach(a => addAuthorItem(a)); }
-    const adContainer = document.getElementById('ads-repeater-container'); if(adContainer) { adContainer.innerHTML = ''; (s.ads || []).forEach(ad => addAdUnit(ad)); }
+    
+    const adContainer = document.getElementById('ads-repeater-container'); 
+    if(adContainer) { 
+        adContainer.innerHTML = ''; 
+        (s.ads || []).forEach(ad => addAdUnit(ad)); 
+    }
 }
 
 function renderRepeater(containerId, data, type) {
@@ -337,7 +348,7 @@ function renderRepeater(containerId, data, type) {
     c.innerHTML = '';
     (data || []).forEach(item => {
         if(type === 'menu') addMenuItem(containerId, item.label, item.link);
-        if(type === 'social') addSocialItem(item.label, item.link); // Using label as icon class
+        if(type === 'social') addSocialItem(item.label, item.link); 
     });
 }
 
@@ -398,11 +409,12 @@ function addNestedSocial(containerId) {
 }
 
 function addAdUnit(data = {}) {
+    // UPDATED CLASSES TO AVOID ADBLOCK
     const html = `
-    <div class="ad-unit-block">
-        <button class="ad-remove-btn" onclick="this.parentElement.remove()">x</button>
+    <div class="sponsor-unit-block">
+        <button class="sponsor-remove-btn" onclick="this.parentElement.remove()">x</button>
         <textarea class="code-editor ad-code-input" rows="3" placeholder="Paste Ad Code Here...">${data.code || ''}</textarea>
-        <div class="ad-meta-row">
+        <div class="sponsor-meta-row">
             <div>
                 <label class="schema-label">Placement</label>
                 <select class="ad-place-input">
@@ -450,66 +462,71 @@ function collectRepeater(containerId, type) {
 
 async function saveGlobalSettings() {
     showLoader(true, "Saving Settings...");
-    let siteUrl = document.getElementById('set-site-url').value.trim();
-    if(siteUrl && siteUrl.endsWith('/')) siteUrl = siteUrl.slice(0, -1); 
-
-    const s = {
-        ...state.settings,
-        siteTitle: document.getElementById('set-site-title').value,
-        siteUrl: siteUrl,
-        favicon: document.getElementById('set-favicon').value,
-        copyright: document.getElementById('set-copyright').value,
-        enable404: document.getElementById('set-404-redirect').checked,
-        gaId: document.getElementById('set-ga-id').value,
-        adsenseAuto: document.getElementById('set-adsense-auto').value,
-        customCss: document.getElementById('set-custom-css').value,
-        customHeadJs: document.getElementById('set-custom-head-js').value,
-        structureMode: document.getElementById('set-structure-mode').value,
-        newsCategory: document.getElementById('set-news-category').value,
-        newsPubName: document.getElementById('set-news-pub-name').value,
-        robotsTxt: document.getElementById('set-robots-txt').value,
-        sitemapExclude: document.getElementById('set-sitemap-exclude').value,
-        enableShare: document.getElementById('set-enable-share').checked,
-        shareExclude: document.getElementById('set-share-exclude').value,
-        verifications: collectRepeater('meta-verify-container', 'meta'),
-        headerMenu: collectRepeater('header-menu-container', 'menu'),
-        footerMenu: collectRepeater('footer-menu-container', 'menu'),
-        socialLinks: collectRepeater('social-links-container', 'social'),
-        authors: [], ads: []
-    };
-    
-    document.querySelectorAll('.author-card').forEach(b => {
-        const id = b.dataset.id;
-        const socials = [];
-        b.querySelectorAll(`#nested-socials-${id} .mini-row`).forEach(row => { socials.push({ icon: row.querySelector('.mini-icon').value, link: row.querySelector('.mini-link').value }); });
-        s.authors.push({ id: id, name: b.querySelector('.auth-name').value, image: b.querySelector('.auth-img').value, bio: b.querySelector('.auth-bio').value, socials: socials });
-    });
-    document.querySelectorAll('.ad-unit-block').forEach(b => { s.ads.push({ code: b.querySelector('.ad-code-input').value, placement: b.querySelector('.ad-place-input').value, exclude: b.querySelector('.ad-exclude-input').value }); });
-
-    state.settings = s;
     try {
+        let siteUrl = document.getElementById('set-site-url').value.trim();
+        if(siteUrl && siteUrl.endsWith('/')) siteUrl = siteUrl.slice(0, -1); 
+
+        const adsenseEl = document.getElementById('set-monetization-auto');
+        
+        const s = {
+            ...state.settings,
+            siteTitle: document.getElementById('set-site-title').value,
+            siteUrl: siteUrl,
+            favicon: document.getElementById('set-favicon').value,
+            copyright: document.getElementById('set-copyright').value,
+            enable404: document.getElementById('set-404-redirect').checked,
+            gaId: document.getElementById('set-ga-id').value,
+            adsenseAuto: adsenseEl ? adsenseEl.value : '',
+            customCss: document.getElementById('set-custom-css').value,
+            customHeadJs: document.getElementById('set-custom-head-js').value,
+            structureMode: document.getElementById('set-structure-mode').value,
+            newsCategory: document.getElementById('set-news-category').value,
+            newsPubName: document.getElementById('set-news-pub-name').value,
+            robotsTxt: document.getElementById('set-robots-txt').value,
+            sitemapExclude: document.getElementById('set-sitemap-exclude').value,
+            enableShare: document.getElementById('set-enable-share').checked,
+            shareExclude: document.getElementById('set-share-exclude').value,
+            verifications: collectRepeater('meta-verify-container', 'meta'),
+            headerMenu: collectRepeater('header-menu-container', 'menu'),
+            footerMenu: collectRepeater('footer-menu-container', 'menu'),
+            socialLinks: collectRepeater('social-links-container', 'social'),
+            authors: [], ads: []
+        };
+        
+        document.querySelectorAll('.author-card').forEach(b => {
+            const id = b.dataset.id;
+            const socials = [];
+            b.querySelectorAll(`#nested-socials-${id} .mini-row`).forEach(row => { socials.push({ icon: row.querySelector('.mini-icon').value, link: row.querySelector('.mini-link').value }); });
+            s.authors.push({ id: id, name: b.querySelector('.auth-name').value, image: b.querySelector('.auth-img').value, bio: b.querySelector('.auth-bio').value, socials: socials });
+        });
+        
+        // UPDATED CLASS SELECTOR
+        document.querySelectorAll('.sponsor-unit-block').forEach(b => { 
+            s.ads.push({ 
+                code: b.querySelector('.ad-code-input').value, 
+                placement: b.querySelector('.ad-place-input').value, 
+                exclude: b.querySelector('.ad-exclude-input').value 
+            }); 
+        });
+
+        state.settings = s;
+
+        // FETCH LATEST SHA BEFORE SAVING
+        const freshSha = await getLatestFileSha('_cms/settings.json');
+        
         const body = { message: 'Update Settings', content: b64EncodeUnicode(JSON.stringify(s, null, 2)) };
-        if(state.settingsSha) body.sha = state.settingsSha;
+        if(freshSha) body.sha = freshSha;
         const res = await githubReq('contents/_cms/settings.json', 'PUT', body);
         state.settingsSha = await res.json().then(d => d.content.sha);
         
         // Save Robots.txt
         const robSha = await getLatestFileSha('robots.txt');
-        if (robSha) {
-             // Logic to check difference could go here, but robots usually small
-             await githubReq('robots.txt', 'PUT', { message: 'Up Robots', content: b64EncodeUnicode(s.robotsTxt), sha: robSha });
-        } else {
-             await githubReq('robots.txt', 'PUT', { message: 'Init Robots', content: b64EncodeUnicode(s.robotsTxt) });
-        }
+        await githubReq('robots.txt', 'PUT', { message: 'Up Robots', content: b64EncodeUnicode(s.robotsTxt), sha: robSha || undefined });
 
         if(s.enable404) {
             const sha404 = await getLatestFileSha('contents/404.html');
             const html404 = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=${s.siteUrl}/"></head><body>Redirecting...</body></html>`;
-            if (sha404) {
-                 await githubReq('contents/404.html', 'PUT', { message: 'Up 404', content: b64EncodeUnicode(html404), sha: sha404 });
-            } else {
-                 await githubReq('contents/404.html', 'PUT', { message: 'Init 404', content: b64EncodeUnicode(html404) });
-            }
+            await githubReq('contents/404.html', 'PUT', { message: 'Up 404', content: b64EncodeUnicode(html404), sha: sha404 || undefined });
         }
         showToast('Settings Saved!');
     } catch(e) { showToast(e.message, true); }
@@ -678,6 +695,12 @@ async function updateContentIndex(slug, type, title, action = 'update', cats = [
 
 // --- 8. PUBLISHING ---
 document.getElementById('save-btn').addEventListener('click', async () => {
+    // 1. VALIDATE EDITOR
+    if(!tinymce.activeEditor || tinymce.activeEditor.isHidden()) {
+        showToast("Editor error. Please refresh.", true);
+        return;
+    }
+
     const title = document.getElementById('meta-title').value;
     const slug = document.getElementById('meta-slug').value;
     if(!title || !slug) return showToast("Title & Slug Required", true);
@@ -833,6 +856,8 @@ document.getElementById('save-btn').addEventListener('click', async () => {
         }
         state.currentSha = null;
     }
+    
+    // FETCH LATEST SHA FOR THE HTML FILE
     const freshSha = await getLatestFileSha(path);
     const bodyReq = { message: `Update ${slug}`, content: b64EncodeUnicode(html) };
     if(freshSha) bodyReq.sha = freshSha;
@@ -840,6 +865,8 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     
     await githubReq(`contents/${path}`, 'PUT', bodyReq);
     
+    // REFRESH INDEX BEFORE SAVING TO AVOID CONFLICTS
+    await loadContentIndex(); 
     await updateContentIndex(slug, state.currentType, title, 'update', selectedCats);
     
     if(isPost && s.structureMode === 'category') {
@@ -1033,9 +1060,16 @@ function initTinyMCE(cb) {
         skin: 'oxide-dark', 
         content_css: 'dark', 
         height: '100%', 
+        auto_focus: 'tinymce-editor',
         plugins: 'preview searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons', 
         toolbar: 'undo redo | blocks | bold italic | align | bullist numlist | link image media | code', 
-        setup: (e) => { e.on('init', cb); e.on('change', () => e.save()); } 
+        setup: (e) => { 
+            e.on('init', () => {
+                e.getBody().style.fontSize = '1.1rem';
+                if(cb) cb();
+            }); 
+            e.on('change', () => e.save()); 
+        } 
     }); 
 }
 function handleAutoSave() {
