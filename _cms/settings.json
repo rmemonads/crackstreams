@@ -49,5 +49,22 @@
       ]
     }
   ],
-  "ads": []
+  "ads": [],
+  "categories": [
+    {
+      "name": "Test",
+      "slug": "test"
+    },
+    {
+      "name": "new 2",
+      "slug": "new-2"
+    }
+  ],
+  "structureMode": "category",
+  "newsCategory": "",
+  "newsPubName": "",
+  "robotsTxt": "User-agent: *\nDisallow:\nSitemap: https://crackstreams.help/sitemap.xml",
+  "sitemapExclude": "",
+  "enableShare": false,
+  "shareExclude": ""
 }
