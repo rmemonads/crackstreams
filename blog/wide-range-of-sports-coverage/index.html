@@ -18,7 +18,8 @@
     
     <style>
       
-/* 1. FONTS (Centralized) */
+/* 1. FONTS */
+/* swap helps text appear, min-heights below prevent shift when it does */
 @font-face{font-family:'Poppins Fallback';src:local('Arial');ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%}
 @font-face{font-family:Poppins;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLDz8Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:Poppins;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -40,7 +41,10 @@
 
 /* 4. GENERAL STYLES */
 html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:sans-serif;font-family:var(--font-family);background-color:var(--background-color);color:var(--text-color);line-height:1.7;overflow-x:hidden}
-h1 { font-size: 2.5rem; line-height: 1.2; margin: 0.67em 0; }
+
+/* Title Slotting: Prevent shift when loading font */
+h1 { font-size: 2.5rem; line-height: 1.2; margin: 0.67em 0; min-height: 1.2em; }
+
 a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var(--primary-color)}
 
 /* Progress Bar */
@@ -55,11 +59,13 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 body.menu-open .burger { opacity: 0; pointer-events: none; }
 .nav-close-btn { display: none; position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1; z-index: 2002; }
 
-/* Page Header & Meta */
+/* Page Header & Meta - Pre-reserved Space */
 .page-header-section{text-align:left;padding:3rem 0 1.5rem;max-width:var(--content-width);margin:0 auto; min-height: 200px;}
-.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize; min-height: 1.5em; display:block;}
+/* Breadcrumbs height reserved */
+.breadcrumbs{font-size:.9rem;color:var(--text-color-secondary);margin-bottom:1rem;text-transform:capitalize; min-height: 1.5em; display:block; line-height: 1.5;}
 .page-title{font-size:clamp(2rem,5vw,3rem);font-weight:700;margin-bottom:.8rem;line-height:1.2;color:#fff; min-height: 1.2em;}
-.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap; min-height: 34px;}
+/* Meta container reserved */
+.page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap; min-height: 34px; line-height: 1.5;}
 .page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color); background-color: #333; aspect-ratio: 1/1;}
 
 /* Featured Image - STRICT 1200x628 Aspect Ratio (1.91:1) */
@@ -202,7 +208,7 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
                 "name": "Games"
             },
             "datePublished": "2025-12-14T14:36:22.248Z",
-            "dateModified": "2025-12-14T14:58:41.645Z"
+            "dateModified": "2025-12-14T15:21:47.991Z"
         },
         {
             "@type": "BreadcrumbList",
@@ -229,6 +235,9 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
         },
         {
             "@type": "BreadcrumbList"
+        },
+        {
+            "@type": "BreadcrumbList"
         }
     ]
 }</script>
@@ -247,12 +256,12 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
     <main>
         <section class="page-header-section">
             <div class="breadcrumbs" >
-                 <span id="dynamicBreadcrumbSlug"></span>
+                 <a href="../" style="color:var(--text-color-secondary)">Blog</a> <span>/</span> wide range of sports coverage
             </div>
             <h1 class="page-title">Wide Range of Sports Coverage</h1>
             <div class="page-meta">
                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9zI4cub-hhiOJCLg6MWAufwOMXWJNiX1WYA&s" class="auth-tiny" alt="author" width="32" height="32">
-               <span>By Games</span> <span style="margin:0 5px">•</span> <span id="dynamicDate"></span> <span style="margin:0 5px">•</span> <span id="dynamicReadingTime"></span>
+               <span>By Games</span> <span style="margin:0 5px">•</span> December 14, 2025 <span style="margin:0 5px">•</span> 3 Min Read
             </div>
         </section>
 
