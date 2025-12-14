@@ -1,12 +1,6 @@
 /**
  * ULTIMATE SERVERLESS CMS - RANKING MACHINE EDITION
- * - Write-Time SEO (Zero Layout Shift)
- * - Dual Sitemap Generation (News + Standard)
- * - Professional Category Grids
- * - Inline SVG Social Sharing
- * - Structure Toggle (Blog vs Category)
- * - Fixed: Login/Init Sequence
- * - Fixed: AdBlockers & SHA Concurrency
+ * FIXED & OPTIMIZED VERSION
  */
 
 // --- 1. CONFIG & ASSETS ---
@@ -18,7 +12,6 @@ const state = {
 };
 
 const SYSTEM_ASSETS = {
-    // Zero Layout Shift CSS
     "assets/css/article.css": `
 @font-face{font-family:'Poppins Fallback';src:local('Arial');ascent-override:90%;descent-override:22%;line-gap-override:0%;size-adjust:104%}
 @font-face{font-family:Poppins;font-style:normal;font-weight:300;font-display:swap;src:url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLDz8Z1xlFd2JQEk.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -225,7 +218,6 @@ async function ensureSystemFiles() {
             if (res) {
                 const data = await res.json();
                 const existingContent = b64DecodeUnicode(data.content);
-                // Only update if content is different (avoids 409 conflict loops on init)
                 if (existingContent.trim() !== content.trim()) {
                     await githubReq(`contents/${path}`, 'PUT', { message: `Update ${path}`, content: b64EncodeUnicode(content), sha: data.sha });
                 }
@@ -255,7 +247,12 @@ async function loadContentIndex() {
         if (res) {
             const data = await res.json();
             state.indexSha = data.sha;
-            state.contentIndex = JSON.parse(b64DecodeUnicode(data.content));
+            try {
+                state.contentIndex = JSON.parse(b64DecodeUnicode(data.content));
+            } catch (err) {
+                console.warn("Index JSON corrupted, resetting.");
+                state.contentIndex = [];
+            }
         } else state.contentIndex = [];
     } catch(e) { console.error(e); state.contentIndex = []; }
 }
@@ -409,7 +406,6 @@ function addNestedSocial(containerId) {
 }
 
 function addAdUnit(data = {}) {
-    // UPDATED CLASSES TO AVOID ADBLOCK
     const html = `
     <div class="sponsor-unit-block">
         <button class="sponsor-remove-btn" onclick="this.parentElement.remove()">x</button>
@@ -447,14 +443,21 @@ function addMetaVerifyItem(data = {}) {
 
 function collectRepeater(containerId, type) {
     const items = [];
-    document.querySelectorAll(`#${containerId} .repeater-item`).forEach(row => {
+    const container = document.getElementById(containerId);
+    if (!container) return items;
+    
+    container.querySelectorAll('.repeater-item').forEach(row => {
         if(type === 'menu') {
-            items.push({ label: row.querySelector('.menu-label').value, link: row.querySelector('.menu-link').value });
+            const label = row.querySelector('.menu-label');
+            const link = row.querySelector('.menu-link');
+            if(label && link) items.push({ label: label.value, link: link.value });
         } else if(type === 'social') {
-            items.push({ label: row.querySelector('.social-icon').value, link: row.querySelector('.social-link').value });
+            const icon = row.querySelector('.social-icon');
+            const link = row.querySelector('.social-link');
+            if(icon && link) items.push({ label: icon.value, link: link.value });
         } else if(type === 'meta') {
-            const val = row.querySelector('.meta-val').value;
-            if(val) items.push(val);
+            const val = row.querySelector('.meta-val');
+            if(val && val.value) items.push(val.value);
         }
     });
     return items;
@@ -468,7 +471,8 @@ async function saveGlobalSettings() {
 
         const adsenseEl = document.getElementById('set-monetization-auto');
         
-        const s = {
+        // Construct new settings object strictly from DOM to avoid pollution
+        const newSettings = {
             ...state.settings,
             siteTitle: document.getElementById('set-site-title').value,
             siteUrl: siteUrl,
@@ -490,47 +494,63 @@ async function saveGlobalSettings() {
             headerMenu: collectRepeater('header-menu-container', 'menu'),
             footerMenu: collectRepeater('footer-menu-container', 'menu'),
             socialLinks: collectRepeater('social-links-container', 'social'),
-            authors: [], ads: []
+            authors: [], 
+            ads: []
         };
         
         document.querySelectorAll('.author-card').forEach(b => {
             const id = b.dataset.id;
             const socials = [];
-            b.querySelectorAll(`#nested-socials-${id} .mini-row`).forEach(row => { socials.push({ icon: row.querySelector('.mini-icon').value, link: row.querySelector('.mini-link').value }); });
-            s.authors.push({ id: id, name: b.querySelector('.auth-name').value, image: b.querySelector('.auth-img').value, bio: b.querySelector('.auth-bio').value, socials: socials });
+            b.querySelectorAll(`#nested-socials-${id} .mini-row`).forEach(row => { 
+                socials.push({ icon: row.querySelector('.mini-icon').value, link: row.querySelector('.mini-link').value }); 
+            });
+            newSettings.authors.push({ 
+                id: id, 
+                name: b.querySelector('.auth-name').value, 
+                image: b.querySelector('.auth-img').value, 
+                bio: b.querySelector('.auth-bio').value, 
+                socials: socials 
+            });
         });
         
-        // UPDATED CLASS SELECTOR
         document.querySelectorAll('.sponsor-unit-block').forEach(b => { 
-            s.ads.push({ 
+            newSettings.ads.push({ 
                 code: b.querySelector('.ad-code-input').value, 
                 placement: b.querySelector('.ad-place-input').value, 
                 exclude: b.querySelector('.ad-exclude-input').value 
             }); 
         });
 
-        state.settings = s;
-
-        // FETCH LATEST SHA BEFORE SAVING
+        // FETCH LATEST SHA BEFORE SAVING to ensure no conflicts
+        // If file doesn't exist, freshSha is null, which is fine for creation.
         const freshSha = await getLatestFileSha('_cms/settings.json');
         
-        const body = { message: 'Update Settings', content: b64EncodeUnicode(JSON.stringify(s, null, 2)) };
+        const body = { message: 'Update Settings', content: b64EncodeUnicode(JSON.stringify(newSettings, null, 2)) };
         if(freshSha) body.sha = freshSha;
+        
         const res = await githubReq('contents/_cms/settings.json', 'PUT', body);
-        state.settingsSha = await res.json().then(d => d.content.sha);
+        const data = await res.json();
+        
+        // Only update local state AFTER successful save
+        state.settings = newSettings;
+        state.settingsSha = data.content.sha;
         
         // Save Robots.txt
         const robSha = await getLatestFileSha('robots.txt');
-        await githubReq('robots.txt', 'PUT', { message: 'Up Robots', content: b64EncodeUnicode(s.robotsTxt), sha: robSha || undefined });
+        await githubReq('robots.txt', 'PUT', { message: 'Up Robots', content: b64EncodeUnicode(newSettings.robotsTxt), sha: robSha || undefined });
 
-        if(s.enable404) {
+        if(newSettings.enable404) {
             const sha404 = await getLatestFileSha('contents/404.html');
-            const html404 = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=${s.siteUrl}/"></head><body>Redirecting...</body></html>`;
+            const html404 = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=${newSettings.siteUrl}/"></head><body>Redirecting...</body></html>`;
             await githubReq('contents/404.html', 'PUT', { message: 'Up 404', content: b64EncodeUnicode(html404), sha: sha404 || undefined });
         }
         showToast('Settings Saved!');
-    } catch(e) { showToast(e.message, true); }
-    finally { showLoader(false); }
+    } catch(e) { 
+        showToast("Save Error: " + e.message, true); 
+        console.error(e);
+    } finally { 
+        showLoader(false); 
+    }
 }
 
 // --- 7. UI LOGIC (Categories & Editor) ---
@@ -678,18 +698,32 @@ async function editContent(type, slug) {
 }
 
 async function updateContentIndex(slug, type, title, action = 'update', cats = []) {
+    // Reload index to ensure we have latest before modifying
+    await loadContentIndex(); 
+    
     const now = new Date().toISOString();
     const idx = state.contentIndex.findIndex(i => i.slug === slug && i.type === type);
+    
+    // Create copy to modify
+    const newIndex = [...state.contentIndex];
+    
     if (action === 'delete') {
-        if (idx > -1) state.contentIndex.splice(idx, 1);
+        if (idx > -1) newIndex.splice(idx, 1);
     } else {
-        const originalDate = (idx > -1) ? state.contentIndex[idx].date : now;
+        const originalDate = (idx > -1) ? newIndex[idx].date : now;
         const entry = { slug, type, title, date: originalDate, modified: now, cats: cats, desc: document.getElementById('meta-desc').value };
-        if (idx > -1) state.contentIndex[idx] = entry; else state.contentIndex.unshift(entry);
+        if (idx > -1) newIndex[idx] = entry; else newIndex.unshift(entry);
     }
-    const body = { message: 'Update Index', content: b64EncodeUnicode(JSON.stringify(state.contentIndex, null, 2)) };
-    if (state.indexSha) body.sha = state.indexSha;
+    
+    // Get SHA again to be safe
+    const freshSha = await getLatestFileSha('_cms/index.json');
+    const body = { message: 'Update Index', content: b64EncodeUnicode(JSON.stringify(newIndex, null, 2)) };
+    if (freshSha) body.sha = freshSha;
+    
     const res = await githubReq('contents/_cms/index.json', 'PUT', body);
+    
+    // Only update local state on success
+    state.contentIndex = newIndex;
     state.indexSha = (await res.json()).content.sha;
 }
 
@@ -706,76 +740,78 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     if(!title || !slug) return showToast("Title & Slug Required", true);
     
     showLoader(true, "Publishing...");
-    const isPost = state.currentType === 'post';
-    const folder = isPost ? `blog/${slug}` : `${slug}`;
-    const path = `${folder}/index.html`;
-    const s = state.settings;
     
-    // Get Categories
-    let selectedCats = [];
-    if(isPost && s.structureMode === 'category') {
-        document.querySelectorAll('.cat-chk:checked').forEach(c => selectedCats.push(c.value));
-    }
-
-    let contentHtml = tinymce.activeEditor.getContent().replace(/src="http:\/\//g, 'src="https://');
-    contentHtml = injectAds(contentHtml, slug);
-    
-    // Share Buttons Injection
-    if(s.enableShare && !s.shareExclude.split(',').map(x=>x.trim()).includes(slug)) {
-        const shareSvg = `<div class="share-buttons">
-            <a href="https://www.facebook.com/sharer/sharer.php?u=${s.siteUrl}/${folder}/" target="_blank" class="share-btn btn-fb" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.15 5.96C15.21 5.96 16.12 6.04 16.12 6.04V8.51H15.02C13.78 8.51 13.39 9.28 13.39 10.07V12.06H16.18L15.74 14.96H13.39V21.96C18.16 21.21 21.82 17.06 21.82 12.06C21.82 6.53 17.32 2.04 12 2.04Z"/></svg> Share</a>
-            <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${s.siteUrl}/${folder}/" target="_blank" class="share-btn btn-x" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> Post</a>
-            <a href="https://www.linkedin.com/shareArticle?mini=true&url=${s.siteUrl}/${folder}/&title=${encodeURIComponent(title)}" target="_blank" class="share-btn btn-in" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg> Share</a>
-            <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>alert('Link Copied!'))" class="share-btn btn-cp"><i class="fa-solid fa-link"></i> Copy</button>
-        </div>`;
-        contentHtml += shareSvg;
-    }
-
-    const fullUrl = resolveMenuLink((isPost?'blog/':'')+slug, s.siteUrl);
-    const customCanon = document.getElementById('meta-canonical').value.trim();
-    const finalCanon = customCanon || fullUrl;
-    
-    let bannerUrl = document.getElementById('meta-banner').value;
-    if(bannerUrl.startsWith('http://')) bannerUrl = bannerUrl.replace('http://', 'https://');
-    const author = (s.authors || []).find(a => a.id === document.getElementById('meta-author-select').value) || { name: 'Admin', image: '', bio: '', socials: [] };
-    
-    // Auth Socials
-    let authSocialsHtml = (author.socials || []).map(soc => `<a href="${ensureExternalUrl(soc.link)}" aria-label="Social"><i class="${soc.icon}"></i></a>`).join('');
-
-    // Featured Img
-    const featuredImgHtml = bannerUrl ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="1200" height="628" class="featured-image" fetchpriority="high" decoding="async"></div>` : '';
-    const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}" fetchpriority="high">` : '';
-
-    // WRITE-TIME SEO
-    const entry = state.contentIndex.find(i => i.slug === slug && i.type === state.currentType);
-    const datePublished = entry ? entry.date : new Date().toISOString();
-    const dateModified = new Date().toISOString();
-    const dateStr = new Date(datePublished).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const rawText = tinymce.activeEditor.getBody().textContent || "";
-    const readTime = (Math.ceil(rawText.trim().split(/\s+/).length / 225) || 1) + " Min Read";
-
-    // BREADCRUMB
-    let crumbHtml = '';
-    if(isPost) {
-        if(s.structureMode === 'category' && selectedCats.length > 0) {
-            const firstCatSlug = selectedCats[0];
-            const firstCatName = (s.categories||[]).find(c=>c.slug===firstCatSlug)?.name || firstCatSlug;
-            crumbHtml = `<a href="../../" style="color:#b0b0b0">Home</a> <span>/</span> <a href="../../category/${firstCatSlug}/" style="color:#b0b0b0">${firstCatName}</a> <span>/</span> ${title}`;
-        } else {
-            crumbHtml = `<a href="../../" style="color:#b0b0b0">Home</a> <span>/</span> <a href="../" style="color:#b0b0b0">Blog</a> <span>/</span> ${title}`;
+    try {
+        const isPost = state.currentType === 'post';
+        const folder = isPost ? `blog/${slug}` : `${slug}`;
+        const path = `${folder}/index.html`;
+        const s = state.settings;
+        
+        // Get Categories
+        let selectedCats = [];
+        if(isPost && s.structureMode === 'category') {
+            document.querySelectorAll('.cat-chk:checked').forEach(c => selectedCats.push(c.value));
         }
-    } else {
-        crumbHtml = `<a href="../" style="color:#b0b0b0">Home</a> <span>/</span> ${title}`;
-    }
 
-    const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a></li>`).join('');
-    const footerLinks = (s.footerMenu || []).map(l => `<a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a>`).join('');
-    const globalSocials = (s.socialLinks || []).map(l => `<a href="${ensureExternalUrl(l.link)}"><i class="${l.label}"></i></a>`).join('');
+        let contentHtml = tinymce.activeEditor.getContent().replace(/src="http:\/\//g, 'src="https://');
+        contentHtml = injectAds(contentHtml, slug);
+        
+        // Share Buttons Injection
+        if(s.enableShare && !s.shareExclude.split(',').map(x=>x.trim()).includes(slug)) {
+            const shareSvg = `<div class="share-buttons">
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${s.siteUrl}/${folder}/" target="_blank" class="share-btn btn-fb" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.15 5.96C15.21 5.96 16.12 6.04 16.12 6.04V8.51H15.02C13.78 8.51 13.39 9.28 13.39 10.07V12.06H16.18L15.74 14.96H13.39V21.96C18.16 21.21 21.82 17.06 21.82 12.06C21.82 6.53 17.32 2.04 12 2.04Z"/></svg> Share</a>
+                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${s.siteUrl}/${folder}/" target="_blank" class="share-btn btn-x" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> Post</a>
+                <a href="https://www.linkedin.com/shareArticle?mini=true&url=${s.siteUrl}/${folder}/&title=${encodeURIComponent(title)}" target="_blank" class="share-btn btn-in" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg> Share</a>
+                <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>alert('Link Copied!'))" class="share-btn btn-cp"><i class="fa-solid fa-link"></i> Copy</button>
+            </div>`;
+            contentHtml += shareSvg;
+        }
 
-    const schemaJson = generateFinalSchema(finalCanon, title, bannerUrl, author.name, datePublished, dateModified, s.structureMode==='category' && isPost ? selectedCats : null);
-    const criticalCss = SYSTEM_ASSETS["assets/css/article.css"];
+        const fullUrl = resolveMenuLink((isPost?'blog/':'')+slug, s.siteUrl);
+        const customCanon = document.getElementById('meta-canonical').value.trim();
+        const finalCanon = customCanon || fullUrl;
+        
+        let bannerUrl = document.getElementById('meta-banner').value;
+        if(bannerUrl.startsWith('http://')) bannerUrl = bannerUrl.replace('http://', 'https://');
+        const author = (s.authors || []).find(a => a.id === document.getElementById('meta-author-select').value) || { name: 'Admin', image: '', bio: '', socials: [] };
+        
+        // Auth Socials
+        let authSocialsHtml = (author.socials || []).map(soc => `<a href="${ensureExternalUrl(soc.link)}" aria-label="Social"><i class="${soc.icon}"></i></a>`).join('');
 
-    const html = `<!DOCTYPE html>
+        // Featured Img
+        const featuredImgHtml = bannerUrl ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="1200" height="628" class="featured-image" fetchpriority="high" decoding="async"></div>` : '';
+        const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}" fetchpriority="high">` : '';
+
+        // WRITE-TIME SEO
+        const entry = state.contentIndex.find(i => i.slug === slug && i.type === state.currentType);
+        const datePublished = entry ? entry.date : new Date().toISOString();
+        const dateModified = new Date().toISOString();
+        const dateStr = new Date(datePublished).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const rawText = tinymce.activeEditor.getBody().textContent || "";
+        const readTime = (Math.ceil(rawText.trim().split(/\s+/).length / 225) || 1) + " Min Read";
+
+        // BREADCRUMB
+        let crumbHtml = '';
+        if(isPost) {
+            if(s.structureMode === 'category' && selectedCats.length > 0) {
+                const firstCatSlug = selectedCats[0];
+                const firstCatName = (s.categories||[]).find(c=>c.slug===firstCatSlug)?.name || firstCatSlug;
+                crumbHtml = `<a href="../../" style="color:#b0b0b0">Home</a> <span>/</span> <a href="../../category/${firstCatSlug}/" style="color:#b0b0b0">${firstCatName}</a> <span>/</span> ${title}`;
+            } else {
+                crumbHtml = `<a href="../../" style="color:#b0b0b0">Home</a> <span>/</span> <a href="../" style="color:#b0b0b0">Blog</a> <span>/</span> ${title}`;
+            }
+        } else {
+            crumbHtml = `<a href="../" style="color:#b0b0b0">Home</a> <span>/</span> ${title}`;
+        }
+
+        const headerLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a></li>`).join('');
+        const footerLinks = (s.footerMenu || []).map(l => `<a href="${resolveMenuLink(l.link, s.siteUrl)}">${l.label}</a>`).join('');
+        const globalSocials = (s.socialLinks || []).map(l => `<a href="${ensureExternalUrl(l.link)}"><i class="${l.label}"></i></a>`).join('');
+
+        const schemaJson = generateFinalSchema(finalCanon, title, bannerUrl, author.name, datePublished, dateModified, s.structureMode==='category' && isPost ? selectedCats : null);
+        const criticalCss = SYSTEM_ASSETS["assets/css/article.css"];
+
+        const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -847,41 +883,46 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <script src="${isPost?'../../':'../'}assets/js/article.js" defer></script>
 </body></html>`;
 
-    if(state.currentSlug && state.currentSlug !== slug) {
-        const oldPath = isPost ? `blog/${state.currentSlug}/index.html` : `${state.currentSlug}/index.html`;
-        const oldSha = await getLatestFileSha(oldPath);
-        if(oldSha) {
-            await githubReq(`contents/${oldPath}`, 'DELETE', { message: 'Move', sha: oldSha });
-            await updateContentIndex(state.currentSlug, state.currentType, null, 'delete');
+        if(state.currentSlug && state.currentSlug !== slug) {
+            const oldPath = isPost ? `blog/${state.currentSlug}/index.html` : `${state.currentSlug}/index.html`;
+            const oldSha = await getLatestFileSha(oldPath);
+            if(oldSha) {
+                await githubReq(`contents/${oldPath}`, 'DELETE', { message: 'Move', sha: oldSha });
+                await updateContentIndex(state.currentSlug, state.currentType, null, 'delete');
+            }
+            state.currentSha = null;
         }
-        state.currentSha = null;
-    }
-    
-    // FETCH LATEST SHA FOR THE HTML FILE
-    const freshSha = await getLatestFileSha(path);
-    const bodyReq = { message: `Update ${slug}`, content: b64EncodeUnicode(html) };
-    if(freshSha) bodyReq.sha = freshSha;
-    else if(state.currentSha && state.currentSlug === slug) bodyReq.sha = state.currentSha;
-    
-    await githubReq(`contents/${path}`, 'PUT', bodyReq);
-    
-    // REFRESH INDEX BEFORE SAVING TO AVOID CONFLICTS
-    await loadContentIndex(); 
-    await updateContentIndex(slug, state.currentType, title, 'update', selectedCats);
-    
-    if(isPost && s.structureMode === 'category') {
-        await generateCategoryPages(s, headerLinks, footerLinks, globalSocials);
-    }
+        
+        // FETCH LATEST SHA FOR THE HTML FILE
+        const freshSha = await getLatestFileSha(path);
+        const bodyReq = { message: `Update ${slug}`, content: b64EncodeUnicode(html) };
+        if(freshSha) bodyReq.sha = freshSha;
+        else if(state.currentSha && state.currentSlug === slug) bodyReq.sha = state.currentSha;
+        
+        await githubReq(`contents/${path}`, 'PUT', bodyReq);
+        
+        // Update index with new data
+        await updateContentIndex(slug, state.currentType, title, 'update', selectedCats);
+        
+        if(isPost && s.structureMode === 'category') {
+            await generateCategoryPages(s, headerLinks, footerLinks, globalSocials);
+        }
 
-    await generateSitemaps(s);
+        await generateSitemaps(s);
 
-    localStorage.removeItem(`draft_${slug}`);
-    if(tinymce.activeEditor) tinymce.activeEditor.setDirty(false);
-    state.currentSlug = slug;
-    showToast("Published Successfully!");
-    document.getElementById('live-link-container').innerHTML = `<a href="${fullUrl}" target="_blank" class="btn-secondary btn-xs" style="color:white;text-decoration:none;">View Live</a>`;
-    document.getElementById('live-link-container').classList.remove('hidden');
-    showLoader(false);
+        localStorage.removeItem(`draft_${slug}`);
+        if(tinymce.activeEditor) tinymce.activeEditor.setDirty(false);
+        state.currentSlug = slug;
+        showToast("Published Successfully!");
+        document.getElementById('live-link-container').innerHTML = `<a href="${fullUrl}" target="_blank" class="btn-secondary btn-xs" style="color:white;text-decoration:none;">View Live</a>`;
+        document.getElementById('live-link-container').classList.remove('hidden');
+
+    } catch(e) {
+        console.error(e);
+        showToast("Publish Error: " + e.message, true);
+    } finally {
+        showLoader(false);
+    }
 });
 
 // GENERATE CATEGORY PAGES
@@ -915,7 +956,6 @@ async function generateCategoryPages(s, headerLinks, footerLinks, globalSocials)
 
         const sha = await getLatestFileSha(path);
         if (sha) {
-             // Basic equality check could go here if optimized, but cat pages change often
              await githubReq(`contents/${path}`, 'PUT', { message: `Up Cat ${cat.slug}`, content: b64EncodeUnicode(html), sha: sha });
         } else {
              await githubReq(`contents/${path}`, 'PUT', { message: `Init Cat ${cat.slug}`, content: b64EncodeUnicode(html) });
