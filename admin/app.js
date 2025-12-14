@@ -2,6 +2,7 @@
  * ULTIMATE SERVERLESS CMS - FINAL OPTIMIZED
  * Fixes: Mobile Menu Design/CLS, Featured Image CLS, Social URL Logic, Unsaved Warning, API Deprecation, Invalid List Structure, Sticky Headers, UI Placeholders
  * Update: Fixed Duplicate CSS injection and Mobile Layout Shift via CSS Reordering.
+ * Update 2: FIXED CLS for Featured Image (1200x628), Google Discover Compliance (max-image-preview:large), Aspect Ratio fallback.
  */
  
 const SYSTEM_ASSETS = {
@@ -18,8 +19,7 @@ const SYSTEM_ASSETS = {
 :root{--primary-color:#00aaff;--background-color:#121212;--surface-color:#1e1e1e;--text-color:#e0e0e0;--text-color-secondary:#b0b0b0;--font-family:'Poppins','Poppins Fallback',sans-serif;--content-width:800px;}
 *{margin:0;padding:0;box-sizing:border-box}
 
-/* 3. CRITICAL LAYOUT & CLS FIX (Moved to Top) */
-/* This ensures the mobile width/padding is applied BEFORE painting, preventing the shift */
+/* 3. CRITICAL LAYOUT & CLS FIX */
 @media screen and (max-width:850px){
     .page-header-section, .featured-image-container, .article-container {
         padding-left: 1rem;
@@ -40,7 +40,7 @@ a{color:#ff3e00;text-decoration:none;transition:color .3s ease}a:hover{color:var
 .site-header nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 5%;background-color:var(--background-color);border-bottom:1px solid #2a2a2a;height:80px}
 .logo{font-weight:700;font-size:1.5rem;color:#fff;text-decoration:none}
 .nav-links{display:flex;justify-content:space-around;list-style:none}
-.nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
+.nav-links li{margin:0 1rem}.nav-links a{color:var(--text-color);font-weight:600;font-size:1rem;position:relative}.nav-links a::after{content:'';position:absolute;width:0;height:2px;background:var(--primary-color);bottom:-5px;left:50%;transform:translateX(-50%);transition:width .3s ease}.nav-links a:hover{color:#fff}.nav-links a:hover::after{width100%}
 .burger{display:none;cursor:pointer;transition:opacity 0.3s ease}.burger div{width:25px;height:3px;background-color:var(--text-color);margin:5px;transition:all .3s ease}
 body.menu-open .burger { opacity: 0; pointer-events: none; }
 .nav-close-btn { display: none; position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; line-height: 1; z-index: 2002; }
@@ -52,29 +52,44 @@ body.menu-open .burger { opacity: 0; pointer-events: none; }
 .page-meta{font-size:.95rem;color:var(--text-color-secondary);margin-bottom:2rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap; min-height: 34px;}
 .page-meta img.auth-tiny{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--primary-color); background-color: #333; aspect-ratio: 1/1;}
 
-/* Featured Image - CLS Fixed via Aspect Ratio */
-.featured-image-container{
-    max-width:var(--content-width);
-    margin:0 auto 2.5rem;
+/* Featured Image - STRICT 1200x628 Aspect Ratio (1.91:1) */
+.featured-image-container {
+    max-width: var(--content-width);
+    margin: 0 auto 2.5rem;
     position: relative;
     width: 100%;
-    height: auto;
-    padding-bottom: 56.25%; /* Fallback 16:9 */
-    overflow:hidden;
-    border-radius:8px;
-    background:#1a1a1a; 
+    /* Modern browsers use aspect-ratio to reserve space immediately */
+    aspect-ratio: 1200 / 628;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #1a1a1a;
     display: block;
-    aspect-ratio: 16/9;
 }
-.featured-image{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    box-shadow:0 8px 25px rgba(0,0,0,.3);
-    border:1px solid #333;
+
+/* Fallback for browsers not supporting aspect-ratio - The Padding Hack (628/1200 = 52.33%) */
+@supports not (aspect-ratio: 1200 / 628) {
+    .featured-image-container {
+        height: 0;
+        padding-bottom: 52.3333%; 
+    }
+}
+
+.featured-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 8px 25px rgba(0,0,0,.3);
+    border: 1px solid #333;
+}
+
+/* Ensure absolute positioning if padding hack is active */
+@supports not (aspect-ratio: 1200 / 628) {
+    .featured-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
 }
 
 /* Content Area */
@@ -690,9 +705,9 @@ document.getElementById('save-btn').addEventListener('click', async () => {
         if(author.website) authSocialsHtml += `<a href="${ensureExternalUrl(author.website)}" aria-label="Website"><i class="fa-solid fa-globe"></i></a>`;
     }
 
-    // CLS FIX: Container has aspect ratio + block display. Image has absolute positioning.
+    // CLS FIX: Explicit 1200x628 dimensions + fetchpriority for Zero Shift & Google Discover
     const featuredImgHtml = bannerUrl 
-        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="800" height="450" class="featured-image" fetchpriority="high" decoding="async"></div>` 
+        ? `<div class="featured-image-container"><img src="${bannerUrl}" alt="${title}" width="1200" height="628" class="featured-image" fetchpriority="high" decoding="async"></div>` 
         : '';
     const preloadLink = bannerUrl ? `<link rel="preload" as="image" href="${bannerUrl}" fetchpriority="high">` : '';
 
@@ -717,6 +732,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${isPost ? title : title + ' - ' + s.siteTitle}</title>
     <meta name="description" content="${document.getElementById('meta-desc').value.replace(/"/g, '&quot;')}">
+    <meta name="robots" content="max-image-preview:large">
     <link rel="icon" href="${s.favicon || ''}">
     <link rel="canonical" href="${fullUrl}">
     <meta property="og:title" content="${title.replace(/"/g, '&quot;')}">
