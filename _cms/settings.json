@@ -63,7 +63,7 @@
   "structureMode": "category",
   "newsCategory": "new-2",
   "newsPubName": "",
-  "robotsTxt": "User-agent: *\nDisallow:\nSitemap: https://crackstreams.help/sitemap.xml",
+  "robotsTxt": "User-agent: *\nDisallow:\nSitemap: https://crackstreams.help/sitemap.xml\nSitemap: https://crackstreams.help/sitemap.xml\nSitemap: https://crackstreams.help/sitemap-news.xml",
   "sitemapExclude": "",
   "enableShare": true,
   "shareExclude": ""
