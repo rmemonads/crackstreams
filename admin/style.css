@@ -33,12 +33,12 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .icon-btn { background: transparent; color: var(--text-muted); font-size: 1.2rem; padding: 5px; }
 .icon-btn:hover { color: white; }
 
-/* Sidebar Nav Scroll */
+/* Scrollable Sidebar Nav */
 .sidebar-nav-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 .sidebar-nav-container::-webkit-scrollbar { width: 4px; }
-.sidebar-nav-container::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+.sidebar-nav-container::-webkit-scrollbar-thumb { background: #333; }
 
-.nav-item { padding: 15px 20px; width: 100%; text-align: left; background: transparent; color: var(--text-muted); display: flex; gap: 15px; align-items: center; font-size: 0.95rem; white-space: nowrap; overflow: hidden; }
+.nav-item { padding: 15px 20px; width: 100%; text-align: left; background: transparent; color: var(--text-muted); display: flex; gap: 15px; align-items: center; font-size: 0.95rem; white-space: nowrap; overflow: hidden; flex-shrink: 0; }
 .nav-item:hover, .nav-item.active { background: var(--bg-hover); color: white; border-left: 3px solid var(--primary); }
 .sidebar.collapsed .nav-item { padding: 15px; justify-content: center; border-left: none; }
 .sidebar.collapsed .nav-item span { display: none; }
@@ -57,7 +57,7 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .wp-table th { background: #252525; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; }
 .wp-table tr:hover { background: var(--bg-hover); }
 
-/* SETTINGS (Fixed Grid for Mobile) */
+/* SETTINGS */
 .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
 .settings-card { background: var(--bg-panel); border: 1px solid var(--border); padding: 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
 .full-width-card { grid-column: 1 / -1; }
@@ -80,7 +80,6 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .repeater-remove { position: absolute; top: 5px; right: 5px; color: #666; font-size: 0.8rem; }
 .add-repeater-btn { background: #333; color: var(--primary); width: 100%; padding: 5px; font-size: 0.8rem; margin-top: 5px; border: 1px dashed #444; cursor: pointer; }
 .menu-row, .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-/* Prevent inputs from overflowing flex items */
 .menu-row input, .social-row input { min-width: 0; }
 .meta-item-row input { font-family: monospace; font-size: 0.8rem; }
 
@@ -121,7 +120,6 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 
 .editor-main-column { flex: 1; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; position: relative; }
 .editor-wrapper { flex: 1; display: flex; flex-direction: column; min-height: 400px; }
-/* TinyMCE Fixes */
 .tox-tinymce { border: none !important; flex: 1; }
 
 /* SCHEMA */
