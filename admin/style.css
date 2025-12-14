@@ -126,7 +126,9 @@ button { cursor: pointer; border: none; outline: none; transition: 0.2s; }
 .image-drop-wrapper input { border: none; border-bottom: 1px solid #444; border-radius: 0; background: transparent; width:100%; }
 .image-drop-wrapper.dragover .drop-overlay { display: flex; }
 .drop-overlay { display: none; position: absolute; inset: 0; background: rgba(0, 170, 255, 0.4); backdrop-filter: blur(2px); align-items: center; justify-content: center; font-weight: bold; color: white; pointer-events: none; z-index: 5; }
-#banner-preview { width: 100%; display: block; max-height: 150px; object-fit: cover; margin-top: 5px; }
+
+/* Updated for 1.91:1 Preview Ratio */
+#banner-preview { width: 100%; display: block; aspect-ratio: 1200 / 628; object-fit: cover; margin-top: 5px; background: #000; }
 #banner-preview[src=""], #banner-preview:not([src]) { display: none; }
 
 .media-drop-area { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
