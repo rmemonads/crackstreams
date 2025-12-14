@@ -52,10 +52,6 @@
   "ads": [],
   "categories": [
     {
-      "name": "Test",
-      "slug": "test"
-    },
-    {
       "name": "new 2",
       "slug": "new-2"
     }
