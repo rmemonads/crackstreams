@@ -14,8 +14,6 @@ const FEATURED_SLUGS = [
     "blog/sportsurge-e-strere/",
     "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1/"
     "blog/test-post-new/"
-"blog/hello-world/"
-"experience-buffstreamgfday/"
 
 
     
