@@ -47,7 +47,7 @@ async function loadSettings() {
         setupAnalytics(data.gaId);
 
     } catch (e) {
-        console.warn("Using defaults settings.");
+        console.warn("Using default settings.", e);
     }
 }
 
@@ -87,11 +87,19 @@ function renderHeader(s) {
     const html = `
         <nav>
             <a href="${s.siteUrl}" class="logo">${s.siteTitle || 'Home'}</a>
-            <ul class="nav-links">${navLinks}</ul>
-            <div class="burger"><i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i></div>
+            <ul class="nav-links" id="nav-links-list">${navLinks}</ul>
+            <div class="burger" onclick="toggleMenu()">
+                <i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i>
+            </div>
         </nav>
     `;
     document.getElementById('dynamic-header').innerHTML = html;
+}
+
+// Mobile Menu Toggle
+function toggleMenu() {
+    const nav = document.getElementById('nav-links-list');
+    nav.classList.toggle('nav-active');
 }
 
 function renderFooter(s) {
