@@ -1,8 +1,11 @@
 /**
- * HOMEPAGE LOADER - INSTANT LCP & CUSTOM DOMAIN FIX
+ * HOMEPAGE LOADER - FINAL
+ * Features: Inline SVGs (No broken icons), Robust Image Proxy (weserv.nl), Instant LCP
  */
 
+// ==========================================
 // [CONFIGURATION]
+// ==========================================
 const FEATURED_SLUGS = [
     "hello-world",
     "blog/live-stream-for-nfl-nba-nhl-mlb-ufc-more",
@@ -10,18 +13,25 @@ const FEATURED_SLUGS = [
     "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1", 
     "blog/test-post-new"
 ];
+// ==========================================
 
 const CONFIG = { settingsUrl: '_cms/settings.json', listContainer: 'featured-grid' };
 const state = { settings: {} };
 
-// [IMMEDIATE EXECUTION] Start fetching LCP (First Card) immediately
+// INLINE SVG DEFINITIONS (Solves visibility issues)
+const SVGS = {
+    burger: `<svg class="icon-lg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`,
+    close: `<svg class="icon-lg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+    arrow: `<svg class="icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`
+};
+
+// Start Fetching Immediately (Pre-DOM)
 const lcpPromise = fetchCardData(FEATURED_SLUGS[0], 0);
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Render LCP Card AS SOON AS READY (Don't wait for others)
-    renderLCP();
-    
-    // 2. Load Settings & Rest of Cards in background
+    // 1. Render First Card ASAP
+    await renderLCP();
+    // 2. Load Settings & Rest of Cards
     loadSettings();
     loadRemainingCards();
 });
@@ -29,20 +39,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function renderLCP() {
     const lcpHtml = await lcpPromise;
     if (lcpHtml) {
-        const skeleton = document.getElementById('lcp-skeleton');
-        if (skeleton) skeleton.outerHTML = lcpHtml;
+        const sk = document.getElementById('lcp-skeleton');
+        if (sk) sk.outerHTML = lcpHtml;
     }
 }
 
 async function loadRemainingCards() {
     const container = document.getElementById(CONFIG.listContainer);
-    // Skip index 0 (LCP), fetch the rest
+    // Skip the first one as it is LCP
     const promises = FEATURED_SLUGS.slice(1).map((slug, i) => fetchCardData(slug, i + 1));
     const cards = await Promise.all(promises);
     
-    // Remove remaining skeletons and append cards
-    const skeletons = container.querySelectorAll('.skeleton-card');
-    skeletons.forEach(s => s.remove());
+    // Remove skeletons
+    container.querySelectorAll('.skeleton-card').forEach(s => s.remove());
     
     cards.forEach(html => {
         if(html) container.insertAdjacentHTML('beforeend', html);
@@ -62,28 +71,27 @@ async function fetchCardData(slug, index) {
         const imgMeta = doc.querySelector('meta[property="og:image"]');
         let rawImg = imgMeta ? imgMeta.content : '';
 
-        // [DOMAIN SANITIZATION] Force Custom Domain
-        if (rawImg.includes('github.io')) {
-            const splitPoint = rawImg.indexOf('/images/');
-            if(splitPoint > -1) rawImg = window.location.origin + rawImg.substring(splitPoint);
-        } else if (rawImg.startsWith('http://')) {
-            rawImg = rawImg.replace('http://', 'https://');
-        } else if (rawImg.startsWith('/')) {
-            rawImg = window.location.origin + rawImg;
-        } else if (rawImg && !rawImg.startsWith('http')) {
-             rawImg = window.location.origin + '/' + rawImg;
+        // [URL SANITIZATION]
+        if (rawImg.startsWith('http://')) rawImg = rawImg.replace('http://', 'https://');
+        
+        // Handle Relative URLs
+        if (rawImg && !rawImg.startsWith('http')) {
+            rawImg = rawImg.startsWith('/') 
+                ? window.location.origin + rawImg 
+                : window.location.origin + '/' + rawImg;
         }
 
-        // [OPTIMIZATION] wsrv.nl (WebP + Resize)
+        // [COMPRESSION FIX] Use images.weserv.nl (More Permissive)
+        // If image fails to compress (400 error), onerror handler reverts to rawImg
         const optimizedImg = rawImg 
-            ? `https://wsrv.nl/?url=${encodeURIComponent(rawImg)}&w=600&output=webp&q=80` 
+            ? `https://images.weserv.nl/?url=${encodeURIComponent(rawImg)}&w=600&output=webp&q=80` 
             : `https://via.placeholder.com/600x314/1e1e1e/333?text=No+Image`;
 
         const loadingAttr = index === 0 ? 'eager' : 'lazy';
         const priorityAttr = index === 0 ? 'fetchpriority="high"' : '';
 
         return `
-        <article class="home-card">
+        <article class="home-card fade-in">
             <a href="${path}/" class="card-img-container">
                 <img 
                     src="${optimizedImg}" 
@@ -93,7 +101,7 @@ async function fetchCardData(slug, index) {
                     loading="${loadingAttr}" 
                     width="600" 
                     height="314"
-                    onerror="this.onerror=null;this.src='${rawImg}'" 
+                    onerror="this.onerror=null;this.src='${rawImg}'"
                 >
             </a>
             <div class="card-body">
@@ -101,7 +109,7 @@ async function fetchCardData(slug, index) {
                 <div class="card-footer-row">
                     <span class="read-now-text">Read Now</span>
                     <a href="${path}/" class="read-more-link" aria-label="Read more">
-                        <i class="fa-solid fa-arrow-right"></i>
+                        ${SVGS.arrow}
                     </a>
                 </div>
             </div>
@@ -141,16 +149,17 @@ function applyGlobalSettings(s) {
 
 function renderHeader(s) {
     const navLinks = (s.headerMenu || []).map(l => `<li><a href="${resolveLink(l.link)}" onclick="toggleMenu()">${l.label}</a></li>`).join('');
+    
     document.getElementById('dynamic-header').innerHTML = `
         <nav>
             <a href="${s.siteUrl || '/'}" class="logo">${s.siteTitle || 'Home'}</a>
             <ul class="nav-links" id="nav-links-list">
                 <li style="list-style:none; position:absolute; top:20px; right:25px;">
-                    <button class="nav-close-btn" onclick="toggleMenu()">&times;</button>
+                    <button class="nav-close-btn" onclick="toggleMenu()" aria-label="Close Menu">${SVGS.close}</button>
                 </li>
                 ${navLinks}
             </ul>
-            <button class="burger" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
+            <button class="burger" onclick="toggleMenu()" aria-label="Open Menu">${SVGS.burger}</button>
         </nav>`;
 }
 
@@ -164,9 +173,14 @@ function toggleMenu() {
 
 function renderFooter(s) {
     const nav = (s.footerMenu || []).map(l => `<a href="${resolveLink(l.link)}">${l.label}</a>`).join('');
+    // Note: Social Icons still rely on Fontello classes from Admin Panel settings
     const soc = (s.socialLinks || []).map(l => `<a href="${resolveLink(l.link, true)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`).join('');
+    
     document.getElementById('dynamic-footer').innerHTML = `
-        <div class="footer-container"><nav class="footer-nav">${nav}</nav><div class="footer-social">${soc}</div></div>
+        <div class="footer-container">
+            <nav class="footer-nav">${nav}</nav>
+            <div class="footer-social">${soc}</div>
+        </div>
         <div class="footer-bottom"><p>${s.copyright || '© All Rights Reserved'}</p></div>`;
 }
 
