@@ -3,44 +3,41 @@ import json
 import subprocess
 import sys
 from datetime import datetime
+from urllib.parse import quote  # Added for fixing spaces in URLs
 
 # --- CONFIGURATION ---
 SETTINGS_FILE = '_cms/settings.json'
 OUTPUT_FILE = 'sitemap.xml'
 EXCLUDE_DIRS = {'.git', '.github', '_cms', 'admin', 'assets', 'css', 'js', 'images'}
-EXCLUDE_FILES = {'404.html', 'google', 'yandex'} 
+EXCLUDE_FILES = {'404.html', 'google', 'yandex', 'CNAME'} 
 
 def get_site_url():
-    """Reads the site URL from the CMS settings file."""
     default_url = "https://example.com"
     if not os.path.exists(SETTINGS_FILE):
-        print(f"DEBUG: {SETTINGS_FILE} not found. Using default URL.")
         return default_url
-    
     try:
         with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
             url = data.get('siteUrl', default_url)
             return url.rstrip('/')
-    except Exception as e:
-        print(f"DEBUG: Error reading settings ({e}). Using default URL.")
+    except:
         return default_url
 
 def get_last_modified_date(filepath):
-    """Gets the last commit date. Returns formatted date or fallback."""
     try:
-        # Run git log command
+        # Get ISO date from git
         cmd = ['git', 'log', '-1', '--format=%cI', filepath]
         date_str = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode('utf-8').strip()
         
-        # If file is new and staged but not committed, git log returns empty
         if not date_str:
-            return datetime.now().strftime('%Y-%m-%dT%H:%M:%S+00:00')
-        return date_str
-    except Exception as e:
-        # Fallback to current time if git fails
-        # This prevents the script from crashing on new files
-        return datetime.now().strftime('%Y-%m-%dT%H:%M:%S+00:00')
+            return datetime.now().strftime('%Y-%m-%d')
+            
+        # Parse the ISO string and convert to YYYY-MM-DD
+        # Handling the timezone part explicitly to be safe
+        dt = datetime.fromisoformat(date_str)
+        return dt.strftime('%Y-%m-%d')
+    except Exception:
+        return datetime.now().strftime('%Y-%m-%d')
 
 def generate_sitemap():
     base_url = get_site_url()
@@ -49,7 +46,6 @@ def generate_sitemap():
     urls = []
     
     for root, dirs, files in os.walk('.'):
-        # Prevent walking into excluded dirs
         dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
         
         for file in files:
@@ -57,18 +53,19 @@ def generate_sitemap():
                 file_path = os.path.join(root, file)
                 rel_path = os.path.relpath(root, '.')
                 
-                # Double check exclusions
                 if rel_path.startswith('admin') or rel_path.startswith('_cms'):
                     continue
 
-                # Build URL
                 if rel_path == '.':
                     loc = f"{base_url}/"
                     priority = "1.0"
                 else:
-                    path_slug = rel_path.replace(os.sep, '/')
-                    loc = f"{base_url}/{path_slug}/"
-                    priority = "0.8" if 'blog' in path_slug else "0.9"
+                    # FIX: Replace OS separator with slash AND Encode special chars/spaces
+                    # 'La Liga' becomes 'La%20Liga'
+                    raw_slug = rel_path.replace(os.sep, '/')
+                    safe_slug = quote(raw_slug) 
+                    loc = f"{base_url}/{safe_slug}/"
+                    priority = "0.8" if 'blog' in safe_slug else "0.9"
 
                 if any(x in loc for x in EXCLUDE_FILES):
                     continue
