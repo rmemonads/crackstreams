@@ -1,6 +1,6 @@
 /**
  * HOMEPAGE LOADER - CURATED CONTENT
- * Fixes: Syntax errors, Link Resolution, and Mobile Menu Logic
+ * Updates: Removed Date/Tags, Added "Read Now", Fixed Syntax
  */
 
 // ==========================================
@@ -11,7 +11,7 @@ const FEATURED_SLUGS = [
     "hello-world",
     "blog/live-stream-for-nfl-nba-nhl-mlb-ufc-more",
     "blog/sportsurge-e-strere",
-    "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1", // <--- Comma was missing here
+    "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1", 
     "blog/test-post-new"
 ];
 // ==========================================
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 // --- 1. LOAD GLOBAL SETTINGS ---
 async function loadSettings() {
     try {
-        // Bust cache with timestamp
         const res = await fetch(CONFIG.settingsUrl + '?t=' + Date.now());
         if (!res.ok) throw new Error("Settings not found");
         const data = await res.json();
@@ -68,13 +67,11 @@ function applyGlobalSettings(s) {
         }
         link.href = s.favicon;
     }
-    // Inject Global CSS
     if(s.customCss) {
         const style = document.createElement('style');
         style.innerHTML = s.customCss;
         document.head.appendChild(style);
     }
-    // Inject Global JS
     if(s.customHeadJs) {
         const script = document.createElement('script');
         script.innerHTML = s.customHeadJs;
@@ -90,12 +87,10 @@ function renderHeader(s) {
     const html = `
         <nav>
             <a href="${s.siteUrl || '/'}" class="logo">${s.siteTitle || 'Home'}</a>
-            
             <ul class="nav-links" id="nav-links-list">
                 <button class="nav-close-btn" onclick="toggleMenu()">&times;</button>
                 ${navLinks}
             </ul>
-
             <div class="burger" onclick="toggleMenu()">
                 <i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i>
             </div>
@@ -108,7 +103,6 @@ function toggleMenu() {
     const nav = document.getElementById('nav-links-list');
     nav.classList.toggle('nav-active');
     
-    // Handle Scroll Lock & Icon Visibility
     if (nav.classList.contains('nav-active')) {
         document.body.classList.add('menu-open');
     } else {
@@ -141,12 +135,10 @@ function renderFooter(s) {
 async function loadFeaturedContent() {
     const container = document.getElementById(CONFIG.listContainer);
     
-    // Fetch all cards in parallel
     const promises = FEATURED_SLUGS.map(slug => fetchCardData(slug));
     const cards = await Promise.all(promises);
     
-    // Clear Skeletons
-    container.innerHTML = '';
+    container.innerHTML = ''; // Clear skeletons
     
     let hasContent = false;
     cards.forEach(html => {
@@ -162,11 +154,9 @@ async function loadFeaturedContent() {
 }
 
 async function fetchCardData(slug) {
-    // Clean path (remove leading/trailing slashes)
     let path = slug.replace(/^\/|\/$/g, '');
     
     try {
-        // Fetch the page content
         const res = await fetch(`${path}/index.html`);
         if(!res.ok) return null;
         
@@ -178,28 +168,16 @@ async function fetchCardData(slug) {
         const imgMeta = doc.querySelector('meta[property="og:image"]');
         const img = imgMeta ? imgMeta.content : 'https://via.placeholder.com/1200x628/1e1e1e/333?text=No+Image';
         
-        // Scrape Date (tries to find it in the page-meta structure)
-        // Checks for the specific structure used in your article.css
-        let dateStr = 'Read Now';
-        const metaSpan = doc.querySelector('.page-meta');
-        if(metaSpan && metaSpan.innerText.includes('•')) {
-            const parts = metaSpan.innerText.split('•');
-            if(parts.length >= 2) dateStr = parts[1].trim(); 
-        }
-
-        const typeLabel = path.includes('blog/') ? 'Article' : 'Page';
-        
         return `
         <article class="home-card fade-in">
             <a href="${path}/" class="card-img-container">
-                <span class="card-badge">${typeLabel}</span>
                 <img src="${img}" alt="${title}" class="card-img" loading="lazy">
             </a>
             <div class="card-body">
                 <a href="${path}/"><h2 class="card-title">${title}</h2></a>
                 <div class="card-footer-row">
-                    <span><i class="fa-regular fa-calendar"></i> ${dateStr}</span>
-                    <a href="${path}/" class="read-more-link">Read <i class="fa-solid fa-arrow-right"></i></a>
+                    <span class="read-now-text">Read Now</span>
+                    <a href="${path}/" class="read-more-link"><i class="fa-solid fa-arrow-right"></i></a>
                 </div>
             </div>
         </article>
@@ -235,20 +213,16 @@ function setupAnalytics(gaId) {
         gtag('js', new Date());
         gtag('config', gaId);
     };
-    // Delayed load for Speed Score
     window.addEventListener('scroll', loadGA, { once: true });
     window.addEventListener('mousemove', loadGA, { once: true });
     window.addEventListener('touchstart', loadGA, { once: true });
 }
 
-// --- LINK RESOLVER (Robust Version) ---
+// --- LINK RESOLVER ---
 function resolveLink(link) {
     if(!link) return '#';
-    // 1. External / Protocols
     if(link.match(/^(https?:|mailto:|tel:|\/\/|#)/)) return link;
-    // 2. Loose External (google.com)
     if(link.startsWith('www.') || (link.includes('.') && !link.startsWith('/'))) return 'https://' + link;
-    // 3. Internal (Root Relative)
     if(link.startsWith('/')) return link;
     return '/' + link;
 }
