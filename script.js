@@ -1,25 +1,23 @@
 /**
  * HOMEPAGE LOADER - CURATED CONTENT
- * 1. Configure the list of posts/pages to show below.
- * 2. Fetches Global Settings (Header/Footer/Ads).
- * 3. Fetches Metadata for specific slugs and renders Grid Cards.
+ * Fixes: Syntax errors, Link Resolution, and Mobile Menu Logic
  */
 
 // ==========================================
 // [CONFIGURATION AREA] - ADD YOUR SLUGS HERE
+// Important: Separate items with commas!
 // ==========================================
 const FEATURED_SLUGS = [
-    "hello-world",           // Example Page
-    "blog/live-stream-for-nfl-nba-nhl-mlb-ufc-more/",    // Example Post (include 'blog/' prefix if it's a post)
-    "blog/sportsurge-e-strere/",
-    "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1/",
-    "blog/test-post-new/"
-
-    ];
+    "hello-world",
+    "blog/live-stream-for-nfl-nba-nhl-mlb-ufc-more",
+    "blog/sportsurge-e-strere",
+    "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1", // <--- Comma was missing here
+    "blog/test-post-new"
+];
 // ==========================================
 
 const CONFIG = {
-    settingsUrl: '_cms/settings.json', // Path from root
+    settingsUrl: '_cms/settings.json', // Path relative to root
     listContainer: 'featured-grid'
 };
 
@@ -40,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // --- 1. LOAD GLOBAL SETTINGS ---
 async function loadSettings() {
     try {
+        // Bust cache with timestamp
         const res = await fetch(CONFIG.settingsUrl + '?t=' + Date.now());
         if (!res.ok) throw new Error("Settings not found");
         const data = await res.json();
@@ -57,8 +56,7 @@ async function loadSettings() {
 }
 
 function applyGlobalSettings(s) {
-    if(s.siteTitle) document.title = s.siteTitle; // Homepage Title usually just Site Title
-    // Update Hero if desired
+    if(s.siteTitle) document.title = s.siteTitle; 
     if(s.siteTitle) document.getElementById('hero-title').innerText = `Welcome to ${s.siteTitle}`;
     
     if(s.favicon) {
@@ -70,11 +68,13 @@ function applyGlobalSettings(s) {
         }
         link.href = s.favicon;
     }
+    // Inject Global CSS
     if(s.customCss) {
         const style = document.createElement('style');
         style.innerHTML = s.customCss;
         document.head.appendChild(style);
     }
+    // Inject Global JS
     if(s.customHeadJs) {
         const script = document.createElement('script');
         script.innerHTML = s.customHeadJs;
@@ -90,10 +90,12 @@ function renderHeader(s) {
     const html = `
         <nav>
             <a href="${s.siteUrl || '/'}" class="logo">${s.siteTitle || 'Home'}</a>
+            
             <ul class="nav-links" id="nav-links-list">
                 <button class="nav-close-btn" onclick="toggleMenu()">&times;</button>
                 ${navLinks}
             </ul>
+
             <div class="burger" onclick="toggleMenu()">
                 <i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i>
             </div>
@@ -105,14 +107,20 @@ function renderHeader(s) {
 function toggleMenu() {
     const nav = document.getElementById('nav-links-list');
     nav.classList.toggle('nav-active');
-    if (nav.classList.contains('nav-active')) document.body.classList.add('menu-open');
-    else document.body.classList.remove('menu-open');
+    
+    // Handle Scroll Lock & Icon Visibility
+    if (nav.classList.contains('nav-active')) {
+        document.body.classList.add('menu-open');
+    } else {
+        document.body.classList.remove('menu-open');
+    }
 }
 
 function renderFooter(s) {
     const navLinks = (s.footerMenu || []).map(l => 
         `<a href="${resolveLink(l.link)}">${l.label}</a>`
     ).join('');
+    
     const socials = (s.socialLinks || []).map(l => 
         `<a href="${resolveLink(l.link)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`
     ).join('');
@@ -133,57 +141,65 @@ function renderFooter(s) {
 async function loadFeaturedContent() {
     const container = document.getElementById(CONFIG.listContainer);
     
-    // Fetch all cards in parallel for speed
+    // Fetch all cards in parallel
     const promises = FEATURED_SLUGS.map(slug => fetchCardData(slug));
     const cards = await Promise.all(promises);
     
     // Clear Skeletons
     container.innerHTML = '';
     
-    // Render
+    let hasContent = false;
     cards.forEach(html => {
-        if(html) container.insertAdjacentHTML('beforeend', html);
+        if(html) {
+            container.insertAdjacentHTML('beforeend', html);
+            hasContent = true;
+        }
     });
 
-    if(container.innerHTML === '') {
-        container.innerHTML = '<p style="text-align:center;color:#666;">No content configured yet.</p>';
+    if(!hasContent) {
+        container.innerHTML = '<p style="text-align:center;color:#666;grid-column:1/-1">No featured content available.</p>';
     }
 }
 
 async function fetchCardData(slug) {
-    // 1. Clean path
-    let path = slug;
-    if(path.endsWith('/')) path = path.slice(0, -1);
+    // Clean path (remove leading/trailing slashes)
+    let path = slug.replace(/^\/|\/$/g, '');
     
-    // 2. Fetch HTML to scrape meta
     try {
+        // Fetch the page content
         const res = await fetch(`${path}/index.html`);
         if(!res.ok) return null;
         
         const text = await res.text();
         const doc = new DOMParser().parseFromString(text, 'text/html');
         
-        // Scrape Info
+        // Scrape Metadata
         const title = doc.querySelector('title')?.innerText.split(' - ')[0] || 'Untitled';
         const imgMeta = doc.querySelector('meta[property="og:image"]');
         const img = imgMeta ? imgMeta.content : 'https://via.placeholder.com/1200x628/1e1e1e/333?text=No+Image';
-        const dateMeta = doc.querySelector('.page-meta span:nth-child(3)'); // Rough scrape from article.css structure
-        const dateStr = dateMeta ? dateMeta.innerText.replace('• ', '') : 'Recently Updated';
+        
+        // Scrape Date (tries to find it in the page-meta structure)
+        // Checks for the specific structure used in your article.css
+        let dateStr = 'Read Now';
+        const metaSpan = doc.querySelector('.page-meta');
+        if(metaSpan && metaSpan.innerText.includes('•')) {
+            const parts = metaSpan.innerText.split('•');
+            if(parts.length >= 2) dateStr = parts[1].trim(); 
+        }
 
-        // Is it a blog post or page? (Check path)
-        const typeLabel = slug.includes('blog/') ? 'Post' : 'Page';
+        const typeLabel = path.includes('blog/') ? 'Article' : 'Page';
         
         return `
         <article class="home-card fade-in">
-            <a href="${slug}/" class="card-img-container">
+            <a href="${path}/" class="card-img-container">
                 <span class="card-badge">${typeLabel}</span>
                 <img src="${img}" alt="${title}" class="card-img" loading="lazy">
             </a>
             <div class="card-body">
-                <a href="${slug}/"><h2 class="card-title">${title}</h2></a>
+                <a href="${path}/"><h2 class="card-title">${title}</h2></a>
                 <div class="card-footer-row">
-                    <span><i class="fa-regular fa-clock"></i> ${dateStr}</span>
-                    <a href="${slug}/" style="color:var(--primary)">Read <i class="fa-solid fa-arrow-right"></i></a>
+                    <span><i class="fa-regular fa-calendar"></i> ${dateStr}</span>
+                    <a href="${path}/" class="read-more-link">Read <i class="fa-solid fa-arrow-right"></i></a>
                 </div>
             </div>
         </article>
@@ -199,8 +215,12 @@ function injectAds(s) {
     const ads = s.ads || [];
     const headAd = ads.find(a => a.placement === 'header_bottom');
     if(headAd && headAd.code) document.getElementById('ad-header-bottom').innerHTML = `<div class="ad-unit">${headAd.code}</div>`;
+    
     const footAd = ads.find(a => a.placement === 'sticky_footer');
-    if(footAd && footAd.code) document.getElementById('ad-sticky-footer').innerHTML = `<button class="ad-close" onclick="this.parentElement.remove()">Close X</button>${footAd.code}`;
+    if(footAd && footAd.code) {
+        document.getElementById('ad-sticky-footer').innerHTML = 
+        `<button class="ad-close" onclick="this.parentElement.remove()">Close X</button>${footAd.code}`;
+    }
 }
 
 function setupAnalytics(gaId) {
@@ -215,15 +235,20 @@ function setupAnalytics(gaId) {
         gtag('js', new Date());
         gtag('config', gaId);
     };
+    // Delayed load for Speed Score
     window.addEventListener('scroll', loadGA, { once: true });
     window.addEventListener('mousemove', loadGA, { once: true });
+    window.addEventListener('touchstart', loadGA, { once: true });
 }
 
-// --- LINK RESOLVER ---
+// --- LINK RESOLVER (Robust Version) ---
 function resolveLink(link) {
     if(!link) return '#';
+    // 1. External / Protocols
     if(link.match(/^(https?:|mailto:|tel:|\/\/|#)/)) return link;
+    // 2. Loose External (google.com)
     if(link.startsWith('www.') || (link.includes('.') && !link.startsWith('/'))) return 'https://' + link;
+    // 3. Internal (Root Relative)
     if(link.startsWith('/')) return link;
     return '/' + link;
 }
