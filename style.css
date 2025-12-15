@@ -32,8 +32,12 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .nav-links a { color: var(--text-main); font-weight: 600; font-size: 1rem; position: relative; }
 .nav-links a:hover { color: var(--primary); }
 
+/* SVG Icons Styles */
+.icon-svg { width: 24px; height: 24px; stroke: currentColor; fill: none; vertical-align: middle; }
+.nav-close-btn .icon-svg { width: 32px; height: 32px; }
+
 /* Menu Toggles */
-.burger { display: none; cursor: pointer; z-index: 101; padding: 10px; transition: opacity 0.3s; }
+.burger { display: none; cursor: pointer; z-index: 101; padding: 10px; transition: opacity 0.3s; color: white; }
 .nav-close-btn { display: none; }
 
 /* --- HERO SECTION --- */
@@ -45,8 +49,21 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 }
 .hero-content h1 { font-size: 3rem; margin-bottom: 15px; color: white; letter-spacing: -1px; }
 .hero-content p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px; }
-.btn-hero { background: var(--primary); color: white; padding: 12px 30px; border-radius: 50px; font-weight: 600; box-shadow: 0 5px 15px rgba(0, 170, 255, 0.3); }
-.btn-hero:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 170, 255, 0.4); }
+
+/* Contrast Fix */
+.btn-hero { 
+    background: var(--primary); 
+    color: #121212; 
+    padding: 12px 30px; 
+    border-radius: 50px; 
+    font-weight: 700; 
+    box-shadow: 0 5px 15px rgba(0, 170, 255, 0.3); 
+}
+.btn-hero:hover { 
+    background: #fff; 
+    transform: translateY(-3px); 
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2); 
+}
 
 /* --- FEATURED GRID --- */
 .featured-wrapper { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
@@ -71,22 +88,10 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     display: flex;
     flex-direction: column;
 }
+.home-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.4); border-color: #555; }
 
-.home-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-    border-color: #555;
-}
-
-/* Image Aspect Ratio 1.91:1 */
-.card-img-container {
-    width: 100%;
-    aspect-ratio: 1.91 / 1;
-    overflow: hidden;
-    background: #000;
-    position: relative;
-    display: block;
-}
+/* Image Ratio 1.91:1 */
+.card-img-container { width: 100%; aspect-ratio: 1.91 / 1; overflow: hidden; background: #000; position: relative; display: block; }
 .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 .home-card:hover .card-img { transform: scale(1.08); }
 
@@ -97,7 +102,7 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 /* Footer of Card */
 .card-footer-row { margin-top: auto; padding-top: 15px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
 .read-now-text { color: var(--primary); font-weight: 600; font-size: 0.9rem; letter-spacing: 0.5px; }
-.read-more-link { color: var(--text-muted); font-size: 1rem; transition: color 0.3s; }
+.read-more-link { color: var(--text-muted); font-size: 1rem; transition: color 0.3s; display: flex; align-items: center; }
 .home-card:hover .read-more-link { color: var(--primary); }
 
 /* --- SKELETONS --- */
@@ -125,13 +130,8 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     .featured-grid { grid-template-columns: 1fr; }
     .hero-content h1 { font-size: 2rem; }
     
-    /* Header Logic */
     .burger { display: block; } 
-    
-    /* Hide Burger when open */
     body.menu-open .burger { opacity: 0; pointer-events: none; }
-    
-    /* Lock Scroll */
     body.menu-open { overflow: hidden; }
 
     .nav-links {
@@ -144,7 +144,8 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     .nav-links.nav-active { transform: translateX(0); }
     .nav-links a { font-size: 1.5rem; }
     
-    .nav-close-btn { display: block; position: absolute; top: 20px; right: 25px; background: transparent; border: none; color: white; font-size: 3rem; cursor: pointer; z-index: 201; }
+    /* Valid Position for Close Button */
+    .nav-close-btn { display: block; background: transparent; border: none; color: white; cursor: pointer; }
     
     .footer-container { flex-direction: column; text-align: center; }
 }
