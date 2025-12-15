@@ -2,56 +2,58 @@ name: Generate Sitemap
 
 on:
   push:
-    branches:
-      - main
-      - master
-      - gh-pages  # Added support for gh-pages branch just in case
     paths:
       - '**.html'
       - '_cms/settings.json'
       - 'sitemap_generator.py'
 
+permissions:
+  contents: write
+
 jobs:
   build_sitemap:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
+    
     steps:
-    # 1. Checkout Code (Full history for dates)
+    # 1. Checkout Code (Full history is REQUIRED for dates)
     - name: Checkout Repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0 
 
-    # 2. Setup Python
+    # 2. Fix Git Permissions (CRITICAL FIX for "detected dubious ownership")
+    - name: Fix Git Safe Directory
+      run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+    # 3. Setup Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    # 3. Run the Generator Script
+    # 4. Run Generator
     - name: Run Sitemap Generator
       run: python sitemap_generator.py
 
-    # 4. Commit and Push (Fixed for Detached HEAD)
-    - name: Commit and Push Sitemap
+    # 5. Commit and Push (Simplified to avoid HEAD errors)
+    - name: Commit and Push
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Check if sitemap.xml changed
-        if [[ -n $(git status -s sitemap.xml) ]]; then
-          echo "Sitemap changed. Committing..."
-          git add sitemap.xml
-          git commit -m "Auto-update sitemap.xml"
-          
-          # Pull latest changes to avoid conflicts (Rebase strategy)
-          git pull origin ${{ github.ref_name }} --rebase
-          
-          # Push specifically to the current branch
-          git push origin HEAD:${{ github.ref_name }}
-          echo "Pushed successfully."
-        else
-          echo "No changes in sitemap.xml. Skipping push."
+        # Add the file
+        git add sitemap.xml
+        
+        # Check if there are actually changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes in sitemap.xml. Exiting."
+          exit 0
         fi
+        
+        git commit -m "Auto-update sitemap.xml"
+        
+        # Pull changes from remote to resolve race conditions
+        git pull --rebase
+        
+        # Push changes
+        git push
