@@ -1,6 +1,6 @@
 /**
- * HOMEPAGE LOADER - OPTIMIZED FOR 100/100 SPEED
- * Features: Image CDN (wsrv.nl), Auto-WebP, Secure Links, Accessibility
+ * HOMEPAGE LOADER - CUSTOM DOMAIN FIX
+ * Features: Forces Custom Domain for Images, Fixes Blocked Policy, LCP Priority
  */
 
 // ==========================================
@@ -61,7 +61,6 @@ function applyGlobalSettings(s) {
         if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
         link.href = s.favicon;
     }
-    // Inject Custom Head JS if exists
     if(s.customHeadJs) {
         const script = document.createElement('script');
         script.textContent = s.customHeadJs; 
@@ -123,7 +122,6 @@ function renderFooter(s) {
 
 async function loadFeaturedContent() {
     const container = document.getElementById(CONFIG.listContainer);
-    // Fetch all cards in parallel
     const promises = FEATURED_SLUGS.map((slug, index) => fetchCardData(slug, index));
     const cards = await Promise.all(promises);
     
@@ -137,10 +135,10 @@ async function loadFeaturedContent() {
 }
 
 /**
- * OPTIMIZED FETCH
- * 1. Cleans GitHub URLs
- * 2. Proxies images via wsrv.nl for WebP + Compression
- * 3. Applies Correct Fetch Priority
+ * CUSTOM DOMAIN IMAGE FIX
+ * 1. Reads the image URL from the post.
+ * 2. If it points to github.io, it STRIPS that and replaces it with your current custom domain.
+ * 3. Sends the CLEAN custom domain URL to wsrv.nl (which is allowed).
  */
 async function fetchCardData(slug, index) {
     let path = slug.replace(/^\/|\/$/g, '');
@@ -155,26 +153,50 @@ async function fetchCardData(slug, index) {
         const imgMeta = doc.querySelector('meta[property="og:image"]');
         let rawImg = imgMeta ? imgMeta.content : '';
 
-        // FIX: Clean GitHub Raw URLs to Custom Domain if needed, or pass as is to proxy
-        if(rawImg.includes('raw.githubusercontent.com') || rawImg.includes('github.io')) {
-            // No action needed, Proxy handles it, but we prefer HTTPS
-            if(rawImg.startsWith('http://')) rawImg = rawImg.replace('http://', 'https://');
+        // --- URL SANITIZATION START ---
+        // If the image comes from "github.io", we cut out the domain and use YOUR custom domain.
+        // Example: "https://rmemonads.github.io/crackstreams/images/img.png" -> "https://crackstreams.help/images/img.png"
+        
+        if (rawImg.includes('github.io')) {
+            // Find where '/images/' starts
+            const splitPoint = rawImg.indexOf('/images/');
+            if(splitPoint > -1) {
+                // Construct: Current Domain + /images/filename.png
+                // window.location.origin is "https://crackstreams.help"
+                rawImg = window.location.origin + rawImg.substring(splitPoint);
+            }
+        } else if (rawImg.startsWith('http')) {
+            // Just ensure HTTPS
+            rawImg = rawImg.replace('http://', 'https://');
+        } else if (rawImg.startsWith('/')) {
+            // It's already relative, make it absolute for the optimizer
+            rawImg = window.location.origin + rawImg;
+        } else if (rawImg && !rawImg.startsWith('http')) {
+             // It's "images/foo.png", make it absolute
+             rawImg = window.location.origin + '/' + rawImg;
         }
+        // --- URL SANITIZATION END ---
 
-        // OPTIMIZATION: Use wsrv.nl for Resize & WebP
-        // width=600 is sufficient for grid cards (High DPI supported)
         const optimizedImg = rawImg 
             ? `https://wsrv.nl/?url=${encodeURIComponent(rawImg)}&w=600&output=webp&q=80` 
             : `https://via.placeholder.com/600x314/1e1e1e/333?text=No+Image`;
 
-        // LCP Logic: First image is high priority, others lazy
         const loadingAttr = index === 0 ? 'eager' : 'lazy';
         const priorityAttr = index === 0 ? 'fetchpriority="high"' : '';
 
         return `
         <article class="home-card fade-in">
             <a href="${path}/" class="card-img-container">
-                <img src="${optimizedImg}" alt="${title}" class="card-img" ${priorityAttr} loading="${loadingAttr}" width="600" height="314">
+                <img 
+                    src="${optimizedImg}" 
+                    alt="${title}" 
+                    class="card-img" 
+                    ${priorityAttr} 
+                    loading="${loadingAttr}" 
+                    width="600" 
+                    height="314"
+                    onerror="this.onerror=null;this.src='${rawImg}'" 
+                >
             </a>
             <div class="card-body">
                 <a href="${path}/"><h2 class="card-title">${title}</h2></a>
@@ -214,7 +236,6 @@ function setupAnalytics(gaId) {
         gtag('js', new Date());
         gtag('config', gaId);
     };
-    // Lazy load Analytics to boost initial speed
     if (window.scrollY > 0) loadGA();
     else window.addEventListener('scroll', loadGA, { once: true });
     window.addEventListener('mousemove', loadGA, { once: true });
@@ -223,18 +244,11 @@ function setupAnalytics(gaId) {
 
 function resolveLink(link, isExternal = false) {
     if(!link) return '#';
-    // Clean spaces
     link = link.trim();
-    
-    // Strict external check
     if(link.match(/^https?:\/\//) || link.startsWith('mailto:') || link.startsWith('tel:') || link.startsWith('#')) return link;
-    
-    // Loose external check (user typed "google.com")
     if(isExternal || (link.includes('.') && !link.startsWith('/'))) {
         return link.startsWith('http') ? link : 'https://' + link;
     }
-    
-    // Internal link cleaning
     if(link.startsWith('/')) return link;
     return '/' + link;
 }
