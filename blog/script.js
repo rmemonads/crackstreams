@@ -1,8 +1,10 @@
 /**
  * BLOG LOADER - INTEGRATED WITH CMS SETTINGS
- * 1. Loads Global Settings (Header, Footer, CSS, Ads, Analytics)
- * 2. Loads Post Index (Sorted by Modified Date)
- * 3. Infinite Scroll with Asynchronous Data Fetching
+ * Features:
+ * 1. Global Settings (Header/Footer/Ads)
+ * 2. Mobile Menu (Open/Close/Scroll Lock)
+ * 3. Smart Link Resolution (External vs Internal)
+ * 4. Infinite Scroll & Async Post Loading
  */
 
 const CONFIG = {
@@ -79,16 +81,23 @@ function applyGlobalSettings(s) {
     }
 }
 
+// --- HEADER RENDERER WITH MOBILE FIX ---
 function renderHeader(s) {
-    // Pass 'false' to indicate header links
+    // Add toggleMenu() to links so menu closes on click
     const navLinks = (s.headerMenu || []).map(l => 
-        `<li><a href="${resolveLink(l.link)}">${l.label}</a></li>`
+        `<li><a href="${resolveLink(l.link)}" onclick="toggleMenu()">${l.label}</a></li>`
     ).join('');
 
     const html = `
         <nav>
             <a href="${s.siteUrl || '/'}" class="logo">${s.siteTitle || 'Home'}</a>
-            <ul class="nav-links" id="nav-links-list">${navLinks}</ul>
+            
+            <ul class="nav-links" id="nav-links-list">
+                <!-- Close Button for Mobile -->
+                <button class="nav-close-btn" onclick="toggleMenu()">&times;</button>
+                ${navLinks}
+            </ul>
+
             <div class="burger" onclick="toggleMenu()">
                 <i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i>
             </div>
@@ -97,10 +106,17 @@ function renderHeader(s) {
     document.getElementById('dynamic-header').innerHTML = html;
 }
 
-// Mobile Menu Toggle
+// TOGGLE MENU FUNCTION (Global scope)
 function toggleMenu() {
     const nav = document.getElementById('nav-links-list');
     nav.classList.toggle('nav-active');
+    
+    // Toggle scroll lock and burger visibility via CSS
+    if (nav.classList.contains('nav-active')) {
+        document.body.classList.add('menu-open');
+    } else {
+        document.body.classList.remove('menu-open');
+    }
 }
 
 function renderFooter(s) {
@@ -108,7 +124,6 @@ function renderFooter(s) {
         `<a href="${resolveLink(l.link)}">${l.label}</a>`
     ).join('');
     
-    // Social links usually need strict external handling
     const socials = (s.socialLinks || []).map(l => 
         `<a href="${resolveLink(l.link)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`
     ).join('');
@@ -208,7 +223,7 @@ function renderNextBatch() {
     });
 }
 
-// --- CARD GENERATOR (Fetches Data for Banners) ---
+// --- CARD GENERATOR ---
 async function generateCard(post) {
     const dateStr = new Date(post.modified || post.date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric'});
     const slug = post.slug;
@@ -264,25 +279,22 @@ function updateSentinel() {
     if(!state.hasMore) document.querySelector('.end-msg').classList.remove('hidden');
 }
 
-// --- UPDATED LINK RESOLVER ---
+// --- LINK RESOLVER (FIXED: No unwanted Site URL) ---
 function resolveLink(link) {
     if(!link) return '#';
     
-    // 1. Explicit External (http, https, //, mailto, tel, #) -> Return as is
+    // 1. Explicit External Protocols
     if(link.match(/^(https?:|mailto:|tel:|\/\/|#)/)) {
         return link;
     }
 
-    // 2. Loose External (www.google.com or google.com) -> Prepend https://
-    // Checks if it starts with 'www.' OR (contains a dot AND doesn't start with /)
+    // 2. Heuristic External (e.g. "google.com" or "www.test.com")
+    // If it has "www." OR (has a dot AND no starting slash)
     if(link.startsWith('www.') || (link.includes('.') && !link.startsWith('/'))) {
         return 'https://' + link;
     }
 
-    // 3. Internal Links (Slugs or Paths) -> Return Root Relative Path
-    // If user typed "about", return "/about"
-    // If user typed "/about", return "/about"
+    // 3. Internal (Root Relative)
     if(link.startsWith('/')) return link;
-    
     return '/' + link;
 }
