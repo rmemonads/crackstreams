@@ -10,9 +10,15 @@
 // ==========================================
 const FEATURED_SLUGS = [
     "hello-world",           // Example Page
-    "blog/my-first-post",    // Example Post (include 'blog/' prefix if it's a post)
-    "blog/another-post",
-    "about-us"
+    "blog/live-stream-for-nfl-nba-nhl-mlb-ufc-more/",    // Example Post (include 'blog/' prefix if it's a post)
+    "blog/sportsurge-e-strere/",
+    "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1/"
+    "blog/test-post-new/"
+"blog/hello-world/"
+"experience-buffstreamgfday/"
+
+
+    
 ];
 // ==========================================
 
