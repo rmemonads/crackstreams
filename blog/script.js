@@ -1,163 +1,269 @@
 /**
- * Modern Blog Loader with Infinite Scroll
- * Fetches data from CMS index, sorts by date, and renders.
+ * BLOG LOADER - INTEGRATED WITH CMS SETTINGS
+ * 1. Loads Global Settings (Header, Footer, CSS, Ads, Analytics)
+ * 2. Loads Post Index (Sorted by Modified Date)
+ * 3. Infinite Scroll with Asynchronous Data Fetching
  */
 
 const CONFIG = {
+    settingsUrl: '../_cms/settings.json',
     indexUrl: '../_cms/index.json',
     itemsPerPage: 10,
-    listContainerId: 'blog-list',
-    sentinelId: 'sentinel'
+    listContainer: 'blog-list',
+    sentinel: 'sentinel'
 };
 
 const state = {
-    allPosts: [],
-    displayedCount: 0,
+    settings: {},
+    posts: [],
+    displayed: 0,
     isLoading: false,
     hasMore: true
 };
 
-document.addEventListener('DOMContentLoaded', initBlog);
-
-async function initBlog() {
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // 1. Fetch CMS Index
-        const response = await fetch(CONFIG.indexUrl + '?t=' + Date.now()); // bust cache
-        if (!response.ok) throw new Error('Failed to load content index');
-        
-        const data = await response.json();
-        
-        // 2. Filter & Sort (Latest Modified Date First)
-        state.allPosts = data
-            .filter(item => item.type === 'post') // Only get posts
-            .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort DESC
-            
-        // 3. Clear Skeletons
-        const container = document.getElementById(CONFIG.listContainerId);
-        container.innerHTML = '';
-        
-        // 4. Initial Load
-        loadMorePosts();
-        
-        // 5. Setup Infinite Scroll Observer
-        setupIntersectionObserver();
+        await loadSettings();
+        await loadPostsIndex();
+        setupInfiniteScroll();
+    } catch (e) {
+        console.error("Init Error:", e);
+    }
+});
 
-    } catch (error) {
-        console.error('Blog Error:', error);
-        document.getElementById(CONFIG.listContainerId).innerHTML = 
-            `<div style="text-align:center; padding:40px; color:#888;">
-                <i class="fa-solid fa-triangle-exclamation"></i> Unable to load posts.
-             </div>`;
+// --- 1. LOAD SETTINGS & APPLY THEME ---
+async function loadSettings() {
+    try {
+        const res = await fetch(CONFIG.settingsUrl + '?t=' + Date.now());
+        if (!res.ok) throw new Error("Settings not found");
+        const data = await res.json();
+        state.settings = data;
+        
+        applyGlobalSettings(data);
+        renderHeader(data);
+        renderFooter(data);
+        injectAds(data);
+        setupAnalytics(data.gaId);
+
+    } catch (e) {
+        console.warn("Using defaults settings.");
     }
 }
 
-function loadMorePosts() {
-    if (state.isLoading || !state.hasMore) return;
+function applyGlobalSettings(s) {
+    // Title & Favicon
+    if(s.siteTitle) document.title = `Blog - ${s.siteTitle}`;
+    if(s.favicon) {
+        let link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+        }
+        link.href = s.favicon;
+    }
+
+    // Global CSS
+    if(s.customCss) {
+        const style = document.createElement('style');
+        style.innerHTML = s.customCss;
+        document.head.appendChild(style);
+    }
+
+    // Global JS
+    if(s.customHeadJs) {
+        const script = document.createElement('script');
+        script.innerHTML = s.customHeadJs;
+        document.head.appendChild(script);
+    }
+}
+
+function renderHeader(s) {
+    const navLinks = (s.headerMenu || []).map(l => 
+        `<li><a href="${resolveLink(l.link, s.siteUrl)}">${l.label}</a></li>`
+    ).join('');
+
+    const html = `
+        <nav>
+            <a href="${s.siteUrl}" class="logo">${s.siteTitle || 'Home'}</a>
+            <ul class="nav-links">${navLinks}</ul>
+            <div class="burger"><i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i></div>
+        </nav>
+    `;
+    document.getElementById('dynamic-header').innerHTML = html;
+}
+
+function renderFooter(s) {
+    const navLinks = (s.footerMenu || []).map(l => 
+        `<a href="${resolveLink(l.link, s.siteUrl)}">${l.label}</a>`
+    ).join('');
     
+    const socials = (s.socialLinks || []).map(l => 
+        `<a href="${ensureExternal(l.link)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`
+    ).join('');
+
+    const html = `
+        <div class="footer-container">
+            <nav class="footer-nav">${navLinks}</nav>
+            <div class="footer-social">${socials}</div>
+        </div>
+        <div class="footer-bottom">
+            <p>${s.copyright || '© All Rights Reserved'}</p>
+        </div>
+    `;
+    document.getElementById('dynamic-footer').innerHTML = html;
+}
+
+// --- 2. ADS & ANALYTICS (Delayed) ---
+function injectAds(s) {
+    const ads = s.ads || [];
+    
+    // Header Bottom
+    const headAd = ads.find(a => a.placement === 'header_bottom');
+    if(headAd && headAd.code) document.getElementById('ad-header-bottom').innerHTML = `<div class="ad-unit">${headAd.code}</div>`;
+
+    // Sticky Footer
+    const footAd = ads.find(a => a.placement === 'sticky_footer');
+    if(footAd && footAd.code) {
+        document.getElementById('ad-sticky-footer').innerHTML = 
+        `<button class="ad-close" onclick="this.parentElement.remove()">Close X</button>${footAd.code}`;
+    }
+}
+
+function setupAnalytics(gaId) {
+    if(!gaId) return;
+    const loadGA = () => {
+        const script = document.createElement('script');
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+        script.async = true;
+        document.head.appendChild(script);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId);
+    };
+    // Delayed Load for Speed
+    window.addEventListener('scroll', loadGA, { once: true });
+    window.addEventListener('mousemove', loadGA, { once: true });
+    window.addEventListener('touchstart', loadGA, { once: true });
+}
+
+// --- 3. LOAD CONTENT ---
+async function loadPostsIndex() {
+    try {
+        const res = await fetch(CONFIG.indexUrl + '?t=' + Date.now());
+        if(!res.ok) throw new Error("Index not found");
+        const data = await res.json();
+        
+        // Filter Posts & Sort by Modified Date DESC
+        state.posts = data
+            .filter(i => i.type === 'post')
+            .sort((a,b) => new Date(b.modified || b.date) - new Date(a.modified || a.date));
+
+        document.getElementById(CONFIG.listContainer).innerHTML = ''; // Clear skeletons
+        renderNextBatch();
+
+    } catch (e) {
+        console.error(e);
+        document.getElementById(CONFIG.listContainer).innerHTML = '<p style="text-align:center;color:#888">No posts found.</p>';
+        state.hasMore = false;
+        updateSentinel();
+    }
+}
+
+function renderNextBatch() {
+    if(state.isLoading || !state.hasMore) return;
     state.isLoading = true;
     document.querySelector('.spinner').classList.remove('hidden');
-    
-    // Simulate slight network delay for smooth UI feel (optional, remove setTimeout for raw speed)
-    setTimeout(async () => {
-        const nextBatch = state.allPosts.slice(state.displayedCount, state.displayedCount + CONFIG.itemsPerPage);
-        
-        if (nextBatch.length === 0) {
-            state.hasMore = false;
-            document.querySelector('.spinner').classList.add('hidden');
-            document.querySelector('.end-msg').classList.remove('hidden');
-            return;
-        }
 
-        const container = document.getElementById(CONFIG.listContainerId);
-        
-        // Render cards
-        for (const post of nextBatch) {
-            const html = await generateCardHtml(post);
-            container.insertAdjacentHTML('beforeend', html);
-        }
-
-        state.displayedCount += nextBatch.length;
+    const batch = state.posts.slice(state.displayed, state.displayed + CONFIG.itemsPerPage);
+    if(batch.length === 0) {
+        state.hasMore = false;
         state.isLoading = false;
-        
-        // Check if we reached the absolute end
-        if (state.displayedCount >= state.allPosts.length) {
-            state.hasMore = false;
-            document.querySelector('.spinner').classList.add('hidden');
-            document.querySelector('.end-msg').classList.remove('hidden');
-        }
-        
-    }, 300); // Small 300ms buffer for smooth animation
-}
-
-async function generateCardHtml(post) {
-    // Format Date
-    const dateObj = new Date(post.date);
-    const dateStr = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    
-    // Fetch individual post content to get Banner/Desc
-    // Note: In a high-traffic production site, you might want to store banner/desc in index.json 
-    // to avoid N+1 requests. For GitHub Pages, this fetch is acceptable for lazy loading.
-    let banner = '';
-    let description = '';
-    
-    try {
-        const res = await fetch(`${post.slug}/index.html`);
-        if (res.ok) {
-            const text = await res.text();
-            const doc = new DOMParser().parseFromString(text, 'text/html');
-            
-            // Extract Meta Description
-            const metaDesc = doc.querySelector('meta[name="description"]');
-            description = metaDesc ? metaDesc.content : getExcerpt(doc);
-            
-            // Extract Banner (OG Image or First Image)
-            const metaImg = doc.querySelector('meta[property="og:image"]');
-            banner = metaImg ? metaImg.content : '';
-            
-            // Fallback Banner
-            if(!banner || banner.length < 5) banner = 'https://via.placeholder.com/800x450/1e1e1e/333?text=No+Image';
-        }
-    } catch (e) {
-        description = "Click to read this article.";
-        banner = 'https://via.placeholder.com/800x450/1e1e1e/333?text=Error';
+        updateSentinel();
+        return;
     }
 
-    // Clean up spaces in slug for URL
-    const safeSlug = post.slug; 
+    // Render logic
+    const promises = batch.map(post => generateCard(post));
+    Promise.all(promises).then(cardsHtml => {
+        const container = document.getElementById(CONFIG.listContainer);
+        cardsHtml.forEach(html => container.insertAdjacentHTML('beforeend', html));
+        
+        state.displayed += batch.length;
+        state.isLoading = false;
+        if(state.displayed >= state.posts.length) state.hasMore = false;
+        updateSentinel();
+    });
+}
+
+// --- CARD GENERATOR (Fetches Data for Banners) ---
+async function generateCard(post) {
+    const dateStr = new Date(post.modified || post.date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric'});
+    const slug = post.slug;
+    
+    // Default Fallbacks
+    let banner = 'https://via.placeholder.com/1200x628/1e1e1e/333?text=No+Image';
+    let desc = 'Click to read more about this topic.';
+
+    // Async Fetch specific post to scrape Meta
+    try {
+        const res = await fetch(`${slug}/index.html`);
+        if(res.ok) {
+            const txt = await res.text();
+            const doc = new DOMParser().parseFromString(txt, 'text/html');
+            
+            const ogImg = doc.querySelector('meta[property="og:image"]');
+            if(ogImg && ogImg.content) banner = ogImg.content;
+            
+            const metaDesc = doc.querySelector('meta[name="description"]');
+            if(metaDesc && metaDesc.content) desc = metaDesc.content;
+        }
+    } catch(e) {}
 
     return `
     <article class="blog-card fade-in">
-        <a href="${safeSlug}/" class="card-img-link">
+        <a href="${slug}/" class="card-img-wrap">
             <img src="${banner}" alt="${post.title}" class="card-img" loading="lazy">
         </a>
         <div class="card-content">
             <div class="card-meta">
-                <i class="fa-regular fa-calendar"></i> ${dateStr}
+                <i class="fa-regular fa-calendar-check"></i> <span>${dateStr}</span>
             </div>
-            <a href="${safeSlug}/">
-                <h2 class="card-title">${post.title}</h2>
+            <a href="${slug}/"><h2 class="card-title">${post.title}</h2></a>
+            <p class="card-desc">${desc}</p>
+            <a href="${slug}/" class="read-more-btn">
+                Read Full Article <i class="fa-solid fa-arrow-right-long"></i>
             </a>
-            <p class="card-desc">${description}</p>
-            <a href="${safeSlug}/" class="read-more">Read Article <i class="fa-solid fa-arrow-right"></i></a>
         </div>
     </article>
     `;
 }
 
-function getExcerpt(doc) {
-    // Helper: Grab first paragraph text if no meta description
-    const p = doc.querySelector('.article-container p');
-    if (p) return p.innerText.substring(0, 140) + '...';
-    return "Read full article to learn more.";
+// --- UTILS ---
+function setupInfiniteScroll() {
+    const obs = new IntersectionObserver(entries => {
+        if(entries[0].isIntersecting) renderNextBatch();
+    }, { rootMargin: '100px' });
+    obs.observe(document.getElementById(CONFIG.sentinel));
 }
 
-function setupIntersectionObserver() {
-    const sentinel = document.getElementById(CONFIG.sentinelId);
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-            loadMorePosts();
-        }
-    }, { rootMargin: '100px' }); // Load 100px before reaching bottom
-    
-    observer.observe(sentinel);
+function updateSentinel() {
+    document.querySelector('.spinner').classList.add('hidden');
+    if(!state.hasMore) document.querySelector('.end-msg').classList.remove('hidden');
+}
+
+function resolveLink(link, siteUrl) {
+    if(!link) return '#';
+    if(link.startsWith('http') || link.startsWith('#')) return link;
+    // Internal link logic matching Admin
+    const base = siteUrl.endsWith('/') ? siteUrl.slice(0,-1) : siteUrl;
+    let path = link.startsWith('/') ? link.substring(1) : link;
+    return `${base}/${path}`;
+}
+
+function ensureExternal(link) {
+    if(!link) return '';
+    return (link.startsWith('http') || link.startsWith('mailto')) ? link : `https://${link}`;
 }
