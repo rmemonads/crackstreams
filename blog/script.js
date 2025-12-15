@@ -80,13 +80,14 @@ function applyGlobalSettings(s) {
 }
 
 function renderHeader(s) {
+    // Pass 'false' to indicate header links
     const navLinks = (s.headerMenu || []).map(l => 
-        `<li><a href="${resolveLink(l.link, s.siteUrl)}">${l.label}</a></li>`
+        `<li><a href="${resolveLink(l.link)}">${l.label}</a></li>`
     ).join('');
 
     const html = `
         <nav>
-            <a href="${s.siteUrl}" class="logo">${s.siteTitle || 'Home'}</a>
+            <a href="${s.siteUrl || '/'}" class="logo">${s.siteTitle || 'Home'}</a>
             <ul class="nav-links" id="nav-links-list">${navLinks}</ul>
             <div class="burger" onclick="toggleMenu()">
                 <i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i>
@@ -104,11 +105,12 @@ function toggleMenu() {
 
 function renderFooter(s) {
     const navLinks = (s.footerMenu || []).map(l => 
-        `<a href="${resolveLink(l.link, s.siteUrl)}">${l.label}</a>`
+        `<a href="${resolveLink(l.link)}">${l.label}</a>`
     ).join('');
     
+    // Social links usually need strict external handling
     const socials = (s.socialLinks || []).map(l => 
-        `<a href="${ensureExternal(l.link)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`
+        `<a href="${resolveLink(l.link)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`
     ).join('');
 
     const html = `
@@ -262,16 +264,25 @@ function updateSentinel() {
     if(!state.hasMore) document.querySelector('.end-msg').classList.remove('hidden');
 }
 
-function resolveLink(link, siteUrl) {
+// --- UPDATED LINK RESOLVER ---
+function resolveLink(link) {
     if(!link) return '#';
-    if(link.startsWith('http') || link.startsWith('#')) return link;
-    // Internal link logic matching Admin
-    const base = siteUrl.endsWith('/') ? siteUrl.slice(0,-1) : siteUrl;
-    let path = link.startsWith('/') ? link.substring(1) : link;
-    return `${base}/${path}`;
-}
+    
+    // 1. Explicit External (http, https, //, mailto, tel, #) -> Return as is
+    if(link.match(/^(https?:|mailto:|tel:|\/\/|#)/)) {
+        return link;
+    }
 
-function ensureExternal(link) {
-    if(!link) return '';
-    return (link.startsWith('http') || link.startsWith('mailto')) ? link : `https://${link}`;
+    // 2. Loose External (www.google.com or google.com) -> Prepend https://
+    // Checks if it starts with 'www.' OR (contains a dot AND doesn't start with /)
+    if(link.startsWith('www.') || (link.includes('.') && !link.startsWith('/'))) {
+        return 'https://' + link;
+    }
+
+    // 3. Internal Links (Slugs or Paths) -> Return Root Relative Path
+    // If user typed "about", return "/about"
+    // If user typed "/about", return "/about"
+    if(link.startsWith('/')) return link;
+    
+    return '/' + link;
 }
