@@ -32,8 +32,9 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .nav-links a { color: var(--text-main); font-weight: 600; font-size: 1rem; position: relative; }
 .nav-links a:hover { color: var(--primary); }
 
-/* FIX: Hide Burger on Desktop */
-.burger { display: none; cursor: pointer; z-index: 101; padding: 10px; }
+/* MENU TOGGLES (Desktop: Hidden) */
+.burger { display: none; cursor: pointer; z-index: 101; padding: 10px; transition: opacity 0.3s; }
+.nav-close-btn { display: none; }
 
 /* --- BLOG LAYOUT --- */
 .blog-wrapper { max-width: 900px; margin: 0 auto; padding: 40px 20px; min-height: 80vh; }
@@ -41,7 +42,7 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .blog-heading h1 { font-size: 2.5rem; color: white; line-height: 1.2; margin-bottom: 5px; }
 .blog-heading p { color: var(--text-muted); }
 
-/* --- LIST CARD (Professional Design) --- */
+/* --- LIST CARD (1.91:1 Ratio) --- */
 .blog-card { 
     display: flex; 
     background: var(--bg-card); 
@@ -57,7 +58,7 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
 }
 
-/* Image Wrapper - Enforces 1.91:1 Ratio */
+/* Thumbnail Wrapper */
 .card-img-wrap { 
     width: 40%; 
     position: relative; 
@@ -69,6 +70,7 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
 .blog-card:hover .card-img { transform: scale(1.05); }
 
+/* Content */
 .card-content { width: 60%; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
 .card-meta { font-size: 0.85rem; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .card-title { font-size: 1.4rem; font-weight: 700; color: white; margin-bottom: 12px; line-height: 1.3; }
@@ -114,7 +116,7 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
-    /* Cards Stack Vertically */
+    /* Stack Cards */
     .blog-card, .skeleton-card { flex-direction: column; height: auto; }
     .card-img-wrap, .sk-img { width: 100%; aspect-ratio: 1.91 / 1; }
     .card-content, .sk-body { width: 100%; padding: 20px; }
@@ -122,8 +124,14 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     .footer-container { flex-direction: column; text-align: center; }
 
     /* Mobile Header Logic */
-    .burger { display: block; } /* Show Toggle */
+    .burger { display: block; } 
     
+    /* Hide Burger Icon when Menu is Open */
+    body.menu-open .burger { opacity: 0; pointer-events: none; }
+    
+    /* Lock Page Scroll */
+    body.menu-open { overflow: hidden; }
+
     .nav-links {
         position: fixed;
         top: 0;
@@ -136,15 +144,27 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transform: translateX(100%); /* Hide off-screen */
-        transition: transform 0.4s ease;
-        z-index: 99;
+        transform: translateX(100%);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 200; /* Above Burger */
         gap: 2rem;
     }
     
-    .nav-links.nav-active {
-        transform: translateX(0); /* Slide in */
-    }
-    
+    .nav-links.nav-active { transform: translateX(0); }
     .nav-links a { font-size: 1.5rem; }
+
+    /* Close Button Styling */
+    .nav-close-btn {
+        display: block;
+        position: absolute;
+        top: 20px;
+        right: 25px;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 3rem;
+        cursor: pointer;
+        line-height: 1;
+        z-index: 201; /* Highest */
+    }
 }
