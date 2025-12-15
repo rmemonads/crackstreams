@@ -15,45 +15,43 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    # 1. Checkout Code (Full history is REQUIRED for dates)
+    # 1. Wait for 2 Minutes (User Request)
+    - name: Wait 2 Minutes for deployment stability
+      run: sleep 120
+
+    # 2. Checkout Code
     - name: Checkout Repo
       uses: actions/checkout@v4
       with:
         fetch-depth: 0 
 
-    # 2. Fix Git Permissions (CRITICAL FIX for "detected dubious ownership")
+    # 3. Fix Git Permissions
     - name: Fix Git Safe Directory
       run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
-    # 3. Setup Python
+    # 4. Setup Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    # 4. Run Generator
+    # 5. Run Generator
     - name: Run Sitemap Generator
       run: python sitemap_generator.py
 
-    # 5. Commit and Push (Simplified to avoid HEAD errors)
+    # 6. Commit and Push
     - name: Commit and Push
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Add the file
         git add sitemap.xml
         
-        # Check if there are actually changes to commit
         if git diff --staged --quiet; then
           echo "No changes in sitemap.xml. Exiting."
           exit 0
         fi
         
         git commit -m "Auto-update sitemap.xml"
-        
-        # Pull changes from remote to resolve race conditions
         git pull --rebase
-        
-        # Push changes
         git push
