@@ -3,77 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - Latest News & Updates</title>
-    <meta name="description" content="Read the latest updates, guides, and news.">
+    <title>Blog Loading...</title>
     
-    <!-- Preload Critical Fonts -->
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome (Cached from main site) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Admin Icons (Fontello) -->
+    <link rel="stylesheet" href="../admin/fontello.css">
 
     <link rel="stylesheet" href="style.css">
-    
-    <!-- SEO: Canonical -->
-    <script>
-        // Dynamic Canonical Tag based on settings (optional enhancement)
-        const link = document.createElement('link');
-        link.rel = 'canonical';
-        link.href = window.location.href.split('?')[0];
-        document.head.appendChild(link);
-    </script>
 </head>
 <body>
 
-    <!-- Header (Consistent with Main Site) -->
-    <header class="site-header">
-        <div class="header-inner">
-            <a href="../" class="logo">Home</a>
-            <!-- Simple Breadcrumb -->
-            <div class="header-actions">
-                <span style="color:#888; font-size:0.9rem;">/ Blog</span>
-            </div>
-        </div>
-    </header>
+    <!-- Dynamic Header (Populated by JS from settings.json) -->
+    <header class="site-header" id="dynamic-header"></header>
+    
+    <!-- Ad Unit: Header Bottom -->
+    <div id="ad-header-bottom"></div>
 
     <main class="blog-wrapper">
-        <div class="blog-header">
+        <div class="blog-heading">
             <h1>Latest Updates</h1>
-            <p>Explore our latest articles, guides, and insights.</p>
+            <p>Read our latest articles, news, and guides.</p>
         </div>
 
         <div id="blog-list" class="blog-list">
-            <!-- Skeleton Loading State (Shown before JS loads) -->
+            <!-- Skeletons appear while JS loads -->
             <div class="skeleton-card">
                 <div class="sk-img"></div>
-                <div class="sk-content">
-                    <div class="sk-line w-75"></div>
-                    <div class="sk-line w-50"></div>
-                    <div class="sk-line w-100"></div>
-                </div>
+                <div class="sk-body"><div class="sk-line w-75"></div><div class="sk-line w-50"></div><div class="sk-line w-100"></div></div>
             </div>
             <div class="skeleton-card">
                 <div class="sk-img"></div>
-                <div class="sk-content">
-                    <div class="sk-line w-75"></div>
-                    <div class="sk-line w-50"></div>
-                    <div class="sk-line w-100"></div>
-                </div>
+                <div class="sk-body"><div class="sk-line w-75"></div><div class="sk-line w-50"></div><div class="sk-line w-100"></div></div>
             </div>
         </div>
 
-        <!-- Infinite Scroll Sentinel -->
+        <!-- Infinite Scroll Trigger -->
         <div id="sentinel" class="loading-sentinel">
             <div class="spinner hidden"></div>
-            <span class="end-msg hidden">You've reached the end.</span>
+            <span class="end-msg hidden">No more posts.</span>
         </div>
     </main>
 
-    <footer class="site-footer">
-        <p>&copy; <script>document.write(new Date().getFullYear())</script> All Rights Reserved.</p>
-    </footer>
+    <!-- Dynamic Footer (Populated by JS) -->
+    <footer class="site-footer" id="dynamic-footer"></footer>
+
+    <!-- Ad Units: Sticky -->
+    <div id="ad-sticky-left"></div>
+    <div id="ad-sticky-right"></div>
+    <div id="ad-sticky-footer"></div>
 
     <script src="script.js" defer></script>
 </body>
