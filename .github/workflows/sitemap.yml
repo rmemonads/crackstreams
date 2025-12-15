@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - gh-pages  # Added support for gh-pages branch just in case
     paths:
       - '**.html'
       - '_cms/settings.json'
@@ -17,7 +18,7 @@ jobs:
       contents: write
 
     steps:
-    # 1. Checkout Code (Fetch depth 0 is required for git log dates)
+    # 1. Checkout Code (Full history for dates)
     - name: Checkout Repo
       uses: actions/checkout@v3
       with:
@@ -33,10 +34,24 @@ jobs:
     - name: Run Sitemap Generator
       run: python sitemap_generator.py
 
-    # 4. Commit and Push if changes exist
+    # 4. Commit and Push (Fixed for Detached HEAD)
     - name: Commit and Push Sitemap
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add sitemap.xml
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update sitemap.xml" && git push)
+        
+        # Check if sitemap.xml changed
+        if [[ -n $(git status -s sitemap.xml) ]]; then
+          echo "Sitemap changed. Committing..."
+          git add sitemap.xml
+          git commit -m "Auto-update sitemap.xml"
+          
+          # Pull latest changes to avoid conflicts (Rebase strategy)
+          git pull origin ${{ github.ref_name }} --rebase
+          
+          # Push specifically to the current branch
+          git push origin HEAD:${{ github.ref_name }}
+          echo "Pushed successfully."
+        else
+          echo "No changes in sitemap.xml. Skipping push."
+        fi
