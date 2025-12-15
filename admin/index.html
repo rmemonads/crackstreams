@@ -6,8 +6,10 @@
     <title>Ultimate Serverless CMS</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- TinyMCE (Community CDN) -->
-    <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Fontello -->
+    <link rel="stylesheet" href="fontello.css"> 
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/cjrpuqhph0vzszdffp7wh6qh6v4m5arf3h5djyy46w0tkvwv/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +21,7 @@
             <form id="login-form">
                 <div class="input-group">
                     <label>GitHub Token (PAT)</label>
-                    <input type="password" id="gh-token" required autocomplete="current-password" placeholder="ghp_...">
+                    <input type="password" id="gh-token" required autocomplete="current-password">
                 </div>
                 <div class="input-group">
                     <label>Repo Owner</label>
@@ -43,7 +45,7 @@
                 <span class="brand-text">CMS Admin</span>
                 <button id="sidebar-toggle-btn" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
             </div>
-            <nav class="sidebar-nav-container">
+            <nav>
                 <button id="nav-btn-dashboard" onclick="switchPanel('dashboard')" class="nav-item active">
                     <i class="fa-solid fa-thumbtack"></i> <span>Posts</span>
                 </button>
@@ -75,7 +77,7 @@
                 </div>
                 <div class="table-container">
                     <table class="wp-table">
-                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('posts-list-body', this)"></th><th>Title</th><th>Category</th><th>Last Updated</th><th>Actions</th></tr></thead>
+                        <thead><tr><th width="30"><input type="checkbox" onchange="toggleAll('posts-list-body', this)"></th><th>Title</th><th>Last Updated</th><th>Actions</th></tr></thead>
                         <tbody id="posts-list-body"></tbody>
                     </table>
                 </div>
@@ -115,9 +117,9 @@
                             <input type="text" id="set-site-title">
                         </div>
                         <div class="form-group">
-                            <label>Site URL</label>
-                            <p class="hint">No trailing slash (e.g., https://mysite.com)</p>
-                            <input type="text" id="set-site-url">
+                            <label>Site URL (e.g., https://mysite.com)</label>
+                            <p class="hint">Important: No trailing slash.</p>
+                            <input type="text" id="set-site-url" placeholder="https://username.github.io/repo">
                         </div>
                         <div class="form-group">
                             <label>Favicon URL</label>
@@ -125,93 +127,43 @@
                         </div>
                         <div class="form-group">
                             <label>Copyright Text</label>
-                            <input type="text" id="set-copyright">
+                            <input type="text" id="set-copyright" placeholder="© 2025 All Rights Reserved">
                         </div>
                     </div>
 
-                    <!-- Structure & Categories -->
+                    <!-- SEO -->
                     <div class="settings-card">
-                        <h3>Website Structure</h3>
+                        <h3>SEO & Verification</h3>
                         <div class="form-group">
-                            <label>Structure Mode</label>
-                            <select id="set-structure-mode" onchange="toggleCategorySettings()">
-                                <option value="blog">Blog Only (Simple)</option>
-                                <option value="category">Categories (Advanced)</option>
-                            </select>
-                        </div>
-                        
-                        <div id="category-settings-wrapper" class="hidden">
-                            <hr>
-                            <h4>Category Manager</h4>
-                            <div class="two-col" style="margin-bottom:10px;">
-                                <input type="text" id="new-cat-name" placeholder="Name (e.g. Technology)">
-                                <button class="btn-secondary" onclick="addCategoryItem()">Add</button>
-                            </div>
-                            <div id="categories-list" class="simple-list"></div>
-                            
-                            <div class="form-group" style="margin-top:15px;">
-                                <label>Google News Category</label>
-                                <select id="set-news-category"><option value="">-- None --</option></select>
-                                <p class="hint">Posts here (last 48h) go to sitemap-news.xml</p>
-                            </div>
-                            <div class="form-group">
-                                <label>Publication Name</label>
-                                <input type="text" id="set-news-pub-name" placeholder="Exact Google News Name">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SEO & Robots -->
-                    <div class="settings-card full-width-card">
-                        <h3>SEO & Robots</h3>
-                        <div class="two-col">
-                            <div>
-                                <label>Robots.txt Content</label>
-                                <div class="robots-actions">
-                                    <button class="btn-xs btn-secondary" onclick="insertRobots('allow')">Allow All</button>
-                                    <button class="btn-xs btn-secondary" onclick="insertRobots('sitemap')">Add Sitemaps</button>
-                                    <button class="btn-xs btn-secondary" onclick="insertRobots('disallow_admin')">Block Admin</button>
-                                </div>
-                                <textarea id="set-robots-txt" rows="6" class="code-editor"></textarea>
-                            </div>
-                            <div>
-                                <label>Sitemap Exclusions</label>
-                                <p class="hint">Comma separated slugs to exclude.</p>
-                                <textarea id="set-sitemap-exclude" rows="3"></textarea>
-                                <label class="switch-label" style="margin-top:10px">
-                                    <input type="checkbox" id="set-404-redirect">
-                                    <span class="chk-text">Generate Smart 404.html</span>
-                                </label>
-                                <div style="margin-top:10px;">
-                                    <label>Meta Verifications</label>
-                                    <div id="meta-verify-container" class="repeater-container"></div>
-                                    <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Tag</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Social Sharing -->
-                    <div class="settings-card full-width-card">
-                        <h3>Social Sharing</h3>
-                        <div class="form-group">
+                            <label>404 Redirection</label>
                             <label class="switch-label">
-                                <input type="checkbox" id="set-enable-share">
-                                <span class="chk-text">Enable Share Buttons on Posts</span>
+                                <input type="checkbox" id="set-404-redirect">
+                                <span class="chk-text">Generate Smart 404.html</span>
                             </label>
                         </div>
                         <div class="form-group">
-                            <label>Exclude Sharing on these Slugs:</label>
-                            <input type="text" id="set-share-exclude" placeholder="privacy, terms, contact">
+                            <label>Site Verification Tags</label>
+                            <p class="hint">Google/Bing meta tags</p>
+                            <div id="meta-verify-container" class="repeater-container"></div>
+                            <button class="add-repeater-btn" onclick="addMetaVerifyItem()">+ Add Meta Tag</button>
                         </div>
                     </div>
 
-                    <!-- Menus & Footer -->
+                    <!-- Author Manager -->
                     <div class="settings-card full-width-card">
-                        <h3>Menus & Site Socials</h3>
+                        <h3>Author Profiles</h3>
+                        <p class="hint">Add authors and their specific social media links (Fontello icons supported).</p>
+                        <div id="authors-repeater-container"></div>
+                        <button class="btn-secondary full-width" onclick="addAuthorItem()">+ Add Author</button>
+                    </div>
+
+                    <!-- Menus -->
+                    <div class="settings-card full-width-card">
+                        <h3>Menus & Global Socials</h3>
                         <div class="two-col">
                             <div>
                                 <label class="schema-label">Header Menu</label>
+                                <p class="hint">Label | Slug or https://...</p>
                                 <div id="header-menu-container" class="repeater-container"></div>
                                 <button class="add-repeater-btn" onclick="addMenuItem('header-menu-container')">+ Add Link</button>
                             </div>
@@ -228,24 +180,24 @@
                         </div>
                     </div>
 
-                    <!-- Author Manager -->
                     <div class="settings-card full-width-card">
-                        <h3>Author Profiles</h3>
-                        <div id="authors-repeater-container"></div>
-                        <button class="btn-secondary full-width" onclick="addAuthorItem()">+ Add Author</button>
+                        <h3>Ad Units Manager</h3>
+                        <p class="hint">AdSense/Custom HTML.</p>
+                        <div id="ads-repeater-container"></div>
+                        <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add Ad Unit</button>
                     </div>
 
                     <!-- Analytics/Code -->
                     <div class="settings-card full-width-card">
-                        <h3>Code Injection</h3>
+                        <h3>Analytics & Code</h3>
                         <div class="two-col">
                             <div>
                                 <label>Google Analytics ID</label>
                                 <input type="text" id="set-ga-id" placeholder="G-XXXXXX">
                             </div>
                             <div>
-                                <label>Auto Monetization / AdSense Script</label>
-                                <textarea id="set-monetization-auto" rows="1"></textarea>
+                                <label>AdSense Auto Script</label>
+                                <textarea id="set-adsense-auto" rows="1"></textarea>
                             </div>
                         </div>
                         <div class="form-group">
@@ -256,12 +208,6 @@
                             <label>Global Head Scripts</label>
                             <textarea id="set-custom-head-js" rows="4"></textarea>
                         </div>
-                    </div>
-                    
-                    <div class="settings-card full-width-card">
-                        <h3>Sponsor / Code Units</h3>
-                        <div id="ads-repeater-container"></div>
-                        <button class="btn-secondary full-width" onclick="addAdUnit()">+ Add Unit</button>
                     </div>
                 </div>
             </div>
@@ -294,30 +240,13 @@
                                 <label>Slug</label>
                                 <input type="text" id="meta-slug">
                             </div>
-                            
-                            <!-- Categories -->
-                            <div id="editor-category-section" class="hidden">
-                                <div class="form-group">
-                                    <label>Categories (Select Multiple)</label>
-                                    <div id="editor-categories-box" class="checkbox-group-box"></div>
-                                </div>
-                            </div>
-                            <div id="editor-blog-message" class="hidden">
-                                <p class="hint"><i class="fa-solid fa-info-circle"></i> Mode: <strong>Blog Only</strong>. Post will be filed under /blog/.</p>
-                            </div>
-
                             <div class="form-group">
                                 <label>Author</label>
                                 <select id="meta-author-select"></select>
                             </div>
                             <div class="form-group">
                                 <label>Description (SEO)</label>
-                                <textarea id="meta-desc" rows="3"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Canonical URL</label>
-                                <input type="text" id="meta-canonical" placeholder="Leave empty for default">
-                                <p class="hint">Use if re-publishing external content.</p>
+                                <textarea id="meta-desc" rows="4"></textarea>
                             </div>
                             <div class="form-group">
                                 <label>Featured Image (1200x628)</label>
@@ -326,6 +255,7 @@
                                     <img id="banner-preview" class="hidden">
                                     <div class="drop-overlay"><i class="fa-solid fa-cloud-arrow-up"></i> Drop to Upload</div>
                                 </div>
+                                <p class="hint">Recommended: 1200x628 pixels (Google Discover).</p>
                             </div>
                             <div class="form-group">
                                 <label class="switch-label">
