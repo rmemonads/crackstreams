@@ -15,9 +15,7 @@ const FEATURED_SLUGS = [
     "blog/ve-sports-streaming-nfl-nba-ufc-wwe-f1/"
     "blog/test-post-new/"
 
-
-    
-];
+    ];
 // ==========================================
 
 const CONFIG = {
