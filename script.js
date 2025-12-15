@@ -1,11 +1,10 @@
 /**
- * HOMEPAGE LOADER - CURATED CONTENT
- * Updates: Removed Date/Tags, Added "Read Now", Fixed Syntax
+ * HOMEPAGE LOADER
+ * Features: Inline SVGs, HTTPS Fix, LCP Priority, Accessibility
  */
 
 // ==========================================
-// [CONFIGURATION AREA] - ADD YOUR SLUGS HERE
-// Important: Separate items with commas!
+// [CONFIGURATION]
 // ==========================================
 const FEATURED_SLUGS = [
     "hello-world",
@@ -17,25 +16,26 @@ const FEATURED_SLUGS = [
 // ==========================================
 
 const CONFIG = {
-    settingsUrl: '_cms/settings.json', // Path relative to root
+    settingsUrl: '_cms/settings.json', 
     listContainer: 'featured-grid'
 };
 
-const state = {
-    settings: {}
+const state = { settings: {} };
+
+// --- ICONS (Inline SVGs) ---
+const ICONS = {
+    burger: `<svg class="icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`,
+    close: `<svg class="icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+    arrowRight: `<svg class="icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`
 };
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await loadSettings();
         await loadFeaturedContent();
-    } catch (e) {
-        console.error("Init Error:", e);
-    }
+    } catch (e) { console.error("Init Error:", e); }
 });
 
-// --- 1. LOAD GLOBAL SETTINGS ---
 async function loadSettings() {
     try {
         const res = await fetch(CONFIG.settingsUrl + '?t=' + Date.now());
@@ -48,23 +48,17 @@ async function loadSettings() {
         renderFooter(data);
         injectAds(data);
         setupAnalytics(data.gaId);
-
-    } catch (e) {
-        console.warn("Using default settings.", e);
-    }
+    } catch (e) { console.warn("Defaults used", e); }
 }
 
 function applyGlobalSettings(s) {
-    if(s.siteTitle) document.title = s.siteTitle; 
-    if(s.siteTitle) document.getElementById('hero-title').innerText = `Welcome to ${s.siteTitle}`;
-    
+    if(s.siteTitle) {
+        document.title = s.siteTitle;
+        document.getElementById('hero-title').innerText = `Welcome to ${s.siteTitle}`;
+    }
     if(s.favicon) {
         let link = document.querySelector("link[rel~='icon']");
-        if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.head.appendChild(link);
-        }
+        if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
         link.href = s.favicon;
     }
     if(s.customCss) {
@@ -88,11 +82,15 @@ function renderHeader(s) {
         <nav>
             <a href="${s.siteUrl || '/'}" class="logo">${s.siteTitle || 'Home'}</a>
             <ul class="nav-links" id="nav-links-list">
-                <button class="nav-close-btn" onclick="toggleMenu()">&times;</button>
+                <li style="list-style:none; position:absolute; top:20px; right:25px;">
+                    <button class="nav-close-btn" onclick="toggleMenu()" aria-label="Close Menu">
+                        ${ICONS.close}
+                    </button>
+                </li>
                 ${navLinks}
             </ul>
-            <div class="burger" onclick="toggleMenu()">
-                <i class="fa-solid fa-bars" style="color:white;font-size:1.5rem"></i>
+            <div class="burger" onclick="toggleMenu()" aria-label="Open Menu">
+                ${ICONS.burger}
             </div>
         </nav>
     `;
@@ -102,19 +100,15 @@ function renderHeader(s) {
 function toggleMenu() {
     const nav = document.getElementById('nav-links-list');
     nav.classList.toggle('nav-active');
-    
-    if (nav.classList.contains('nav-active')) {
-        document.body.classList.add('menu-open');
-    } else {
-        document.body.classList.remove('menu-open');
-    }
+    if (nav.classList.contains('nav-active')) document.body.classList.add('menu-open');
+    else document.body.classList.remove('menu-open');
 }
 
 function renderFooter(s) {
     const navLinks = (s.footerMenu || []).map(l => 
         `<a href="${resolveLink(l.link)}">${l.label}</a>`
     ).join('');
-    
+    // Social icons still use class names (Fontello) from settings
     const socials = (s.socialLinks || []).map(l => 
         `<a href="${resolveLink(l.link)}" aria-label="${l.label}"><i class="${l.label}"></i></a>`
     ).join('');
@@ -131,31 +125,22 @@ function renderFooter(s) {
     document.getElementById('dynamic-footer').innerHTML = html;
 }
 
-// --- 2. LOAD & RENDER FEATURED CARDS ---
 async function loadFeaturedContent() {
     const container = document.getElementById(CONFIG.listContainer);
-    
-    const promises = FEATURED_SLUGS.map(slug => fetchCardData(slug));
+    const promises = FEATURED_SLUGS.map((slug, index) => fetchCardData(slug, index));
     const cards = await Promise.all(promises);
     
-    container.innerHTML = ''; // Clear skeletons
-    
+    container.innerHTML = ''; 
     let hasContent = false;
     cards.forEach(html => {
-        if(html) {
-            container.insertAdjacentHTML('beforeend', html);
-            hasContent = true;
-        }
+        if(html) { container.insertAdjacentHTML('beforeend', html); hasContent = true; }
     });
 
-    if(!hasContent) {
-        container.innerHTML = '<p style="text-align:center;color:#666;grid-column:1/-1">No featured content available.</p>';
-    }
+    if(!hasContent) container.innerHTML = '<p style="text-align:center;color:#666;grid-column:1/-1">No featured content available.</p>';
 }
 
-async function fetchCardData(slug) {
+async function fetchCardData(slug, index) {
     let path = slug.replace(/^\/|\/$/g, '');
-    
     try {
         const res = await fetch(`${path}/index.html`);
         if(!res.ok) return null;
@@ -163,32 +148,36 @@ async function fetchCardData(slug) {
         const text = await res.text();
         const doc = new DOMParser().parseFromString(text, 'text/html');
         
-        // Scrape Metadata
         const title = doc.querySelector('title')?.innerText.split(' - ')[0] || 'Untitled';
         const imgMeta = doc.querySelector('meta[property="og:image"]');
-        const img = imgMeta ? imgMeta.content : 'https://via.placeholder.com/1200x628/1e1e1e/333?text=No+Image';
+        let img = imgMeta ? imgMeta.content : 'https://via.placeholder.com/1200x628/1e1e1e/333?text=No+Image';
         
+        // Mixed Content Fix
+        if(img.startsWith('http://')) img = img.replace('http://', 'https://');
+
+        // Speed Optimization (LCP)
+        const loadingAttr = index === 0 ? 'eager' : 'lazy';
+        const priorityAttr = index === 0 ? 'fetchpriority="high"' : '';
+
         return `
         <article class="home-card fade-in">
             <a href="${path}/" class="card-img-container">
-                <img src="${img}" alt="${title}" class="card-img" loading="lazy">
+                <img src="${img}" alt="${title}" class="card-img" ${priorityAttr} loading="${loadingAttr}">
             </a>
             <div class="card-body">
                 <a href="${path}/"><h2 class="card-title">${title}</h2></a>
                 <div class="card-footer-row">
                     <span class="read-now-text">Read Now</span>
-                    <a href="${path}/" class="read-more-link"><i class="fa-solid fa-arrow-right"></i></a>
+                    <a href="${path}/" class="read-more-link" aria-label="Read more about ${title}">
+                        ${ICONS.arrowRight}
+                    </a>
                 </div>
             </div>
         </article>
         `;
-    } catch (e) {
-        console.error(`Failed to load ${slug}`, e);
-        return null;
-    }
+    } catch (e) { console.error(`Failed: ${slug}`, e); return null; }
 }
 
-// --- ADS & ANALYTICS ---
 function injectAds(s) {
     const ads = s.ads || [];
     const headAd = ads.find(a => a.placement === 'header_bottom');
@@ -218,7 +207,6 @@ function setupAnalytics(gaId) {
     window.addEventListener('touchstart', loadGA, { once: true });
 }
 
-// --- LINK RESOLVER ---
 function resolveLink(link) {
     if(!link) return '#';
     if(link.match(/^(https?:|mailto:|tel:|\/\/|#)/)) return link;
