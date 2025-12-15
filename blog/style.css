@@ -14,15 +14,26 @@ body { background: var(--bg-dark); color: var(--text-main); font-family: var(--f
 a { text-decoration: none; color: inherit; transition: 0.3s; }
 .hidden { display: none !important; }
 
-/* --- HEADER (Matches CMS output) --- */
-.site-header nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; background-color: var(--bg-dark); border-bottom: 1px solid var(--border); height: 80px; }
-.logo { font-weight: 700; font-size: 1.5rem; color: #fff; }
-.nav-links { display: flex; justify-content: space-around; list-style: none; }
-.nav-links li { margin: 0 1rem; }
+/* --- HEADER --- */
+.site-header nav { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 1.5rem 5%; 
+    background-color: var(--bg-dark); 
+    border-bottom: 1px solid var(--border); 
+    height: 80px; 
+    position: relative;
+    z-index: 100;
+}
+.logo { font-weight: 700; font-size: 1.5rem; color: #fff; z-index: 101; }
+.nav-links { display: flex; justify-content: space-around; list-style: none; gap: 20px; }
+.nav-links li { margin: 0 5px; }
 .nav-links a { color: var(--text-main); font-weight: 600; font-size: 1rem; position: relative; }
 .nav-links a:hover { color: var(--primary); }
-/* Mobile Menu Toggle logic handled in script if needed, simplified here for blog list */
-@media (max-width: 768px) { .nav-links { display: none; } } /* Simplify menu for blog list view on mobile */
+
+/* FIX: Hide Burger on Desktop */
+.burger { display: none; cursor: pointer; z-index: 101; padding: 10px; }
 
 /* --- BLOG LAYOUT --- */
 .blog-wrapper { max-width: 900px; margin: 0 auto; padding: 40px 20px; min-height: 80vh; }
@@ -46,13 +57,14 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
     box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
 }
 
-/* Image Wrapper - Enforces 1.91:1 Ratio in the list view thumbnail */
+/* Image Wrapper - Enforces 1.91:1 Ratio */
 .card-img-wrap { 
     width: 40%; 
     position: relative; 
     background: #000;
     overflow: hidden;
     aspect-ratio: 1.91 / 1; 
+    flex-shrink: 0;
 }
 .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
 .blog-card:hover .card-img { transform: scale(1.05); }
@@ -77,7 +89,7 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 
 /* --- SKELETON LOADER --- */
 .skeleton-card { display: flex; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 30px; height: 240px; overflow: hidden; }
-.sk-img { width: 40%; background: #252525; animation: pulse 1.5s infinite; }
+.sk-img { width: 40%; background: #252525; animation: pulse 1.5s infinite; flex-shrink: 0; }
 .sk-body { width: 60%; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
 .sk-line { height: 12px; background: #252525; border-radius: 4px; animation: pulse 1.5s infinite; }
 .w-75 { width: 75%; } .w-50 { width: 50%; } .w-100 { width: 100%; }
@@ -100,11 +112,39 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 .spinner { border: 3px solid #333; border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; margin: 0 auto; animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* --- MOBILE --- */
+/* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
+    /* Cards Stack Vertically */
     .blog-card, .skeleton-card { flex-direction: column; height: auto; }
     .card-img-wrap, .sk-img { width: 100%; aspect-ratio: 1.91 / 1; }
     .card-content, .sk-body { width: 100%; padding: 20px; }
     .card-title { font-size: 1.25rem; }
     .footer-container { flex-direction: column; text-align: center; }
+
+    /* Mobile Header Logic */
+    .burger { display: block; } /* Show Toggle */
+    
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(18, 18, 18, 0.98);
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: translateX(100%); /* Hide off-screen */
+        transition: transform 0.4s ease;
+        z-index: 99;
+        gap: 2rem;
+    }
+    
+    .nav-links.nav-active {
+        transform: translateX(0); /* Slide in */
+    }
+    
+    .nav-links a { font-size: 1.5rem; }
 }
